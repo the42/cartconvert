@@ -7,7 +7,7 @@ package bmn
 
 import (
 	"fmt"
-	"cartconvert"
+	"github.com/the42/cartconvert"
 	"testing"
 )
 
