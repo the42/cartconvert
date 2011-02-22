@@ -20,7 +20,7 @@ The package provides the following functionality:
 * [Direct Transverse Mercator
   Projection](http://en.wikipedia.org/wiki/Transverse_Mercator_projection) and
   inverse thereof for the projection of a Geoid (model of the earth) onto the
-  surface of an cylinder (map projection); Also know as Gauss-Krüger projection.
+  surface of a cylinder (map projection); Also know as Gauss-Krüger projection.
 * [UTM coordinates](http://en.wikipedia.org/wiki/UTM_coordinate_system) to
   Latitude / Longitude
 * [Geohashing:](http://en.wikipedia.org/wiki/Geohash) Latitude, Longitude to
@@ -33,7 +33,7 @@ The package provides the following functionality:
 Installation
 ------------
 
-  goinstall TODO
+  goinstall github.com/the42/cartconvert
 
 or alternatively download the package as tar file, extract the files into an
 empty directory and run
