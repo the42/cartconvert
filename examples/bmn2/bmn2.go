@@ -28,11 +28,11 @@ const (
 	fmtunknown displayformat = iota
 	deg
 	dms
-	utc
+	utm
 	geohash
 )
 
-var ofOptions = map[string]displayformat{"deg": deg, "dms": dms, "utc": utc, "geohash": geohash}
+var ofOptions = map[string]displayformat{"deg": deg, "dms": dms, "utm": utm, "geohash": geohash}
 
 
 func main() {
@@ -97,7 +97,7 @@ func main() {
 			outstring = cartconvert.PolarCoordToString(pc, cartconvert.PCFdeg)
 		case dms:
 			outstring = cartconvert.PolarCoordToString(pc, cartconvert.PCFdms)
-		case utc:
+		case utm:
 			outstring = cartconvert.LatLongToUTM(pc).String()
 		case geohash:
 			outstring = cartconvert.LatLongToGeoHash(pc)

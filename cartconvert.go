@@ -72,22 +72,60 @@ const (
 )
 
 func PolarCoordToString(pc *PolarCoord, format PolarCoordFormat) (pcs string) {
-	latitude := ftoa64precsmallest(pc.Latitude, 6)
-	longitude := ftoa64precsmallest(pc.Longitude, 6)
+
+	var lat, long, latrem, longrem, latmin, longmin, latsec, longsec float64
+	var latitude, longitude string
+
 	switch format {
 	case PCFdeg:
-		pcs = "lat: " + latitude + "°, long: " + longitude + "°"
+		pcs = "lat: " + ftoa64precsmallest(pc.Latitude, 6) + "°, long: " + ftoa64precsmallest(pc.Longitude, 6) + "°"
 	case PCFdms:
+		lat, latrem = math.Modf(pc.Latitude)
+
+		if lat < 0 {
+			lat *= -1
+			latrem *= -1
+		}
+
+		long, longrem = math.Modf(pc.Longitude)
+		if long < 0 {
+			long *= -1
+			longrem *= -1
+		}
+
+		latmin, latrem = math.Modf(latrem / 100 * 6000)
+		longmin, longrem = math.Modf(longrem / 100 * 6000)
+
+		latsec = latrem / 100 * 6000
+		longsec = longrem / 100 * 6000
+
 		if pc.Latitude < 0 {
-			latitude = "S " + latitude[1:]
+			latitude = "S "
+
 		} else {
-			latitude = "N " + latitude
+			latitude = "N "
 		}
+		latitude += fmt.Sprintf("%d°", int(lat))
+		if latmin != 0.0 || latsec != 0.0 {
+			latitude += fmt.Sprintf("%d'", int(latmin))
+		}
+		if latsec != 0.0 {
+			latitude += fmt.Sprintf("%.2f''", latsec)
+		}
+
 		if pc.Longitude < 0 {
-			longitude = "W " + longitude[1:]
+			longitude = "W "
 		} else {
-			longitude = "E " + longitude
+			longitude = "E "
 		}
+		longitude += fmt.Sprintf("%d°", int(long))
+		if longmin != 0.0 || longsec != 0.0 {
+			longitude += fmt.Sprintf("%d'", int(longmin))
+		}
+		if longsec != 0.0 {
+			longitude += fmt.Sprintf("%.2f''", longsec)
+		}
+
 		pcs = latitude + ", " + longitude
 	}
 	return
@@ -233,7 +271,7 @@ L6:
 	}
 
 	if negate {
-		degf *= -1
+		degf = -degf
 	}
 
 	return
@@ -306,7 +344,7 @@ L4:
 	}
 
 	if negate {
-		degf *= -1
+		degf = -degf
 	}
 
 	return
