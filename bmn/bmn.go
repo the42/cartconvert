@@ -50,7 +50,6 @@ type BMNCoord struct {
 
 // Canoncial representation of a BMN-value
 func (bc *BMNCoord) String() (fs string) {
-	// TODO: Bei Rechtswert Million abziehen?
 
 	fs = bmnStrings[bc.Meridian]
 	var next float64
@@ -103,7 +102,8 @@ L1:
 			case "M34":
 				meridian = BMNM34
 			default:
-				// handle error ?
+				err = os.EINVAL
+				break L1
 			}
 		case 1:
 			rights = compact[:index]
@@ -115,22 +115,24 @@ L1:
 		compact = strings.TrimLeft(compact, " ")
 	}
 
-	// TODO: den Millionenwert setzen (oder auch nicht)
-
-	right, err = strconv.Atof64(rights)
 	if err == nil {
 
-		height, err = strconv.Atof64(heights)
+		right, err = strconv.Atof64(rights)
 		if err == nil {
 
-			return &BMNCoord{Right: right, Height: height, Meridian: meridian, el: cartconvert.BesselEllipsoid}, nil
+			height, err = strconv.Atof64(heights)
+			if err == nil {
+
+				return &BMNCoord{Right: right, Height: height, Meridian: meridian, el: cartconvert.BesselEllipsoid}, nil
+			}
 		}
 	}
 
 	return nil, err
 }
 
-// Transform a BMN coordinate value to a WGS84 based latitude and longitude coordinate 
+// Transform a BMN coordinate value to a WGS84 based latitude and longitude coordinate. Function returns
+// nil, if the meridian stripe of the bmn-coordinate is not set
 func BMNToWGS84LatLong(bmncoord *BMNCoord) *cartconvert.PolarCoord {
 
 	var long0, fe float64
@@ -146,7 +148,7 @@ func BMNToWGS84LatLong(bmncoord *BMNCoord) *cartconvert.PolarCoord {
 		long0 = 16.0 + 20.0/60.0
 		fe = 750000
 	default:
-		// handle error
+		return nil
 	}
 
 	gc := cartconvert.InverseTransverseMercator(
@@ -163,7 +165,8 @@ func BMNToWGS84LatLong(bmncoord *BMNCoord) *cartconvert.PolarCoord {
 	return cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.WGS84Ellipsoid})
 }
 
-// Transform a latitute / longitude coordinate datum into a BMN coordinate.
+// Transform a latitute / longitude coordinate datum into a BMN coordinate. Function returns
+// nil, if the meridian stripe of the bmn-coordinate is not set
 //
 // Important: The reference ellipsoid of the originating coordinate system will be assumed
 // to be the WGS84Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid
@@ -188,6 +191,8 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) *BMNCoo
 	case BMNM34:
 		long0 = 16.0 + 20.0/60.0
 		fe = 750000
+	default:
+		return nil
 	}
 
 	gp := cartconvert.DirectTransverseMercator(
