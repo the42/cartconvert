@@ -48,6 +48,57 @@ type PolarCoord struct {
 	El                          *Ellipsoid
 }
 
+func ftoa64precsmallest(f float64, prec int) string {
+
+	fs := fmt.Sprintf("%.*f", prec, f)
+	n := len(fs)
+	for n > 0 && fs[n-1] == '0' {
+		n--
+	}
+	if n > 0 && fs[n-1] == '.' {
+		n--
+	}
+	fs = fs[:n]
+	return fs
+}
+
+// specifier for the string representation of a polar coordinate
+type PolarCoordFormat int
+
+const (
+	PCFUnknown PolarCoordFormat = iota
+	PCFdeg                      // format a polar coordinate in degress using leading sign for negative bearings
+	PCFdms                      // format a polar coordinate in degrees, minutes and seconds with prepended main directions N, S, E, W
+)
+
+func PolarCoordToString(pc *PolarCoord, format PolarCoordFormat) (pcs string) {
+	latitude := ftoa64precsmallest(pc.Latitude, 6)
+	longitude := ftoa64precsmallest(pc.Longitude, 6)
+	switch format {
+	case PCFdeg:
+		pcs = "lat: " + latitude + "°, long: " + longitude + "°"
+	case PCFdms:
+		if pc.Latitude < 0 {
+			latitude = "S " + latitude[1:]
+		} else {
+			latitude = "N " + latitude
+		}
+		if pc.Longitude < 0 {
+			longitude = "W " + longitude[1:]
+		} else {
+			longitude = "E " + longitude
+		}
+		pcs = latitude + ", " + longitude
+	}
+	return
+}
+
+// Canonical representation of a lat/long bearing
+func (pc *PolarCoord) String() string {
+	return PolarCoordToString(pc, PCFdeg)
+}
+
+
 // Holds a generic representation of Easting(Right, Y) and Northing(Height,X) of a 2D projection
 // relative to Ellipsoid El. The height H at Point X,Y is above defining Ellipsoid 
 type GeoPoint struct {
@@ -527,6 +578,11 @@ type UTMCoord struct {
 	Northing, Easting float64
 	Zone              string
 	El                *Ellipsoid
+}
+
+// Canonical representation of an UTM coordinate
+func (utm *UTMCoord) String() string {
+	return fmt.Sprintf("%s %.0f %.0f", utm.Zone, utm.Easting, utm.Northing)
 }
 
 // This function parses a string UTM coordinate literal of the format
