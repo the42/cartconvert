@@ -34,11 +34,11 @@ func bmnequal(bmn1, bmn2 *BMNCoord) bool {
 func TestBMNStringToStruct(t *testing.T) {
 	for _, test := range bMNStringToStructTests {
 		out, err := BMNStringToStruct(test.in)
-		
+
 		if err != nil {
-		  t.Error(err)
+			t.Error(err)
 		}
-		
+
 		if !bmnequal(test.out, out) {
 			t.Error("BMNStringToStruct")
 		}
@@ -52,8 +52,8 @@ type bMNToWGS84LatLongTest struct {
 }
 
 func bMNStringToStructHelper(coord string) (bmncoord *BMNCoord) {
-  bmncoord, _ = BMNStringToStruct(coord)
-  return
+	bmncoord, _ = BMNStringToStruct(coord)
+	return
 }
 
 var bMNToWGS84LatLongTests = []bMNToWGS84LatLongTest{
@@ -61,7 +61,7 @@ var bMNToWGS84LatLongTests = []bMNToWGS84LatLongTest{
 		NewBMNCoord(BMNM28, 592270.0, 272290, 0),
 		&cartconvert.PolarCoord{Latitude: 47.439212, Longitude: 16.197434},
 	},
-	{	// TODO: Ist das möglich??
+	{ // TODO: Ist das möglich??
 		bMNStringToStructHelper("M34 592269 272290"),
 		&cartconvert.PolarCoord{Latitude: 47.570299, Longitude: 14.236188},
 	},
@@ -80,9 +80,9 @@ func latlongequal(pcp1, pcp2 *cartconvert.PolarCoord) bool {
 
 func TestBMNToWGS84LatLong(t *testing.T) {
 	for _, test := range bMNToWGS84LatLongTests {
-	  
+
 		out := BMNToWGS84LatLong(test.in)
-		
+
 		if !latlongequal(test.out, out) {
 			t.Error("BMNToWGS84LatLong")
 		}
