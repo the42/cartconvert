@@ -449,3 +449,26 @@ func TestLatLongToGeoHash(t *testing.T) {
 		}
 	}
 }
+
+// ## PolarCoordToString
+type polarCoordToStringTest struct {
+	in  *PolarCoord
+	out string
+}
+
+var polarCoordToStringTests = []polarCoordToStringTest{
+	{&PolarCoord{Latitude: 140.0, Longitude: 40.0}, "N 140°, E 40°"},
+	{&PolarCoord{Latitude: -140.0, Longitude: -40.0}, "S 140°, W 40°"},
+	{&PolarCoord{Latitude: 140.5, Longitude: -40.5}, "N 140°30', W 40°30'"},
+	{&PolarCoord{Latitude: 140.005, Longitude: -40.505}, "N 140°0'18'', W 40°30'18''"},
+}
+
+func TestPolarCoordToString(t *testing.T) {
+	for index, test := range polarCoordToStringTests {
+		out := PolarCoordToString(test.in, PCFdms)
+
+		if test.out != out {
+			t.Errorf("PolarCoordToString [%d]: expected %s, got %s", index, test.out, out)
+		}
+	}
+}

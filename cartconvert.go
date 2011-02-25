@@ -110,7 +110,7 @@ func PolarCoordToString(pc *PolarCoord, format PolarCoordFormat) (pcs string) {
 			latitude += fmt.Sprintf("%d'", int(latmin))
 		}
 		if latsec != 0.0 {
-			latitude += fmt.Sprintf("%.2f''", latsec)
+			latitude += fmt.Sprintf("%s''", ftoa64precsmallest(latsec, 2))
 		}
 
 		if pc.Longitude < 0 {
@@ -123,7 +123,7 @@ func PolarCoordToString(pc *PolarCoord, format PolarCoordFormat) (pcs string) {
 			longitude += fmt.Sprintf("%d'", int(longmin))
 		}
 		if longsec != 0.0 {
-			longitude += fmt.Sprintf("%.2f''", longsec)
+			longitude += fmt.Sprintf("%s''", ftoa64precsmallest(longsec, 2))
 		}
 
 		pcs = latitude + ", " + longitude
