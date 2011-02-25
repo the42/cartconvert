@@ -3,7 +3,7 @@
 // that can be found in the LICENSE file.
 
 // This command reads coordinates in Bundesmeldenetz from stdin, performs a conversion,
-// and writes to stdout. Errors are written to stdout.
+// and writes to stdout. Errors are written to stderr.
 //
 // The target reference ellipsoid is always the WGS84Ellipsoid
 //
