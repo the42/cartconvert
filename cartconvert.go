@@ -63,23 +63,23 @@ func ftoa64precsmallest(f float64, prec int) string {
 }
 
 // specifier for the string representation of a polar coordinate
-type PolarCoordFormat int
+type LatLongFormat int
 
 const (
-	PCFUnknown PolarCoordFormat = iota
-	PCFdeg                      // format a polar coordinate in degress using leading sign for negative bearings
-	PCFdms                      // format a polar coordinate in degrees, minutes and seconds with prepended main directions N, S, E, W
+	LLFUnknown LatLongFormat = iota
+	LLFdeg                   // format a lat/long coordinate in degress using leading sign for negative bearings
+	LLFdms                   // format a loat/long coordinate in degrees, minutes and seconds with prepended main directions N, S, E, W
 )
 
-func PolarCoordToString(pc *PolarCoord, format PolarCoordFormat) (pcs string) {
+func LatLongToString(pc *PolarCoord, format LatLongFormat) (pcs string) {
 
 	var lat, long, latrem, longrem, latmin, longmin, latsec, longsec float64
 	var latitude, longitude string
 
 	switch format {
-	case PCFdeg:
+	case LLFdeg:
 		pcs = "lat: " + ftoa64precsmallest(pc.Latitude, 6) + "°, long: " + ftoa64precsmallest(pc.Longitude, 6) + "°"
-	case PCFdms:
+	case LLFdms:
 		lat, latrem = math.Modf(pc.Latitude)
 
 		if lat < 0 {
@@ -133,7 +133,7 @@ func PolarCoordToString(pc *PolarCoord, format PolarCoordFormat) (pcs string) {
 
 // Canonical representation of a lat/long bearing
 func (pc *PolarCoord) String() string {
-	return PolarCoordToString(pc, PCFdeg)
+	return LatLongToString(pc, LLFdeg)
 }
 
 
