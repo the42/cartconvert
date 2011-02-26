@@ -48,20 +48,6 @@ type PolarCoord struct {
 	El                          *Ellipsoid
 }
 
-func ftoa64precsmallest(f float64, prec int) string {
-
-	fs := fmt.Sprintf("%.*f", prec, f)
-	n := len(fs)
-	for n > 0 && fs[n-1] == '0' {
-		n--
-	}
-	if n > 0 && fs[n-1] == '.' {
-		n--
-	}
-	fs = fs[:n]
-	return fs
-}
-
 // specifier for the string representation of a polar coordinate
 type LatLongFormat int
 
@@ -78,7 +64,7 @@ func LatLongToString(pc *PolarCoord, format LatLongFormat) (pcs string) {
 
 	switch format {
 	case LLFdeg:
-		pcs = "lat: " + ftoa64precsmallest(pc.Latitude, 6) + "°, long: " + ftoa64precsmallest(pc.Longitude, 6) + "°"
+		pcs = "lat: " + f64toa(pc.Latitude, 6) + "°, long: " + f64toa(pc.Longitude, 6) + "°"
 	case LLFdms:
 		lat, latrem = math.Modf(pc.Latitude)
 
@@ -110,7 +96,7 @@ func LatLongToString(pc *PolarCoord, format LatLongFormat) (pcs string) {
 			latitude += fmt.Sprintf("%d'", int(latmin))
 		}
 		if latsec != 0.0 {
-			latitude += fmt.Sprintf("%s''", ftoa64precsmallest(latsec, 2))
+			latitude += fmt.Sprintf("%s''", f64toa(latsec, 2))
 		}
 
 		if pc.Longitude < 0 {
@@ -123,7 +109,7 @@ func LatLongToString(pc *PolarCoord, format LatLongFormat) (pcs string) {
 			longitude += fmt.Sprintf("%d'", int(longmin))
 		}
 		if longsec != 0.0 {
-			longitude += fmt.Sprintf("%s''", ftoa64precsmallest(longsec, 2))
+			longitude += fmt.Sprintf("%s''", f64toa(longsec, 2))
 		}
 
 		pcs = latitude + ", " + longitude
@@ -924,9 +910,9 @@ func geohashbitset(val, floor, ceiling float64, prec byte) string {
 
 }
 
-func f64toa(val float64, suffixcnt int) (sval string) {
+func f64toa(val float64, prec int) (sval string) {
 
-	sval = fmt.Sprintf("%.*f", suffixcnt, val)
+	sval = fmt.Sprintf("%.*f", prec, val)
 	n := len(sval)
 	for n > 0 && sval[n-1] == '0' {
 		n--
