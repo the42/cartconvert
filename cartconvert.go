@@ -16,7 +16,7 @@ import (
 	"os"
 )
 
-// A CartographyError is yielded when a literal may not be parsable as a bearing specification.
+// A CartographyError is yielded when a literal can not be parsed as a bearing specifier.
 // In this case the following values may be set and carry the meaning:
 type CartographyError struct {
 	Coord string   // a fragment of the coordinate literal containing the error.
@@ -42,7 +42,7 @@ type Ellipsoid struct {
 	a, b float64
 }
 
-// Holds latitude, longitude and ellipsoidal height, relative to El, the reference Ellipsoid
+// Holds latitude, longitude and ellipsoidal height, relative to El, the reference ellipsoid
 type PolarCoord struct {
 	Latitude, Longitude, Height float64
 	El                          *Ellipsoid
@@ -53,8 +53,8 @@ type LatLongFormat int
 
 const (
 	LLFUnknown LatLongFormat = iota
-	LLFdeg                   // format a lat/long coordinate in degress using leading sign for negative bearings
-	LLFdms                   // format a loat/long coordinate in degrees, minutes and seconds with prepended main directions N, S, E, W
+	LLFdeg                   // format a lat/long coordinate in degrees using leading sign for negative bearings
+	LLFdms                   // format a lat/long coordinate in degrees, minutes and seconds with prepended main directions N, S, E, W
 )
 
 func LatLongToString(pc *PolarCoord, format LatLongFormat) (pcs string) {
@@ -123,15 +123,15 @@ func (pc *PolarCoord) String() string {
 }
 
 
-// Holds a generic representation of Easting(Right, Y) and Northing(Height,X) of a 2D projection
-// relative to Ellipsoid El. The height H at Point X,Y is above defining Ellipsoid 
+// A generic representation of easting (right, Y) and northing (Height,X) of a 2D projection
+// relative to Ellipsoid El. The height H at Point X,Y is above defining ellipsoid 
 type GeoPoint struct {
 	X, Y, H float64
 	El      *Ellipsoid
 }
 
-// A generic cartesian, geocentric Point. For ease of conversion between polar and cartesian
-// coordinates, the Ellipsis might be included 
+// A generic Cartesian, geocentric point. For ease of conversion between polar and Cartesian
+// coordinates, the ellipsis might be included 
 type CartPoint struct {
 	X, Y, Z float64
 	El      *Ellipsoid
@@ -339,8 +339,8 @@ L4:
 // ## Polar to Cartesian coordinate conversion and vice-versa
 
 // Function accepts two bearing datum as Deg°MM'SS'' (typically northing and easting)
-// and height at bearing relative to reference ellipsoid and returns a polar coordindate type
-// If the reference ellipsoid is nil, the DefaultEllipsoid is assumed. 
+// and height at bearing relative to reference ellipsoid and returns a polar coordinate type.
+// If the reference ellipsoid is nil, the DefaultEllipsoid will be set in the resulting polar coordinate.
 func ADegMMSSToPolar(Northing, Easting string, Height float64, El *Ellipsoid) (*PolarCoord, os.Error) {
 
 	northing, err := ADegMMSSToNum(Northing)
@@ -361,8 +361,8 @@ func ADegMMSSToPolar(Northing, Easting string, Height float64, El *Ellipsoid) (*
 	return nil, err
 }
 
-// Convert polar coordinates to cartesian. The polar coordinates must be in decimal degrees.
-// The reference ellipsoid is verbatim copied over to the result. 
+// Convert polar coordinates to Cartesian. The polar coordinates must be in decimal degrees.
+// The reference ellipsoid is copied verbatim to the result. 
 // Inspired by http://www.movable-type.co.uk/scripts/latlong-convert-coords.html
 func PolarToCartesian(gc *PolarCoord) *CartPoint {
 
@@ -386,8 +386,8 @@ func PolarToCartesian(gc *PolarCoord) *CartPoint {
 	return &p
 }
 
-// Convert cartesian coordinates to polar.
-// The reference ellipsoid is verbatim copied over to the result.
+// Convert Cartesian coordinates to polar.
+// The reference ellipsoid is copied verbatim to the result.
 // The resulting polar coordinates are in decimal degrees.
 // Inspired by http://www.movable-type.co.uk/scripts/latlong-convert-coords.html
 func CartesianToPolar(pt *CartPoint) *PolarCoord {
@@ -422,13 +422,13 @@ func CartesianToPolar(pt *CartPoint) *PolarCoord {
 
 // ## Transverse Mercator Projection
 
-// Direct transverse mercator projection: Projection of an ellipsoid onto the survace of
+// Direct transverse mercator projection: Projection of an ellipsoid onto the surface of
 // of a cylinder. Also known as Gauss-Krüger projection. Input parameters:
 //
 //	gc *PolarCoord: Latitude and Longitude or point to be projected; in decimal degrees
 //	latO, longO: Shifted origin of latitude and longitude in decimal degrees
 //	fe, fn: False easting and northing respectively in meters
-//	scale: Projection scaling; Dimensionless, typically 1 or litte bellow
+//	scale: Projection scaling; Dimensionless, typically 1 or little bellow
 //
 // This algorithm uses the algorithm described by Redfearn
 // http://en.wikipedia.org/wiki/Transverse_Mercator:_Redfearn_series
@@ -501,13 +501,13 @@ func DirectTransverseMercator(gc *PolarCoord, latO, longO, scale, fe, fn float64
 	return &pt
 }
 
-// Inverse transverse mercator projection: Projection of an cylinder onto the survace of
+// Inverse transverse mercator projection: Projection of an cylinder onto the surface of
 // of an ellipsoid. Also known as reverse Gauss-Krüger projection. Input parameters:
 //
 //	pt *GeoPoint: Easting(Y) and Northing(X) of map point to be projected; in meters
 //	latO, longO: Shifted origin of latitude and longitude in decimal degrees
 //	fe, fn: False easting and northing respectively in meters
-//	scale: Projection scaling; Dimensionless, typically 1 or litte bellow
+//	scale: Projection scaling; Dimensionless, typically 1 or little bellow
 //
 // This algorithm uses the algorithm described by Redfearn
 // http://en.wikipedia.org/wiki/Transverse_Mercator:_Redfearn_series
@@ -597,7 +597,7 @@ func InverseTransverseMercator(pt *GeoPoint, latO, longO, scale, fe, fn float64)
 // ## UTM coordinate functions for parsing and conversion
 
 // A UTM coordinate defined by Northin, Easting and relative origin by Zone
-// The reference Ellipsis is typically the GRS80Ellipsoid or the WGS84Ellipsoid
+// The reference ellipsoid is typically the GRS80Ellipsoid or the WGS84Ellipsoid
 type UTMCoord struct {
 	Northing, Easting float64
 	Zone              string
@@ -857,8 +857,8 @@ func decodegeohashbitset(bitset string, floor, ceiling float64) float64 {
 	return round(mid, int(math.Fmax(1.0, -round(math.Log10(err), 0))-1))
 }
 
-// Return latitude & longitutde from a geohash-encoded string.
-// If the reference Ellipsoid is nil, the default Ellipsoid will be returend.
+// Return latitude & longitude from a geohash-encoded string.
+// If the reference ellipsoid is nil, the default Ellipsoid will be returned.
 // If the string is not a geohash, err will be set to EINVAL.
 func GeoHashToLatLong(geohash string, el *Ellipsoid) (pc *PolarCoord, err os.Error) {
 
@@ -1020,7 +1020,7 @@ type transformer struct {
 	datum                         string
 }
 
-// A generic cartesian point to represent a 3D datum; used by the helmert-transformation
+// A generic Cartesian point to represent a 3D datum; used by the helmert-transformation
 type Point3D struct {
 	X, Y, Z float64
 }
@@ -1082,7 +1082,7 @@ func (tp *transformer) WellKnownString() string {
 	return fmt.Sprintf("TOWGS84[\"%f\", \"%f\", \"%f\", \"%f\", \"%f\", \"%f\", \"%f\"]", tp.dx, tp.dy, tp.dz, tp.dM, tp.drx, tp.dry, tp.drz)
 }
 
-// Create a new instance of helmert paramters.
+// Create a new instance of helmert parameters.
 //
 //	dx, dy, dz: delta of coordinate origin in meters
 //	drx, dry, drz: delta of coordinate bearing in rads
@@ -1090,7 +1090,7 @@ func (tp *transformer) WellKnownString() string {
 //		system, in parts of per million
 //  
 // Attention: Unlike the other functions dealing with bearings and coordinates in this package,
-// the angular helmert parameters have to be sepcified in rad [-pi;pi]  
+// the angular helmert parameters have to be specified in rad [-pi;pi]  
 func NewHelmertTransformer(dx, dy, dz, dM, drx, dry, drz float64, datum string) *transformer {
 	return &transformer{dx: dx, dy: dy, dz: dz, dM: dM, drx: drx, dry: dry, drz: drz, datum: datum}
 }
