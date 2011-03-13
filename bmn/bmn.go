@@ -12,7 +12,7 @@
 // and here specifically of the Bundesmeldenetz, the former federal cartographic datum
 // of Austria. The Bundesmeldenetz is already widely replaced by UTM coordinates but much legacy
 // data is still encoded in BMN coordinates. Unlike UTM, the BMN uses the Bessel reference ellipsoid
-// and ues lat0 at Hierro (canary islands), which makes transformations tedious.
+// and uses lat0 at Hierro (canary islands), which makes transformations tedious.
 // For more information see
 //
 // [DE]: http://www.topsoft.at/pstrainer/entwicklung/algorithm/karto/oek/austria_oek.htm#bmn
@@ -27,8 +27,8 @@ import (
 	"os"
 )
 
-// Meridian Coordinates of the Bundesmeldenetz, three values describing false easting and false northing
-// The meridian specification of BMN plays the same role as the zone specifier of UTM
+// Meridian Coordinates of the Bundesmeldenetz, three values describing false easting and false northing.
+// The meridian specification of BMN plays the same role as the zone specifier of UTM.
 type BMNMeridian int
 
 const (
@@ -40,7 +40,7 @@ const (
 
 var bmnStrings = map[BMNMeridian]string{BMNM28: "M28", BMNM31: "M31", BMNM34: "M34"}
 
-// A BMN coordinate is specified by right-value (Easting), height-value (Northing)
+// A BMN coordinate is specified by right-value (easting), height-value (northing)
 // and the meridian stripe, 28°, 31° or 34° West of Hierro 
 type BMNCoord struct {
 	Right, Height, RelHeight float64
@@ -48,7 +48,7 @@ type BMNCoord struct {
 	el                       *cartconvert.Ellipsoid
 }
 
-// Canoncial representation of a BMN-value
+// Canonical representation of a BMN-value
 func (bc *BMNCoord) String() (fs string) {
 
 	fs = bmnStrings[bc.Meridian]
@@ -76,8 +76,8 @@ func (bc *BMNCoord) String() (fs string) {
 	return
 }
 
-// Parses a string representation of a BMN-Coordinate into a struct holding a BMN coordinate value
-// The reference ellipsoid of BMN coordinates is always the Bessel ellipsoid
+// Parses a string representation of a BMN-Coordinate into a struct holding a BMN coordinate value.
+// The reference ellipsoid of BMN coordinates is always the Bessel ellipsoid.
 func BMNStringToStruct(bmncoord string) (*BMNCoord, os.Error) {
 
 	compact := strings.ToUpper(strings.TrimSpace(bmncoord))
@@ -165,11 +165,11 @@ func BMNToWGS84LatLong(bmncoord *BMNCoord) *cartconvert.PolarCoord {
 	return cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.WGS84Ellipsoid})
 }
 
-// Transform a latitute / longitude coordinate datum into a BMN coordinate. Function returns
-// nil, if the meridian stripe of the bmn-coordinate is not set
+// Transform a latitude / longitude coordinate datum into a BMN coordinate. Function returns
+// nil, if the meridian stripe of the bmn-coordinate is not set.
 //
 // Important: The reference ellipsoid of the originating coordinate system will be assumed
-// to be the WGS84Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid
+// to be the WGS84Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid.
 func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) *BMNCoord {
 
 	var long0, fe float64
