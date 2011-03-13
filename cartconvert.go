@@ -31,10 +31,10 @@ func (ce CartographyError) String() string {
 
 // Set of common ellipsoidal models regularly found in cartography 
 var (
-	BesselEllipsoid   = NewEllipsoidConversion(6377397.155, 6356078.965)
-	GRS80Ellipsoid    = NewEllipsoidConversion(6378137, 6356752.31414)
-	WGS84Ellipsoid    = NewEllipsoidConversion(6378137, 6356752.31425)
-	Airy1830Ellipsoid = NewEllipsoidConversion(6377563.396, 6356256.910)
+	BesselEllipsoid   = NewEllipsoid(6377397.155, 6356078.965)
+	GRS80Ellipsoid    = NewEllipsoid(6378137, 6356752.31414)
+	WGS84Ellipsoid    = NewEllipsoid(6378137, 6356752.31425)
+	Airy1830Ellipsoid = NewEllipsoid(6377563.396, 6356256.910)
 	DefaultEllipsoid  = WGS84Ellipsoid
 )
 
@@ -1009,7 +1009,7 @@ func LatLongToGeoHashBits(pc *PolarCoord, bits byte) string {
 // HELMERT Transformation - http://en.wikipedia.org/wiki/Helmert_transformation
 
 // Returns a new ellipsoid by the given major axis a and major axis b in meters.
-func NewEllipsoidConversion(a, b float64) *Ellipsoid {
+func NewEllipsoid(a, b float64) *Ellipsoid {
 	return &Ellipsoid{a: a, b: b}
 }
 
