@@ -33,7 +33,7 @@ func bmnequal(bmn1, bmn2 *BMNCoord) bool {
 
 func TestBMNStringToStruct(t *testing.T) {
 	for _, test := range bMNStringToStructTests {
-		out, err := BMNStringToStruct(test.in)
+		out, err := ABMNToStruct(test.in)
 
 		if err != nil {
 			t.Error(err)
@@ -52,7 +52,7 @@ type bMNToWGS84LatLongTest struct {
 }
 
 func bMNStringToStructHelper(coord string) (bmncoord *BMNCoord) {
-	bmncoord, _ = BMNStringToStruct(coord)
+	bmncoord, _ = ABMNToStruct(coord)
 	return
 }
 

@@ -78,7 +78,7 @@ func (bc *BMNCoord) String() (fs string) {
 
 // Parses a string representation of a BMN-Coordinate into a struct holding a BMN coordinate value.
 // The reference ellipsoid of BMN coordinates is always the Bessel ellipsoid.
-func BMNStringToStruct(bmncoord string) (*BMNCoord, os.Error) {
+func ABMNToStruct(bmncoord string) (*BMNCoord, os.Error) {
 
 	compact := strings.ToUpper(strings.TrimSpace(bmncoord))
 	var rights, heights string

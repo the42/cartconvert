@@ -78,7 +78,7 @@ func main() {
 			continue
 		}
 
-		bcoord, bcoorderr := bmn.BMNStringToStruct(instring)
+		bcoord, bcoorderr := bmn.ABMNToStruct(instring)
 
 		if bcoorderr != nil {
 			fmt.Fprintf(os.Stderr, "bmn2: error on line %d: %s\n", lines, bcoorderr)
