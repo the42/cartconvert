@@ -3,9 +3,9 @@
 
 include $(GOROOT)/src/Make.inc
 
-TARG=bmn2
+TARG=geotrans
 GOFILES=\
-	bmn2.go\
+	geotrans.go\
 
 # gb: this is the local install
 GBROOT=../..
@@ -25,5 +25,4 @@ $(GBROOT)/bin/$(TARG): $(TARG)
 command: $(GBROOT)/bin/$(TARG)
 
 # gb: local dependencies
-$(TARG): $(GBROOT)/_obj/github.com/the42/cartconvert/bmn.a
 $(TARG): $(GBROOT)/_obj/github.com/the42/cartconvert.a
