@@ -3,22 +3,26 @@
 
 include $(GOROOT)/src/Make.inc
 
-TARG=github.com/the42/cartconvert/osgb36
+TARG=geotrans
 GOFILES=\
-	osgb36.go\
+	geotrans.go\
 
 # gb: this is the local install
-GBROOT=..
+GBROOT=../..
 
 # gb: compile/link against local install
 GC+= -I $(GBROOT)/_obj
 LD+= -L $(GBROOT)/_obj
 
-# gb: copy to local install
-$(GBROOT)/_obj/$(TARG).a: _obj/$(TARG).a
-	mkdir -p $(dir $@); cp -f $< $@
-package: $(GBROOT)/_obj/$(TARG).a
+# gb: default target is in GBROOT this way
+command:
 
-include $(GOROOT)/src/Make.pkg
+include $(GOROOT)/src/Make.cmd
+
+# gb: copy to local install
+$(GBROOT)/bin/$(TARG): $(TARG)
+	mkdir -p $(dir $@); cp -f $< $@
+command: $(GBROOT)/bin/$(TARG)
+
 # gb: local dependencies
-_obj/$(TARG).a: $(GBROOT)/_obj/github.com/the42/cartconvert.a
+$(TARG): $(GBROOT)/_obj/github.com/the42/cartconvert.a
