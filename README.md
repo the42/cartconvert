@@ -71,4 +71,4 @@ Testing
 
 To run the tests:
 
-  make tests
+  make test
