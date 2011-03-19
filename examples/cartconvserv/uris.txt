@@ -1,0 +1,5 @@
+UTMto (comma, deg, geohash):	/utm/<value>.{json|xml}?outputformat={=latlongcomma|latlongdeg|geohash|cartesian?}
+latlongto (utm, geohash): 	/latlong.{json|xml}/?lat=&long=&outputformat={=utm|geohash|cartesian?}
+geohashtolatlong: 		/geohash/<hash>.{json.xml}[?outputformat={=latlongcomma|latlongdeg}]
+
+bmnto (latlong, utm, geohash):	/bmn.{json|xml}[?outputformat={=latlongcomma|latlongdeg|utm|geohash}]
