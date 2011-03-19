@@ -4,3 +4,5 @@ _*
 bin/
 *.exe
 examples/conv/conv
+examples/cartconvserv/cartconvserv
+examples/geotrans/geotrans
