@@ -1,7 +1,7 @@
-<form action='/' method='post'>
+<form action='/edit/' method='post'>
     <div>
-        <input name='xcoord' value='$xcoord'>
-        <input name='ycoord' value='$ycoord'>
+        <input name='xcoord' value='{xcoord}'>
+        <input name='ycoord' value='{ycoord}'>
         <!-- <textarea name='body'>$body</textarea> -->
     </div>
     <div id='Actions'>

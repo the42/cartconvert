@@ -1,31 +1,48 @@
 package main
 
 import (
-	"github.com/garyburd/twister/server"
-	"github.com/garyburd/twister/web"
-	"github.com/ziutek/kview"
 	"strconv"
+	"http"
+	"template"
 	"github.com/the42/cartconvert"
 )
+
+// Better read it from an INI-File
+const staticWebDir = "../../static/"
+const templateDir = "../..templates/"
+
+var templateNames = []string{
+	"layout.tpl",
+	"edit.tpl",
+}
+
+var templates = make(map[string]*template.Template)
 
 type CoordinateTrans struct {
 	xcoord, ycoord string
 	fromcs, tocs   string
 }
 
-// Get an article
+func initTemplates() {
+	fmap := template.FormatterMap{}
+
+	for _, name := range templateNames {
+		fmap[name] = evalTemplate
+	}
+	
+	for _, name := range templateNames {
+		templates[name] = template.MustParseFile(templateDir + name, fmap)
+	}
+}
+
+
 func transCoordinate(ct CoordinateTrans) (coord *CoordinateTrans) {
 	coord = &CoordinateTrans{ct.xcoord, ct.ycoord, "GSK", "UTM"}
 	return
 }
 
-
-type ViewCtx struct {
-	edit interface{}
-}
-
 // Render edit page
-func edit(req *web.Request) {
+func editHandler(w http.ResponseWriter, req *http.Request) {
 	xcoord := req.Param.Get("xcoord")
 	ycoord := req.Param.Get("ycoord")
 	// xcoord, ycoord = ycoord, xcoord
@@ -33,8 +50,6 @@ func edit(req *web.Request) {
 	flat, _ := strconv.Atof64(xcoord)
 	flong, _ := strconv.Atof64(ycoord)
 
-	// cart := cartconvert.WGS84Ellipsoid.GeocoordtoCartesian( &cartconvert.GeoCoord{ Latitude: flat, Longitude: flong})
-	// cart = helmert.WGS84toMGITransformer.Apply(cart)
 	gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
 
 	edit_view.Exec(
@@ -43,27 +58,16 @@ func edit(req *web.Request) {
 	)
 }
 
-var edit_view kview.View
-
-func viewInit() {
-	// Load layout template
-	kview.TemplatesDir = "../../template"
-	layout := kview.New("layout.kt")
-
-	// Create edit page
-	edit_view = layout.Copy()
-	edit_view.Div("Edit", kview.New("edit.kt"))
+func staticFileHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, staticWebDir+req.URL.Path); 
 }
 
 
 func main() {
-	viewInit()
 
-	router := web.NewRouter().
-		Register("/", "GET", edit, "POST", edit).
-		Register("/style.css", "GET", web.FileHandler("../../static/style.css"))
+	initTemplates()
 
-	h := web.ProcessForm(1000, false, router)
-	server.Run("localhost:1111", h)
-
+	http.HandleFunc("/", staticFileHandler)
+	http.HandleFunc("/edit/", editHandler)
+	http.ListenAndServe(":1111", nil)
 }

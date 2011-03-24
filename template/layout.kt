@@ -8,7 +8,7 @@
     <body>
         <div id='Container0'>
             <div id='Container1'>
-                <div id='Edit'>$Edit.Render(edit)</div>
+                <div id='Edit'>{edit|edit.tpl}</div>
             </div>
         </div>
     </body>
