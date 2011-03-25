@@ -1,8 +1,7 @@
 <form action='/edit/' method='post'>
     <div>
-        <input name='xcoord' value='{xcoord}'>
-        <input name='ycoord' value='{ycoord}'>
-        <!-- <textarea name='body'>$body</textarea> -->
+        <input name='xcoord' value='{Xcoord}'>
+        <input name='ycoord' value='{Ycoord}'>
     </div>
     <div id='Actions'>
         <input type='submit' value='Cancel'>

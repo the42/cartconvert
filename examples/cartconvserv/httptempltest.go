@@ -20,7 +20,7 @@ Consider the templates:
 
 —footer.html—-
 Posted: {posted}
- */
+*/
 
 
 import (
@@ -58,11 +58,11 @@ func evalTemplate(wr io.Writer, formatter string, data ...interface{}) {
 
 func main() {
 	fmap := template.FormatterMap{}
-	
+
 	for _, name := range templateNames {
 		fmap[name] = evalTemplate
 	}
-	
+
 	for _, name := range templateNames {
 		templates[name] = template.MustParseFile(name, fmap)
 	}
