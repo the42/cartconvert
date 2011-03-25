@@ -53,7 +53,7 @@ var templateNames = []string{
 var templates = make(map[string]*template.Template)
 
 func evalTemplate(wr io.Writer, formatter string, data ...interface{}) {
-	err := templates[formatter].Execute(wr, data)
+	err := templates[formatter].Execute(wr, data[0])
 	if err != nil {
 		print(err.String())
 	}
