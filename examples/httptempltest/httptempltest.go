@@ -1,4 +1,4 @@
-package httptempltest
+package main
 
 /*
 Consider the templates:
@@ -30,30 +30,33 @@ import (
 )
 
 type Content struct {
-	items []string
+	Items []string
 }
 
 type Footer struct {
-	posted string
+	Posted string
 }
 
 type Page struct {
-	title   string
-	content Content
-	footer  Footer
+	Title   string
+	Content Content
+	Footer  Footer
 }
 
 var templateNames = []string{
-	"layout.tpl",
-	"content.tpl",
-	"header.tpl",
-	"footer.tpl",
+	"layout1.tpl",
+	"content1.tpl",
+	"header1.tpl",
+	"footer1.tpl",
 }
 
 var templates = make(map[string]*template.Template)
 
 func evalTemplate(wr io.Writer, formatter string, data ...interface{}) {
-	templates[formatter].Execute(wr, data)
+	err := templates[formatter].Execute(wr, data)
+	if err != nil {
+	  print(err.String())
+	}
 }
 
 func main() {
@@ -68,5 +71,8 @@ func main() {
 	}
 
 	page := Page{"test page", Content{[]string{"a", "b"}}, Footer{"today"}}
-	templates["main.html"].Execute(os.Stdout, page)
+	err := templates["layout1.tpl"].Execute(os.Stdout, page)
+	if err != nil {
+	  print(err.String())
+	}
 }
