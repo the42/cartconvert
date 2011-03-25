@@ -10,8 +10,8 @@ echo Building \
 && echo "(in .)" && cd . && make $1 && cd - > /dev/null \
 && echo "(in bmn)" && cd bmn && make $1 && cd - > /dev/null \
 && echo "(in examples/bmn2)" && cd examples/bmn2 && make $1 && cd - > /dev/null \
+&& echo "(in examples/httptempltest)" && cd examples/httptempltest && make $1 && cd - > /dev/null \
 && echo "(in examples/geotrans)" && cd examples/geotrans && make $1 && cd - > /dev/null \
-&& echo "(in examples/cartconvserv)" && cd examples/cartconvserv && make $1 && cd - > /dev/null \
 
 fi
 
