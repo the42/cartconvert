@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"github.com/the42/cartconvert"
