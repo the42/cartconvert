@@ -8,7 +8,7 @@
     <body>
         <div id='Container0'>
             <div id='Container1'>
-                <div id='Edit'>{Ep|edit.tpl}</div>
+                <div id='Edit'>{@|edit.tpl}</div>
             </div>
         </div>
     </body>
