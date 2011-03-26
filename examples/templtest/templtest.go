@@ -1,3 +1,6 @@
+// Example for nested templates
+// Taken from http://go.hokapoka.com/example/embedding-or-nesting-go-templates/
+// and re-written for language - changes
 package main
 
 /*
@@ -44,10 +47,10 @@ type Page struct {
 }
 
 var templateNames = []string{
-	"layout1.tpl",
-	"content1.tpl",
-	"header1.tpl",
-	"footer1.tpl",
+	"layout.tpl",
+	"content.tpl",
+	"header.tpl",
+	"footer.tpl",
 }
 
 var templates = make(map[string]*template.Template)
@@ -71,7 +74,7 @@ func main() {
 	}
 
 	page := Page{"test page", Content{[]string{"a", "b"}}, Footer{"today"}}
-	err := templates["layout1.tpl"].Execute(os.Stdout, page)
+	err := templates["layout.tpl"].Execute(os.Stdout, page)
 	if err != nil {
 		print(err.String())
 	}

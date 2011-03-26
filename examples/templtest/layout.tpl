@@ -1,5 +1,5 @@
 
-{@|header1.tpl}
+{@|header.tpl}
 
-{Content|content1.tpl}
-{Footer|footer1.tpl}
+{Content|content.tpl}
+{Footer|footer.tpl}
