@@ -8,17 +8,9 @@ import (
 	"github.com/the42/cartconvert"
 )
 
-type EditCtx struct {
-	Ep EditPart
-}
-
-type EditPart struct {
-	Ct CoordinateTrans
-}
-
 // Better read it from an INI-File
-const staticWebDir = "../../static/"
-const templateDir = "../../templates/"
+const staticWebDir = "../static/"
+const templateDir = "../templates/"
 
 // Better read it from an INI-File or by a dirreader
 var templateNames = []string{
@@ -34,7 +26,7 @@ type CoordinateTrans struct {
 }
 
 func evalTemplate(wr io.Writer, formatter string, data ...interface{}) {
-	err := templates[formatter].Execute(wr, data)
+	err := templates[formatter].Execute(wr, data[0])
 	if err != nil {
 		print(err.String())
 	}
@@ -71,7 +63,7 @@ func editHandler(w http.ResponseWriter, req *http.Request) {
 	gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
 
 	templates["layout.tpl"].Execute(w,
-		EditCtx{EditPart{Ct: transCoordinate(CoordinateTrans{Xcoord: strconv.Ftoa64(gc.X, 'f', 6), Ycoord: strconv.Ftoa64(gc.Y, 'f', 6)})}})
+		transCoordinate(CoordinateTrans{Xcoord: strconv.Ftoa64(gc.X, 'f', 6), Ycoord: strconv.Ftoa64(gc.Y, 'f', 6)}))
 }
 
 func staticFileHandler(w http.ResponseWriter, r *http.Request) {
