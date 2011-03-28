@@ -32,7 +32,7 @@ import (
 type BMNMeridian int
 
 const (
-	BMNMunknown BMNMeridian = iota
+	BMNZoneDet BMNMeridian = iota
 	BMNM28
 	BMNM31
 	BMNM34
@@ -63,7 +63,7 @@ func (bc *BMNCoord) String() (fs string) {
 			next = bc.Height
 		}
 
-		fs += fmt.Sprintf("%.2f", next)
+		fs += fmt.Sprintf("%.0f", next)
 		n := len(fs)
 		for n > 0 && fs[n-1] == '0' {
 			n--
@@ -133,7 +133,7 @@ L1:
 
 // Transform a BMN coordinate value to a WGS84 based latitude and longitude coordinate. Function returns
 // nil, if the meridian stripe of the bmn-coordinate is not set
-func BMNToWGS84LatLong(bmncoord *BMNCoord) *cartconvert.PolarCoord {
+func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, os.Error) {
 
 	var long0, fe float64
 
@@ -148,7 +148,7 @@ func BMNToWGS84LatLong(bmncoord *BMNCoord) *cartconvert.PolarCoord {
 		long0 = 16.0 + 20.0/60.0
 		fe = 750000
 	default:
-		return nil
+		return nil, os.EINVAL
 	}
 
 	gc := cartconvert.InverseTransverseMercator(
@@ -162,7 +162,7 @@ func BMNToWGS84LatLong(bmncoord *BMNCoord) *cartconvert.PolarCoord {
 	cart := cartconvert.PolarToCartesian(gc)
 	pt := cartconvert.HelmertWGS84ToMGI.InverseTransform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
 
-	return cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.WGS84Ellipsoid})
+	return cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.WGS84Ellipsoid}), nil
 }
 
 // Transform a latitude / longitude coordinate datum into a BMN coordinate. Function returns
@@ -170,7 +170,7 @@ func BMNToWGS84LatLong(bmncoord *BMNCoord) *cartconvert.PolarCoord {
 //
 // Important: The reference ellipsoid of the originating coordinate system will be assumed
 // to be the WGS84Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid.
-func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) *BMNCoord {
+func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCoord, os.Error) {
 
 	var long0, fe float64
 
@@ -181,6 +181,18 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) *BMNCoo
 	pt := cartconvert.HelmertWGS84ToMGI.Transform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
 	polar := cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.BesselEllipsoid})
 
+	// Determine meridian stripe based on longitude
+	if meridian == BMNZoneDet {
+		switch  {
+		  case 11.0 + 0.5 / 6 * 10  >= polar.Longitude && polar.Longitude >= 8.0 + 0.5 / 6 * 10:
+			meridian = BMNM28
+		  case 14.0 + 0.5 / 6 * 10 >= polar.Longitude && polar.Longitude >= 11.0 + 0.5 / 6 * 10:
+			meridian = BMNM31
+		  case 17.0 + 0.5 / 6 * 10 >= polar.Longitude && polar.Longitude >= 14.0 + 0.5 / 6 * 10:
+			meridian = BMNM34
+		}
+	}
+	
 	switch meridian {
 	case BMNM28:
 		long0 = 10.0 + 20.0/60.0
@@ -192,7 +204,7 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) *BMNCoo
 		long0 = 16.0 + 20.0/60.0
 		fe = 750000
 	default:
-		return nil
+		return nil, os.EINVAL
 	}
 
 	gp := cartconvert.DirectTransverseMercator(
@@ -203,7 +215,7 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) *BMNCoo
 		fe,
 		-5000000)
 
-	return &BMNCoord{Meridian: meridian, Height: gp.Y, Right: gp.X, el: gp.El}
+	return &BMNCoord{Meridian: meridian, Height: gp.Y, Right: gp.X, el: gp.El}, nil
 }
 
 func NewBMNCoord(Meridian BMNMeridian, Right, Height, RelHeight float64) *BMNCoord {

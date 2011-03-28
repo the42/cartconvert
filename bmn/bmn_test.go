@@ -81,7 +81,7 @@ func latlongequal(pcp1, pcp2 *cartconvert.PolarCoord) bool {
 func TestBMNToWGS84LatLong(t *testing.T) {
 	for _, test := range bMNToWGS84LatLongTests {
 
-		out := BMNToWGS84LatLong(test.in)
+		out, _ := BMNToWGS84LatLong(test.in)
 
 		if !latlongequal(test.out, out) {
 			t.Error("BMNToWGS84LatLong")
@@ -107,11 +107,17 @@ var wGS84LatLongToBMNTests = []wGS84LatLongToBMNTest{
 			meridian: BMNM34},
 		NewBMNCoord(BMNM34, 592269, 272290.05, 0),
 	},
+	{
+		wGS84LatLongToBMNParam{
+			gc:       &cartconvert.PolarCoord{Latitude: 48.507001, Longitude: 15.698748, El: cartconvert.WGS84Ellipsoid},
+			meridian: BMNZoneDet},
+		NewBMNCoord(BMNM34, 703168, 374510, 0),
+	},	
 }
 
 func TestWGS84LatLongToBMN(t *testing.T) {
 	for index, test := range wGS84LatLongToBMNTests {
-		out := WGS84LatLongToBMN(test.in.gc, test.in.meridian)
+		out, _ := WGS84LatLongToBMN(test.in.gc, test.in.meridian)
 		if !bmnequal(test.out, out) {
 			t.Errorf("WGS84LatLongToBMN [%d]: expected %s, got %s", index, test.out, out)
 		}
