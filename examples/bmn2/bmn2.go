@@ -78,17 +78,17 @@ func main() {
 			continue
 		}
 
-		bcoord, bcoorderr := bmn.ABMNToStruct(instring)
+		bcoord, err := bmn.ABMNToStruct(instring)
 
-		if bcoorderr != nil {
-			fmt.Fprintf(os.Stderr, "bmn2: error on line %d: %s\n", lines, bcoorderr)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "bmn2: error on line %d: %s\n", lines, err)
 			continue
 		}
 
-		pc := bmn.BMNToWGS84LatLong(bcoord)
+		pc, err := bmn.BMNToWGS84LatLong(bcoord)
 
-		if pc == nil {
-			fmt.Fprintf(os.Stderr, "bmn2: error on line %d: BMN does not return a lat/long bearing\n", lines)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "bmn2: error on line %d: %s (BMN does not return a lat/long bearing)\n", lines, err)
 			continue
 		}
 
