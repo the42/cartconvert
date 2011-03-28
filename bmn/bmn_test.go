@@ -112,7 +112,11 @@ var wGS84LatLongToBMNTests = []wGS84LatLongToBMNTest{
 			gc:       &cartconvert.PolarCoord{Latitude: 48.507001, Longitude: 15.698748, El: cartconvert.WGS84Ellipsoid},
 			meridian: BMNZoneDet},
 		NewBMNCoord(BMNM34, 703168, 374510, 0),
+<<<<<<< HEAD
 	},
+=======
+	},	
+>>>>>>> BMN Zone auto detection, tests for Zone auto detection and more error handling
 }
 
 func TestWGS84LatLongToBMN(t *testing.T) {
