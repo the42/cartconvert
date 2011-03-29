@@ -34,7 +34,7 @@ var (
 	BesselEllipsoid   = NewEllipsoid(6377397.155, 6356078.965)
 	GRS80Ellipsoid    = NewEllipsoid(6378137, 6356752.31414)
 	WGS84Ellipsoid    = NewEllipsoid(6378137, 6356752.31425)
-	Airy1830Ellipsoid = NewEllipsoid(6377563.396, 6356256.910)
+	Airy1830Ellipsoid = NewEllipsoid(6377563.396, 6356256.909)
 	DefaultEllipsoid  = WGS84Ellipsoid
 )
 
