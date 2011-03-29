@@ -32,23 +32,23 @@ var directtransversemercatorTests = []directtransversemercatorTest{
 			400000,
 			-100000,
 		},
-		&GeoPoint{X: 577274.983801, Y: 69740.492272},
+		&GeoPoint{X: 577274.9838, Y: 69740.4923},
 	},
 }
 
 func geopointequal(gp1, gp2 *GeoPoint) bool {
-	gp1s := fmt.Sprintf("%f %f", gp1.X, gp1.Y)
-	gp2s := fmt.Sprintf("%f %f", gp2.X, gp2.Y)
+	gp1s := fmt.Sprintf("%.4f %.4f", gp1.X, gp1.Y)
+	gp2s := fmt.Sprintf("%.4f %.4f", gp2.X, gp2.Y)
 
 	return gp1s == gp2s
 }
 
 
 func TestDirectTransverseMercator(t *testing.T) {
-	for _, test := range directtransversemercatorTests {
+	for cnt, test := range directtransversemercatorTests {
 		out := DirectTransverseMercator(test.in.pc, test.in.lat0, test.in.long0, test.in.scale, test.in.fe, test.in.fn)
 		if !geopointequal(test.out, out) {
-			t.Errorf("DirectTransverseMercator")
+			t.Errorf("DirectTransverseMercator [%d]: Expected %s, got %s", cnt, test.out, out)
 		}
 	}
 }
