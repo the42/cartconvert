@@ -22,110 +22,69 @@ import (
 	"os"
 )
 
-// Meridian Coordinates of the Bundesmeldenetz, three values describing false easting and false northing.
-// The meridian specification of BMN plays the same role as the zone specifier of UTM.
-type BMNMeridian int
 
-const (
-	BMNZoneDet BMNMeridian = iota
-	BMNM28
-	BMNM31
-	BMNM34
-)
-
-var bmnStrings = map[BMNMeridian]string{BMNM28: "M28", BMNM31: "M31", BMNM34: "M34"}
-
-// A BMN coordinate is specified by right-value (easting), height-value (northing)
-// and the meridian stripe, 28°, 31° or 34° West of Hierro 
-type BMNCoord struct {
-	Right, Height, RelHeight float64
-	Meridian                 BMNMeridian
-	el                       *cartconvert.Ellipsoid
+// A OSGB36 coordinate is specified by right-value (easting), height-value (northing)
+// and zone. 
+type OSGB36Coord struct {
+	Right, Height int
+	RelHeight     float64
+	Zone          string
+	el            *cartconvert.Ellipsoid
 }
 
-// Canonical representation of a BMN-value
-func (bc *BMNCoord) String() (fs string) {
+// Canonical representation of a OSGB36 datum
+func (bc *OSGB36Coord) String() string {
 
-	fs = bmnStrings[bc.Meridian]
-	var next float64
-
-	for i := 0; i < 2; i++ {
-		fs += " "
-		switch i {
-		case 0:
-			next = bc.Right
-		case 1:
-			next = bc.Height
-		}
-
-		fs += fmt.Sprintf("%.0f", next)
-		n := len(fs)
-		for n > 0 && fs[n-1] == '0' {
-			n--
-		}
-		if n > 0 && fs[n-1] == '.' {
-			n--
-		}
-		fs = fs[:n]
-	}
-	return
+	return fmt.Sprintf("%s%d%d", bc.Zone, bc.Right, bc.Height)
 }
 
 // Parses a string representation of a BMN-Coordinate into a struct holding a BMN coordinate value.
 // The reference ellipsoid of BMN coordinates is always the Bessel ellipsoid.
-func ABMNToStruct(bmncoord string) (*BMNCoord, os.Error) {
+func AOSGB36ToStruct(osgb36coord string) (*OSGB36Coord, os.Error) {
 
-	compact := strings.ToUpper(strings.TrimSpace(bmncoord))
-	var rights, heights string
-	var meridian BMNMeridian
-	var right, height float64
+	compact := strings.ToUpper(strings.TrimSpace(osgb36coord))
+	var rights, heights, rnh string
+	var zone string
+	var right, height int
 	var err os.Error
 
 L1:
-	for i, index := 0, 0; i < 3; i++ {
-		index = strings.Index(compact, " ")
-		if index == -1 {
-			index = len(compact)
+	for _, item := range compact {
+		switch {
+		case item == ' ':
+			continue L1
+		case byte(item)-'0' >= 0 && byte(item)-'0' <= 9:
+			rnh += string(item)
+		default:
+			zone += string(item)
 		}
-		switch i {
-		case 0:
-			switch compact[:index] {
-			case "M28":
-				meridian = BMNM28
-			case "M31":
-				meridian = BMNM31
-			case "M34":
-				meridian = BMNM34
-			default:
-				err = os.EINVAL
-				break L1
-			}
-		case 1:
-			rights = compact[:index]
-		case 2:
-			heights = compact[:index]
-			break L1
-		}
-		compact = compact[index+len(" "):]
-		compact = strings.TrimLeft(compact, " ")
+
 	}
 
+	zl := len(zone)
+	if zl == 0 || zl > 2 {
+		return nil, os.EINVAL
+	}
+
+	rnhlen := len(rnh)
+	if rnhlen%2 > 0 {
+		return nil, os.EINVAL
+	}
+
+	rights, heights = rnh[:rnhlen/2], rnh[rnhlen/2:]
+
+	right, err = strconv.Atoi(rights)
 	if err == nil {
 
-		right, err = strconv.Atof64(rights)
+		height, err = strconv.Atoi(heights)
 		if err == nil {
 
-			height, err = strconv.Atof64(heights)
-			if err == nil {
-
-				return &BMNCoord{Right: right, Height: height, Meridian: meridian, el: cartconvert.BesselEllipsoid}, nil
-			}
+			return &OSGB36Coord{Right: right, Height: height, Zone: zone, el: cartconvert.Airy1830Ellipsoid}, nil
 		}
 	}
-
 	return nil, err
 }
-
+/*
 // Transform a BMN coordinate value to a WGS84 based latitude and longitude coordinate. Function returns
 // nil, if the meridian stripe of the bmn-coordinate is not set
 func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, os.Error) {
@@ -216,3 +175,4 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCo
 func NewBMNCoord(Meridian BMNMeridian, Right, Height, RelHeight float64) *BMNCoord {
 	return &BMNCoord{Right: Right, Height: Height, RelHeight: RelHeight, Meridian: Meridian, el: cartconvert.BesselEllipsoid}
 }
+*/

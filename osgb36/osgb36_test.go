@@ -7,44 +7,45 @@ package osgb36
 
 import (
 	"fmt"
-	"github.com/the42/cartconvert"
+	// "github.com/the42/cartconvert"
 	"testing"
 )
 
 // ## BMNStringToStruct
-type bMNStringToStructTest struct {
+type oSGB36StringToStructTest struct {
 	in  string
-	out *BMNCoord
+	out *OSGB36Coord
 }
 
-var bMNStringToStructTests = []bMNStringToStructTest{
+var oSGB36StringToStructTestssuc = []oSGB36StringToStructTest{
 	{
-		"M31 592269 272290",
-		&BMNCoord{Meridian: BMNM31, Right: 592269.0, Height: 272290.0},
+		"NN166712",
+		&OSGB36Coord{Zone: "NN", Right: 166, Height: 712},
 	},
 }
 
-func bmnequal(bmn1, bmn2 *BMNCoord) bool {
-	p1 := fmt.Sprintf("%s", bmn1)
-	p2 := fmt.Sprintf("%s", bmn2)
+func osgb36equal(osgb1, osgb2 *OSGB36Coord) bool {
+	p1 := fmt.Sprintf("%s", osgb1)
+	p2 := fmt.Sprintf("%s", osgb2)
 
 	return p1 == p2
 }
 
-func TestBMNStringToStruct(t *testing.T) {
-	for _, test := range bMNStringToStructTests {
-		out, err := ABMNToStruct(test.in)
+func TestOSGB36StringToStruct(t *testing.T) {
+	for _, test := range oSGB36StringToStructTestssuc {
+		out, err := AOSGB36ToStruct(test.in)
 
 		if err != nil {
 			t.Error(err)
 		}
 
-		if !bmnequal(test.out, out) {
-			t.Error("BMNStringToStruct")
+		if !osgb36equal(test.out, out) {
+			t.Error("TestOSGB36StringToStruct")
 		}
 	}
 }
 
+/*
 // ## BMNToWGS84LatLong
 type bMNToWGS84LatLongTest struct {
 	in  *BMNCoord
@@ -123,3 +124,4 @@ func TestWGS84LatLongToBMN(t *testing.T) {
 		}
 	}
 }
+*/
