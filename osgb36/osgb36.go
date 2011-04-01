@@ -84,41 +84,85 @@ L1:
 	}
 	return nil, err
 }
-/*
+
 // Transform a BMN coordinate value to a WGS84 based latitude and longitude coordinate. Function returns
 // nil, if the meridian stripe of the bmn-coordinate is not set
-func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, os.Error) {
+func OSGB36ToWGS84LatLong(coord *OSGB36Coord) (*cartconvert.PolarCoord, os.Error) {
 
-	var long0, fe float64
+	fe, fn, ok := osgb36zonetorefcoords(coord.Zone)
 
-	switch bmncoord.Meridian {
-	case BMNM28:
-		long0 = 10.0 + 20.0/60.0
-		fe = 150000
-	case BMNM31:
-		long0 = 13.0 + 20.0/60.0
-		fe = 450000
-	case BMNM34:
-		long0 = 16.0 + 20.0/60.0
-		fe = 750000
-	default:
+	if !ok {
 		return nil, os.EINVAL
 	}
 
 	gc := cartconvert.InverseTransverseMercator(
-		&cartconvert.GeoPoint{Y: bmncoord.Height, X: bmncoord.Right, El: bmncoord.el},
-		0,
-		long0,
-		1,
-		fe,
-		-5000000)
+		&cartconvert.GeoPoint{Y: float64(coord.Height), X: float64(coord.Right), El: coord.el},
+		-2,
+		49,
+		0.9996012717,
+		float64(fe),
+		float64(fn))
 
 	cart := cartconvert.PolarToCartesian(gc)
-	pt := cartconvert.HelmertWGS84ToMGI.InverseTransform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
+	pt := cartconvert.HelmertWGS84ToOSGB36.InverseTransform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
 
 	return cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.WGS84Ellipsoid}), nil
 }
 
+const osgb36gridsquare = "VWXYZQRSTULMNOPFGHJKABCDE"
+
+func osgb36zonetorefcoords(zone string) (easting, northing int, ok bool) {
+	var x_multiplier, y_multiplier int
+
+	ok = true
+
+	//find 500km offset
+	switch zone[0] {
+	case 'S':
+		x_multiplier = 0
+		y_multiplier = 0
+	case 'T':
+		x_multiplier = 1
+		y_multiplier = 0
+	case 'N':
+		x_multiplier = 0
+		y_multiplier = 1
+	case 'O':
+		x_multiplier = 1
+		y_multiplier = 1
+	case 'H':
+		x_multiplier = 0
+		y_multiplier = 2
+	case 'J':
+		x_multiplier = 1
+		y_multiplier = 2
+
+	default:
+		ok = false
+	}
+
+	if ok {
+		easting = x_multiplier * 500000
+		northing = y_multiplier * 500000
+
+		//find 100km offset and add to 500km offset to get coordinate of
+		//square point is in
+		if len(zone) > 1 {
+			pos := strings.Index(osgb36gridsquare, zone[1:1])
+			if pos > -1 {
+				easting += pos % 5 * 100000
+				northing += pos / 5 * 100000
+
+			} else {
+				easting, northing = 0, 0
+				ok = false
+			}
+		}
+	}
+	return
+}
+
+/*
 // Transform a latitude / longitude coordinate datum into a BMN coordinate. Function returns
 // nil, if the meridian stripe of the bmn-coordinate is not set.
 //
@@ -171,8 +215,8 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCo
 
 	return &BMNCoord{Meridian: meridian, Height: gp.Y, Right: gp.X, el: gp.El}, nil
 }
-
-func NewBMNCoord(Meridian BMNMeridian, Right, Height, RelHeight float64) *BMNCoord {
-	return &BMNCoord{Right: Right, Height: Height, RelHeight: RelHeight, Meridian: Meridian, el: cartconvert.BesselEllipsoid}
-}
 */
+
+func NewOSGB36Coord(Zone string, Right, Height int, RelHeight float64) *OSGB36Coord {
+	return &OSGB36Coord{Right: Right, Height: Height, RelHeight: RelHeight, Zone: Zone, el: cartconvert.Airy1830Ellipsoid}
+}

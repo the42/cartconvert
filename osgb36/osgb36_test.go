@@ -7,7 +7,7 @@ package osgb36
 
 import (
 	"fmt"
-	// "github.com/the42/cartconvert"
+	"github.com/the42/cartconvert"
 	"testing"
 )
 
@@ -45,30 +45,18 @@ func TestOSGB36StringToStruct(t *testing.T) {
 	}
 }
 
-/*
+
 // ## BMNToWGS84LatLong
-type bMNToWGS84LatLongTest struct {
-	in  *BMNCoord
+type oSGB36ToWGS84LatLongTest struct {
+	in  *OSGB36Coord
 	out *cartconvert.PolarCoord
 }
 
-func bMNStringToStructHelper(coord string) (bmncoord *BMNCoord) {
-	bmncoord, _ = ABMNToStruct(coord)
-	return
-}
 
-var bMNToWGS84LatLongTests = []bMNToWGS84LatLongTest{
+var oSGB36ToWGS84LatLongTests = []oSGB36ToWGS84LatLongTest{
 	{
-		NewBMNCoord(BMNM28, 592270.0, 272290, 0),
-		&cartconvert.PolarCoord{Latitude: 47.439212, Longitude: 16.197434},
-	},
-	{ // TODO: Ist das möglich??
-		bMNStringToStructHelper("M34 592269 272290"),
-		&cartconvert.PolarCoord{Latitude: 47.570299, Longitude: 14.236188},
-	},
-	{
-		bMNStringToStructHelper("M34 703168 374510"),
-		&cartconvert.PolarCoord{Latitude: 48.507001, Longitude: 15.698748},
+		NewOSGB36Coord("ST", 58982, 72915, 0),
+		&cartconvert.PolarCoord{Latitude: 50.815243, Longitude: 0.137062},
 	},
 }
 
@@ -79,17 +67,23 @@ func latlongequal(pcp1, pcp2 *cartconvert.PolarCoord) bool {
 	return pp1s == pp2s
 }
 
-func TestBMNToWGS84LatLong(t *testing.T) {
-	for _, test := range bMNToWGS84LatLongTests {
+func TestOSGB36ToWGS84LatLong(t *testing.T) {
+	for cnt, test := range oSGB36ToWGS84LatLongTests {
 
-		out, _ := BMNToWGS84LatLong(test.in)
+		out, err := OSGB36ToWGS84LatLong(test.in)
 
-		if !latlongequal(test.out, out) {
-			t.Error("BMNToWGS84LatLong")
+		if err != nil {
+			t.Errorf("OSGB36ToWGS84LatLong [%d]: Error: %s", cnt, err)
+		} else {
+
+			if !latlongequal(test.out, out) {
+				t.Errorf("OSGB36ToWGS84LatLong [%d]: Expected: %s, got: %s", cnt, test.out, out)
+			}
 		}
 	}
 }
 
+/*
 // ## WGS84LatLongToBMN
 type wGS84LatLongToBMNParam struct {
 	gc       *cartconvert.PolarCoord
