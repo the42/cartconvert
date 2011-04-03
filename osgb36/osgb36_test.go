@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-// ## BMNStringToStruct
+// ## AOSGB36ToStruct
 type oSGB36StringToStructTest struct {
 	in  string
 	out *OSGB36Coord
@@ -19,44 +19,59 @@ type oSGB36StringToStructTest struct {
 
 var oSGB36StringToStructTestssuc = []oSGB36StringToStructTest{
 	{
-		"NN166712",
-		&OSGB36Coord{Zone: "NN", Right: 166, Height: 712},
+		"NN1660071200",
+		&OSGB36Coord{Zone: "NN", Easting: 166, Northing: 712, GridLen: 3},
 	},
+		{
+		"NN",
+		&OSGB36Coord{Zone: "NN", Easting: 0, Northing: 0, GridLen: 0},
+	},
+
 }
 
 func osgb36equal(osgb1, osgb2 *OSGB36Coord) bool {
 	p1 := fmt.Sprintf("%s", osgb1)
 	p2 := fmt.Sprintf("%s", osgb2)
-
 	return p1 == p2
 }
 
 func TestOSGB36StringToStruct(t *testing.T) {
-	for _, test := range oSGB36StringToStructTestssuc {
-		out, err := AOSGB36ToStruct(test.in)
+	for cnt, test := range oSGB36StringToStructTestssuc {
+		out, err := AOSGB36ToStruct(test.in, OSGB36Auto)
 
 		if err != nil {
-			t.Error(err)
-		}
-
-		if !osgb36equal(test.out, out) {
-			t.Error("TestOSGB36StringToStruct")
+			t.Errorf("TestOSGB36StringToStruct [%d]: Error: %s", cnt, err)
+		} else {
+			if !osgb36equal(test.out, out) {
+				t.Errorf("TestOSGB36StringToStruct [%d]: Expected %s, got %s", cnt, test.out, out)
+			}
 		}
 	}
 }
 
 
-// ## BMNToWGS84LatLong
+// ## OSGB36ToWGS84LatLong
 type oSGB36ToWGS84LatLongTest struct {
 	in  *OSGB36Coord
 	out *cartconvert.PolarCoord
 }
 
-
 var oSGB36ToWGS84LatLongTests = []oSGB36ToWGS84LatLongTest{
 	{
-		NewOSGB36Coord("ST", 58982, 72915, 0),
-		&cartconvert.PolarCoord{Latitude: 50.815243, Longitude: 0.137062},
+		&OSGB36Coord{Zone: "SE", Easting: 29793, Northing: 33798, GridLen: 5, el: cartconvert.Airy1830Ellipsoid},
+		&cartconvert.PolarCoord{Latitude: 53.79965, Longitude: -1.54915},
+	},
+	{
+		&OSGB36Coord{Zone: "NN", Easting: 166, Northing: 712, GridLen: 3, el: cartconvert.Airy1830Ellipsoid},
+		&cartconvert.PolarCoord{Latitude: 56.796088, Longitude: -5.0039304},
+	},
+	{
+		&OSGB36Coord{Zone: "NN", Easting: 16600, Northing: 71200, GridLen: 5, el: cartconvert.Airy1830Ellipsoid},
+		&cartconvert.PolarCoord{Latitude: 56.796557, Longitude: -5.0047120},
+	},
+	{
+		&OSGB36Coord{Zone: "NN", Easting: 16650, Northing: 71250, GridLen: 5, el: cartconvert.Airy1830Ellipsoid},
+		&cartconvert.PolarCoord{Latitude: 56.796557, Longitude: -5.0039304},
 	},
 }
 
@@ -75,47 +90,39 @@ func TestOSGB36ToWGS84LatLong(t *testing.T) {
 		if err != nil {
 			t.Errorf("OSGB36ToWGS84LatLong [%d]: Error: %s", cnt, err)
 		} else {
-
 			if !latlongequal(test.out, out) {
-				t.Errorf("OSGB36ToWGS84LatLong [%d]: Expected: %s, got: %s", cnt, test.out, out)
+				t.Errorf("OSGB36ToWGS84LatLong:%d [%s]: Expected %s, got %s", cnt, test.in, test.out, out)
 			}
 		}
 	}
 }
 
-/*
-// ## WGS84LatLongToBMN
-type wGS84LatLongToBMNParam struct {
-	gc       *cartconvert.PolarCoord
-	meridian BMNMeridian
+// ## WGS84LatLongToOSGB36
+type wGS84LatLongToOSGB36Test struct {
+	in  *cartconvert.PolarCoord
+	out *OSGB36Coord
 }
 
-type wGS84LatLongToBMNTest struct {
-	in  wGS84LatLongToBMNParam
-	out *BMNCoord
-}
-
-var wGS84LatLongToBMNTests = []wGS84LatLongToBMNTest{
+var wGS84LatLongToBMNTests = []wGS84LatLongToOSGB36Test{
 	{
-		wGS84LatLongToBMNParam{
-			gc:       &cartconvert.PolarCoord{Latitude: 47.570299, Longitude: 14.236188, El: cartconvert.WGS84Ellipsoid},
-			meridian: BMNM34},
-		NewBMNCoord(BMNM34, 592269, 272290.05, 0),
+		&cartconvert.PolarCoord{Latitude: 53.79965, Longitude: -1.54915},
+		&OSGB36Coord{Zone: "SE", Easting: 29793, Northing: 33798, el: cartconvert.Airy1830Ellipsoid},
 	},
 	{
-		wGS84LatLongToBMNParam{
-			gc:       &cartconvert.PolarCoord{Latitude: 48.507001, Longitude: 15.698748, El: cartconvert.WGS84Ellipsoid},
-			meridian: BMNZoneDet},
-		NewBMNCoord(BMNM34, 703168, 374510, 0),
+		&cartconvert.PolarCoord{Latitude: 56.796557, Longitude: -5.0039304},
+		&OSGB36Coord{Zone: "NN", Easting: 16650, Northing: 71250, el: cartconvert.Airy1830Ellipsoid},
 	},
 }
 
-func TestWGS84LatLongToBMN(t *testing.T) {
-	for index, test := range wGS84LatLongToBMNTests {
-		out, _ := WGS84LatLongToBMN(test.in.gc, test.in.meridian)
-		if !bmnequal(test.out, out) {
-			t.Errorf("WGS84LatLongToBMN [%d]: expected %s, got %s", index, test.out, out)
+func TestWGS84LatLongToOSGB36(t *testing.T) {
+	for cnt, test := range wGS84LatLongToBMNTests {
+		out, err := WGS84LatLongToOSGB36(test.in)
+		if err != nil {
+			t.Errorf("OSGB36ToWGS84LatLong [%d]: Error: %s", cnt, err)
+		} else {
+			if !osgb36equal(test.out, out) {
+				t.Errorf("WGS84LatLongToOSGB36:%d [%s]: Expected %s, got %s", cnt, test.in, test.out, out)
+			}
 		}
 	}
 }
-*/
