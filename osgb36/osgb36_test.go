@@ -12,21 +12,58 @@ import (
 )
 
 // ## AOSGB36ToStruct
+type oSGB36StringToStructParam struct {
+	osgb36coord string
+	prec        OSGB36prec
+}
+
 type oSGB36StringToStructTest struct {
-	in  string
+	in  oSGB36StringToStructParam
 	out *OSGB36Coord
+}
+
+func newNewOSGB36CoordHelper(zone string, easting, northing uint, prec OSGB36prec, relheight float64) *OSGB36Coord {
+	coord, _ := NewOSGB36Coord(zone, easting, northing, prec, relheight)
+	return coord
 }
 
 var oSGB36StringToStructTestssuc = []oSGB36StringToStructTest{
 	{
-		"NN1660071200",
-		&OSGB36Coord{Zone: "NN", Easting: 166, Northing: 712, GridLen: 3},
+		oSGB36StringToStructParam{"NN1660071200", OSGB36Auto},
+		newNewOSGB36CoordHelper("NN", 1660, 7120, OSGB36Auto, 0),
 	},
-		{
-		"NN",
+	{
+		oSGB36StringToStructParam{"NN", OSGB36Auto},
 		&OSGB36Coord{Zone: "NN", Easting: 0, Northing: 0, GridLen: 0},
 	},
-
+	{
+		oSGB36StringToStructParam{"NN11", OSGB36Auto},
+		&OSGB36Coord{Zone: "NN", Easting: 1, Northing: 1, GridLen: 1},
+	},
+	{
+		oSGB36StringToStructParam{"NN1212", OSGB36Auto},
+		&OSGB36Coord{Zone: "NN", Easting: 12, Northing: 12, GridLen: 2},
+	},
+	{
+		oSGB36StringToStructParam{"NN123123", OSGB36Auto},
+		&OSGB36Coord{Zone: "NN", Easting: 123, Northing: 123, GridLen: 3},
+	},
+	{
+		oSGB36StringToStructParam{"NN12341234", OSGB36Auto},
+		&OSGB36Coord{Zone: "NN", Easting: 1234, Northing: 1234, GridLen: 4},
+	},
+	{
+		oSGB36StringToStructParam{"NN1234512345", OSGB36Auto},
+		&OSGB36Coord{Zone: "NN", Easting: 12345, Northing: 12345, GridLen: 5},
+	},
+	{
+		oSGB36StringToStructParam{"NN1234512345", OSGB36_2},
+		&OSGB36Coord{Zone: "NN", Easting: 12, Northing: 12, GridLen: 2},
+	},
+	{
+		oSGB36StringToStructParam{"NN1234512345", OSGB36_2},
+		newNewOSGB36CoordHelper("NN", 12, 12, OSGB36Auto, 0),
+	},
 }
 
 func osgb36equal(osgb1, osgb2 *OSGB36Coord) bool {
@@ -37,13 +74,14 @@ func osgb36equal(osgb1, osgb2 *OSGB36Coord) bool {
 
 func TestOSGB36StringToStruct(t *testing.T) {
 	for cnt, test := range oSGB36StringToStructTestssuc {
-		out, err := AOSGB36ToStruct(test.in, OSGB36Auto)
+		out, err := AOSGB36ToStruct(test.in.osgb36coord, test.in.prec)
 
 		if err != nil {
 			t.Errorf("TestOSGB36StringToStruct [%d]: Error: %s", cnt, err)
 		} else {
+			formattspec := "TestOSGB36StringToStruct [%d]: Expected %s, got %s"
 			if !osgb36equal(test.out, out) {
-				t.Errorf("TestOSGB36StringToStruct [%d]: Expected %s, got %s", cnt, test.out, out)
+				t.Errorf(formattspec, cnt, test.out, out)
 			}
 		}
 	}
@@ -106,11 +144,11 @@ type wGS84LatLongToOSGB36Test struct {
 var wGS84LatLongToBMNTests = []wGS84LatLongToOSGB36Test{
 	{
 		&cartconvert.PolarCoord{Latitude: 53.79965, Longitude: -1.54915},
-		&OSGB36Coord{Zone: "SE", Easting: 29793, Northing: 33798, el: cartconvert.Airy1830Ellipsoid},
+		&OSGB36Coord{Zone: "SE", Easting: 29793, Northing: 33798, GridLen: 5, el: cartconvert.Airy1830Ellipsoid},
 	},
 	{
 		&cartconvert.PolarCoord{Latitude: 56.796557, Longitude: -5.0039304},
-		&OSGB36Coord{Zone: "NN", Easting: 16650, Northing: 71250, el: cartconvert.Airy1830Ellipsoid},
+		&OSGB36Coord{Zone: "NN", Easting: 16650, Northing: 71250, GridLen: 5, el: cartconvert.Airy1830Ellipsoid},
 	},
 }
 
