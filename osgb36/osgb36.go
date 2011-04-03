@@ -2,14 +2,14 @@
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
-// This package provides functions to deal with 
-// conversion and transformations of coordinates in OSGB36,
-// the UK National Grid.
+// This package provides functions to deal with conversion and transformations of coordinates
+// of the OSGB36 datum, the UK National Grid.
 //
 // The conversion between WGS84 and OSGB36 uses a simple helmert transformation,
-// which in the case of OSGB36 inconsistencies may result in an accuracy not exceeding +/- 5m.
-// If higher accuracy is required, a set of helmert parameters must be used or the
-// procedure described in http://www.ordnancesurvey.co.uk/gps/docs/Geomatics_world.pdf.
+// which in the case of OSGB36 inconsistencies, may result in an accuracy not exceeding +/- 5m, and
+// for cornercases worse than +/- 15m.
+// If a higher accuracy is required, a set of helmert parameters must be used or the
+// procedure described at http://www.ordnancesurvey.co.uk/gps/docs/Geomatics_world.pdf.
 //
 // For further info see http://gps.ordnancesurvey.co.uk/etrs89geo_natgrid.asp
 package osgb36
@@ -23,18 +23,25 @@ import (
 	"math"
 )
 
-// A OSGB36 coordinate is specified by right-value (easting), height-value (northing)
-// and zone. 
+// A OSGB36 coordinate is specified by zone, easting and northing. 
 type OSGB36Coord struct {
 	Easting, Northing uint
 	RelHeight         float64
 	Zone              string
 	el                *cartconvert.Ellipsoid
-	GridLen           OSGB36prec
+	gridLen           OSGB36prec
 }
 
-// The precision of an OSGB36 coordinate can either be set explicitely from meter - resolutiuon (OSGB36_5)
-// to the bare 100x100 km Zone OSGB36Min.
+// Controls formatting of an OSGB36 coordinate.
+//
+//    OSGB36Auto - for easting and northing the most compact representation will be found. Eg.: NN12006500 will be stored as NN1265
+//    OSGB36Leave - the adverse of OSGB36Auto: Do not try to do any compacting on easting and northing
+//    OSGB36_1 ... OSGB36_5 - set northing resp. easting to exactly 1 .. 5 digits. If the inputs are shorter than n,
+//       they will be filled with '0'. N1256 with precision 5 will result in N1200056000. If the input is longer than n,
+//       it will be truncated. N123567 with precision 2 will result in N1256. When shortening bearings, no rounding takes place.
+//
+// The precision of an OSGB36 coordinate can either be set explicitly; From meter - resolution (OSGB36_5)
+// to the bare 100x100 km Zone OSGB36_1. OSGB36Min is a synonym for OSGB36_1, OSGB36_Max is a synonym for OSGB36_5.
 type OSGB36prec byte
 
 const (
@@ -49,9 +56,9 @@ const (
 	OSGB36Auto  = OSGB36Leave + 1
 )
 
-// Canonical representation of a OSGB36 datum
+// Canonical representation of a OSGB36 datum.
 func (coord *OSGB36Coord) String() string {
-	if coord.GridLen > 0 {
+	if coord.gridLen > 0 {
 		return fmt.Sprintf("%s%d%d", coord.Zone, coord.Easting, coord.Northing)
 	}
 	return coord.Zone
@@ -64,11 +71,11 @@ func (coord *OSGB36Coord) String() string {
 //    ZOEANO
 // with ZO the two letter zone specifier, EA easting and NO northing to the accuracy of a meter.
 //
-// prec has the meaning:
-//    OSGB36Leave - pass the northing and easting as is to the internal struct
-//    OSGB36Auto - shorten trailing zeros. NN1665034570 becomes NN16653457 and NN16001700 becomes NN1617.
-//    OSGB36_1 ... _5 - shorten northing and easting to the specified length, regardless of loss of precision
-// The reference ellipsoid of an OSGB36 coordinate is always the Airy1830 ellipsoid.
+// For a description of prec see OSGB36prec.
+//
+// The reference ellipsoid of an OSGB36 will always be set to the Airy1830 ellipsoid.
+//
+// The function returns EINVAL if northing and easting are of different length.
 func AOSGB36ToStruct(osgb36coord string, prec OSGB36prec) (*OSGB36Coord, os.Error) {
 
 	compact := strings.ToUpper(strings.TrimSpace(osgb36coord))
@@ -134,17 +141,27 @@ func OSGB36ZoneToRefCoords(coord *OSGB36Coord) (easting, northing uint) {
 	northing = ((19 - l1/5*5) - l2/5) * 100000
 
 	// append numeric part of references to grid index:
-	fact := uint(math.Pow(10, float64(OSGB36_Max-coord.GridLen)))
-	easting += coord.Easting*fact + 5*(fact/10)
-	northing += coord.Northing*fact + 5*(fact/10)
+	fact := uint(math.Pow(10, float64(OSGB36_Max-coord.gridLen)))
+	easting += coord.Easting * fact
+	northing += coord.Northing * fact
+
+	// For grid zones return location at point. In other cases return the point
+	// at the middle of the square.
+	if fact < 10000 {
+		easting += 5 * (fact / 10)
+		northing += 5 * (fact / 10)
+	}
 
 	return
 }
 
-// Convert an OSGB36 coordinate value to a WGS84 based latitude and longitude coordinate. Important: A OSGB36 datum like
-// NN1745 will be internally expanded to NN1750045500 to point to the middle of the zone. For the point at
-// NN1700045000 it is necessary to fully qualify northing and easting.
-func OSGB36ToWGS84LatLong(coord *OSGB36Coord) (*cartconvert.PolarCoord, os.Error) {
+// Convert an OSGB36 coordinate value to a WGS84 based latitude and longitude coordinate.
+//
+// Important: A OSGB36 datum like NN11 will be internally expanded to NN1500015000 to point to the middle of the zone.
+// For the point at NN1000010000 it is necessary to fully qualify northing and easting.
+//
+// Plain grid zone specifiers will NOT be shifted towards the middle of the square.
+func OSGB36ToWGS84LatLong(coord *OSGB36Coord) *cartconvert.PolarCoord {
 
 	easting, northing := OSGB36ZoneToRefCoords(coord)
 
@@ -159,9 +176,12 @@ func OSGB36ToWGS84LatLong(coord *OSGB36Coord) (*cartconvert.PolarCoord, os.Error
 	cart := cartconvert.PolarToCartesian(gc)
 	pt := cartconvert.HelmertWGS84ToOSGB36.InverseTransform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
 
-	return cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.WGS84Ellipsoid}), nil
+	return cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.WGS84Ellipsoid})
 }
 
+// Perform formating on an OSGB36 datum. For formatting see OSGB36prec.
+//
+// The function will return EINVAL if easting and northing have a different number of digits.
 func SanitizeOSGB36CoordToPrec(easting, northing *uint, prec *OSGB36prec) os.Error {
 
 	if *easting+*northing == 0 {
@@ -213,7 +233,10 @@ func SanitizeOSGB36CoordToPrec(easting, northing *uint, prec *OSGB36prec) os.Err
 	return nil
 }
 
-// Build OSGB36 coordinate from easting and northing relative to Grid. Reduce precision to prec positions.
+// Build OSGB36 coordinate from easting and northing relative to Grid. The parameter prec controls
+// how the resulting OSGB36 coordinates are formated. See OSGB36prec.
+//
+// The function will return EINVAL if lat/long are not within the OSGB36 datum area.
 func GridRefNumToLet(easting, northing uint, height float64, prec OSGB36prec) (*OSGB36Coord, os.Error) {
 	// get the 100km-grid indices
 	easting100k := easting / 100000
@@ -245,7 +268,9 @@ func GridRefNumToLet(easting, northing uint, height float64, prec OSGB36prec) (*
 // Transform a latitude / longitude coordinate datum into a OSGB36 coordinate.
 //
 // Important: The reference ellipsoid of the originating coordinate system will be assumed
-// to be the WGS84Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid.
+// to be the WGS84Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid. 
+//
+// The function will return EINVAL if lat/long are not within the OSGB36 datum area.
 func WGS84LatLongToOSGB36(gc *cartconvert.PolarCoord) (*OSGB36Coord, os.Error) {
 	// This sets the Ellipsoid to WGS84, regardless of the actual value set
 	gc.El = cartconvert.WGS84Ellipsoid
@@ -273,13 +298,6 @@ func max(x, y int) int {
 	return y
 }
 
-func min(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}
-
 func uintlen(x uint) (len uint) {
 	for ; x > 0; x /= 10 {
 		len++
@@ -287,9 +305,18 @@ func uintlen(x uint) (len uint) {
 	return
 }
 
+// Create a new OSGB36 coordinate from literals. The parameter prec plays an important role in how the literals
+// are interpreted:
+//    OSGB36Auto - for easting and northing the most compact representation will be found. Eg.: NN12006500 will be stored as NN1265
+//    OSGB36Leave - the adverse of OSGB36Auto: Do not try to do any compacting on easting and northing
+//    OSGB36_1 ... OSGB36_5 - set northing resp. easting to exactly 1 .. 5 digits. If the inputs are shorter than n,
+//       they will be filled with '0'. N1256 with precision 5 will result in N1200056000. If the input is longer than n,
+//       it will be truncated. N123567 with precision 2 will result in N1256. When shortening bearings, no rounding takes place.
+//
+// The function will return EINVAL when northing and easting do not have the same number of digits.
 func NewOSGB36Coord(Zone string, easting, northing uint, prec OSGB36prec, relheight float64) (*OSGB36Coord, os.Error) {
 	if err := SanitizeOSGB36CoordToPrec(&easting, &northing, &prec); err != nil {
 		return nil, err
 	}
-	return &OSGB36Coord{Easting: easting, Northing: northing, RelHeight: relheight, Zone: Zone, GridLen: prec, el: cartconvert.Airy1830Ellipsoid}, nil
+	return &OSGB36Coord{Easting: easting, Northing: northing, RelHeight: relheight, Zone: Zone, gridLen: prec, el: cartconvert.Airy1830Ellipsoid}, nil
 }
