@@ -201,12 +201,10 @@ func SanitizeOSGB36CoordToPrec(easting, northing *uint, prec *OSGB36prec) os.Err
 			fact := uint(math.Pow(10, float64(inputpreclen-byte(desiredprec))))
 			*easting /= fact
 			*northing /= fact
-
 		} else {
 			fact := uint(math.Pow(10, float64(byte(desiredprec)-inputpreclen)))
 			*easting *= fact
 			*northing *= fact
-
 		}
 		*prec = desiredprec
 	case OSGB36Leave:
@@ -264,7 +262,7 @@ func WGS84LatLongToOSGB36(gc *cartconvert.PolarCoord) (*OSGB36Coord, os.Error) {
 		400000,
 		-100000)
 
-	return GridRefNumToLet(uint(gp.X+0.5), uint(gp.Y+0.5), 0, OSGB36Auto)
+	return GridRefNumToLet(uint(gp.X+0.5), uint(gp.Y+0.5), 0, OSGB36_Max)
 
 }
 
