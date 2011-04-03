@@ -29,7 +29,7 @@ import (
 
 // Meridian Coordinates of the Bundesmeldenetz, three values describing false easting and false northing.
 // The meridian specification of BMN plays the same role as the zone specifier of UTM.
-type BMNMeridian int
+type BMNMeridian byte
 
 const (
 	BMNZoneDet BMNMeridian = iota
