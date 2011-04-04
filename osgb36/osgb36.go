@@ -29,7 +29,7 @@ type OSGB36Coord struct {
 	RelHeight         float64
 	Zone              string
 	el                *cartconvert.Ellipsoid
-	gridLen           OSGB36prec
+	gridLen           byte
 }
 
 // Controls formatting of an OSGB36 coordinate.
@@ -45,7 +45,7 @@ type OSGB36Coord struct {
 type OSGB36prec byte
 
 const (
-	OSGB36Min OSGB36prec = iota
+	OSGB36_Min OSGB36prec = iota
 	OSGB36_1
 	OSGB36_2
 	OSGB36_3
@@ -100,14 +100,14 @@ L1:
 		return nil, os.EINVAL
 	}
 
-	ennlen := OSGB36prec(len(enn))
+	ennlen := byte(len(enn))
 	if ennlen > 0 {
 		if ennlen%2 > 0 {
 			return nil, os.EINVAL
 		}
 
 		ennlen /= 2
-		if ennlen > OSGB36_Max {
+		if ennlen > byte(OSGB36_Max) {
 			return nil, os.EINVAL
 		}
 
@@ -120,7 +120,7 @@ L1:
 			return nil, err
 		}
 	}
-	return NewOSGB36Coord(zone, uint(east), uint(north), prec, 0), nil
+	return NewOSGB36Coord(zone, uint(east), uint(north), 0, ennlen, prec), nil
 }
 
 // Returns northing and easting based on OSGB36 zone specifier relative to false northing and easting
@@ -146,12 +146,12 @@ func OSGB36ZoneToRefCoords(coord *OSGB36Coord) (easting, northing uint) {
 	northing = ((19 - l1/5*5) - l2/5) * 100000
 
 	// append numeric part of references to grid index:
-	fact := uint(math.Pow(10, float64(OSGB36_Max-coord.gridLen)))
-	easting += coord.Easting * fact
-	northing += coord.Northing * fact
+	easting += coord.Easting
+	northing += coord.Northing
 
 	// if only the grid zone was specified, return the location at point.
 	// for all other specified vales return location at middle of square
+	fact := uint(math.Pow(10, float64(byte(OSGB36_Max)-coord.gridLen)))
 	if fact < 10000 {
 		easting += 5 * (fact / 10)
 		northing += 5 * (fact / 10)
@@ -184,20 +184,23 @@ func OSGB36ToWGS84LatLong(coord *OSGB36Coord) *cartconvert.PolarCoord {
 }
 
 // Perform formating on an OSGB36 datum. For formatting see OSGB36prec.
-func SanitizeOSGB36CoordToPrec(easting, northing *uint, prec *OSGB36prec) {
+func SanitizeOSGB36CoordToPrec(easting, northing *uint, inputprec byte, desiredprec OSGB36prec) byte {
 
-	if *easting+*northing == 0 {
-		*prec = 0
-		return
+	if *easting+*northing == 0 || inputprec == 0 {
+		return byte(OSGB36_Min)
 	}
 
-	inputpreclen := byte(max(int(uintlen(*northing)), int(uintlen(*easting))))
+	// inputpreclen := byte(max(int(uintlen(*northing)), int(uintlen(*easting))))
 
-	desiredprec := *prec
+	  if inputprec < byte(OSGB36_Max) {
+		fact := uint(math.Pow(10, float64(byte(OSGB36_Max)-inputprec)))
+		*easting *= fact
+		*northing *= fact
+	  }
 
-	switch *prec {
+	switch desiredprec {
 	case OSGB36Auto:
-		northprec, eastprec := inputpreclen, inputpreclen
+		northprec, eastprec := OSGB36_Max, OSGB36_Max
 		easttmp, northtmp := *easting, *northing
 
 		for easttmp%10 == 0 && eastprec > 0 {
@@ -213,7 +216,13 @@ func SanitizeOSGB36CoordToPrec(easting, northing *uint, prec *OSGB36prec) {
 
 		fallthrough
 
-	case OSGB36_1, OSGB36_2, OSGB36_3, OSGB36_4, OSGB36_5:
+	case OSGB36_Min, OSGB36_1, OSGB36_2, OSGB36_3, OSGB36_4, OSGB36_5:
+	  if desiredprec < OSGB36_Max {
+		fact := uint(math.Pow(10, float64(OSGB36_Max-desiredprec)))
+		*easting /= fact
+		*northing /= fact
+	  }
+	  /*
 		if byte(desiredprec) < inputpreclen {
 			fact := uint(math.Pow(10, float64(inputpreclen-byte(desiredprec))))
 			if fact != 0 {
@@ -222,14 +231,14 @@ func SanitizeOSGB36CoordToPrec(easting, northing *uint, prec *OSGB36prec) {
 			}
 		} else {
 			fact := uint(math.Pow(10, float64(byte(desiredprec)-inputpreclen)))
-			*easting *= fact
-			*northing *= fact
-		}
-		*prec = desiredprec
+						if fact != 0 {
+						}
+
+		}*/
 	case OSGB36Leave:
-		*prec = OSGB36prec(inputpreclen)
+		desiredprec = OSGB36prec(inputprec)
 	}
-	return
+	return byte(desiredprec)
 }
 
 // Build OSGB36 coordinate from easting and northing relative to Grid. The parameter prec controls
@@ -261,7 +270,7 @@ func GridRefNumToLet(easting, northing uint, height float64, prec OSGB36prec) (*
 	easting %= 100000
 	northing %= 100000
 
-	return NewOSGB36Coord(zone, easting, northing, prec, 0), nil
+	return NewOSGB36Coord(zone, easting, northing, 0, 5, OSGB36Leave), nil
 }
 
 // Transform a latitude / longitude coordinate datum into a OSGB36 coordinate.
@@ -309,7 +318,7 @@ func uintlen(x uint) (len uint) {
 //       they will be filled with '0'. N1256 with precision 5 will result in N1200056000. If the input is longer than n,
 //       it will be truncated. N123567 with precision 2 will result in N1256. When shortening bearings, no rounding takes place.
 //
-func NewOSGB36Coord(Zone string, easting, northing uint, prec OSGB36prec, relheight float64) *OSGB36Coord {
-	SanitizeOSGB36CoordToPrec(&easting, &northing, &prec)
-	return &OSGB36Coord{Easting: easting, Northing: northing, RelHeight: relheight, Zone: Zone, gridLen: prec, el: cartconvert.Airy1830Ellipsoid}
+func NewOSGB36Coord(Zone string, easting, northing uint, relheight float64, inputprec byte, desiredprec OSGB36prec) *OSGB36Coord {
+	effbytes := SanitizeOSGB36CoordToPrec(&easting, &northing, inputprec, desiredprec)
+	return &OSGB36Coord{Easting: easting, Northing: northing, RelHeight: relheight, Zone: Zone, gridLen: effbytes, el: cartconvert.Airy1830Ellipsoid}
 }

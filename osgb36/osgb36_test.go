@@ -26,16 +26,16 @@ type oSGB36StringToStructTest struct {
 var oSGB36StringToStructTestssuc = []oSGB36StringToStructTest{
 	{
 		oSGB36StringToStructParam{"NN000500", OSGB36Auto},
-		NewOSGB36Coord("NN", 0, 500, OSGB36Auto, 0),
+		NewOSGB36Coord("NN", 0, 500, 0, 3, OSGB36Auto),
 	},
 	{
 		oSGB36StringToStructParam{"NN000510", OSGB36Auto},
-		NewOSGB36Coord("NN", 0, 510, OSGB36Auto, 0),
+		NewOSGB36Coord("NN", 0, 510, 0, 3, OSGB36Auto),
 	},
 
 	{
 		oSGB36StringToStructParam{"NN1660071200", OSGB36Auto},
-		NewOSGB36Coord("NN", 1660, 7120, OSGB36Auto, 0),
+		NewOSGB36Coord("NN", 1660, 7120, 0, 4, OSGB36Auto),
 	},
 	{
 		oSGB36StringToStructParam{"NN", OSGB36Auto},
@@ -67,11 +67,11 @@ var oSGB36StringToStructTestssuc = []oSGB36StringToStructTest{
 	},
 	{
 		oSGB36StringToStructParam{"NN1234512345", OSGB36_2},
-		NewOSGB36Coord("NN", 12, 12, OSGB36Auto, 0),
+		NewOSGB36Coord("NN", 12, 12, 0, 2, OSGB36Auto),
 	},
 	{
 		oSGB36StringToStructParam{"NN166712", OSGB36_5},
-		NewOSGB36Coord("NN", 1660, 7120, OSGB36_5, 0),
+		NewOSGB36Coord("NN", 1660, 7120, 0, 4, OSGB36_5),
 	},
 }
 
@@ -110,7 +110,7 @@ var oSGB36ToWGS84LatLongTests = []oSGB36ToWGS84LatLongTest{
 		&cartconvert.PolarCoord{Latitude: 53.79965, Longitude: -1.54915},
 	},
 	{
-		&OSGB36Coord{Zone: "NN", Easting: 166, Northing: 712, gridLen: 3, el: cartconvert.Airy1830Ellipsoid},
+		&OSGB36Coord{Zone: "NN", Easting: 16600, Northing: 71200, gridLen: 3, el: cartconvert.Airy1830Ellipsoid},
 		&cartconvert.PolarCoord{Latitude: 56.796088, Longitude: -5.0039304},
 	},
 	{
