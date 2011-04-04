@@ -192,11 +192,11 @@ func SanitizeOSGB36CoordToPrec(easting, northing *uint, inputprec byte, desiredp
 
 	// inputpreclen := byte(max(int(uintlen(*northing)), int(uintlen(*easting))))
 
-	  if inputprec < byte(OSGB36_Max) {
+	if inputprec < byte(OSGB36_Max) {
 		fact := uint(math.Pow(10, float64(byte(OSGB36_Max)-inputprec)))
 		*easting *= fact
 		*northing *= fact
-	  }
+	}
 
 	switch desiredprec {
 	case OSGB36Auto:
@@ -217,24 +217,24 @@ func SanitizeOSGB36CoordToPrec(easting, northing *uint, inputprec byte, desiredp
 		fallthrough
 
 	case OSGB36_Min, OSGB36_1, OSGB36_2, OSGB36_3, OSGB36_4, OSGB36_5:
-	  if desiredprec < OSGB36_Max {
-		fact := uint(math.Pow(10, float64(OSGB36_Max-desiredprec)))
-		*easting /= fact
-		*northing /= fact
-	  }
-	  /*
-		if byte(desiredprec) < inputpreclen {
-			fact := uint(math.Pow(10, float64(inputpreclen-byte(desiredprec))))
-			if fact != 0 {
-				*easting /= fact
-				*northing /= fact
-			}
-		} else {
-			fact := uint(math.Pow(10, float64(byte(desiredprec)-inputpreclen)))
-						if fact != 0 {
-						}
+		if desiredprec < OSGB36_Max {
+			fact := uint(math.Pow(10, float64(OSGB36_Max-desiredprec)))
+			*easting /= fact
+			*northing /= fact
+		}
+		/*
+			if byte(desiredprec) < inputpreclen {
+				fact := uint(math.Pow(10, float64(inputpreclen-byte(desiredprec))))
+				if fact != 0 {
+					*easting /= fact
+					*northing /= fact
+				}
+			} else {
+				fact := uint(math.Pow(10, float64(byte(desiredprec)-inputpreclen)))
+							if fact != 0 {
+							}
 
-		}*/
+			}*/
 	case OSGB36Leave:
 		desiredprec = OSGB36prec(inputprec)
 	}

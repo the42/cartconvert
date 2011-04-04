@@ -32,7 +32,6 @@ var oSGB36StringToStructTestssuc = []oSGB36StringToStructTest{
 		oSGB36StringToStructParam{"NN000510", OSGB36Auto},
 		NewOSGB36Coord("NN", 0, 510, 0, 3, OSGB36Auto),
 	},
-
 	{
 		oSGB36StringToStructParam{"NN1660071200", OSGB36Auto},
 		NewOSGB36Coord("NN", 1660, 7120, 0, 4, OSGB36Auto),
@@ -114,6 +113,10 @@ var oSGB36ToWGS84LatLongTests = []oSGB36ToWGS84LatLongTest{
 		&cartconvert.PolarCoord{Latitude: 56.796088, Longitude: -5.0039304},
 	},
 	{
+		&OSGB36Coord{Zone: "NN", Easting: 1, Northing: 7, gridLen: 5, el: cartconvert.Airy1830Ellipsoid},
+		&cartconvert.PolarCoord{Latitude: 56.150648, Longitude: -5.2214376},
+	},
+	{
 		&OSGB36Coord{Zone: "NN", Easting: 16600, Northing: 71200, gridLen: 5, el: cartconvert.Airy1830Ellipsoid},
 		&cartconvert.PolarCoord{Latitude: 56.796557, Longitude: -5.0047120},
 	},
@@ -154,7 +157,7 @@ type wGS84LatLongToOSGB36Test struct {
 	out *OSGB36Coord
 }
 
-var wGS84LatLongToBMNTests = []wGS84LatLongToOSGB36Test{
+var wGS84LatLongToOSGB36Tests = []wGS84LatLongToOSGB36Test{
 	{
 		&cartconvert.PolarCoord{Latitude: 53.79965, Longitude: -1.54915},
 		&OSGB36Coord{Zone: "SE", Easting: 29793, Northing: 33798, gridLen: 5, el: cartconvert.Airy1830Ellipsoid},
@@ -175,7 +178,7 @@ func osgb36fuzzyequal(osgb1, osgb2 *OSGB36Coord) bool {
 }
 
 func TestWGS84LatLongToOSGB36(t *testing.T) {
-	for cnt, test := range wGS84LatLongToBMNTests {
+	for cnt, test := range wGS84LatLongToOSGB36Tests {
 		out, err := WGS84LatLongToOSGB36(test.in)
 		if err != nil {
 			t.Errorf("WGS84LatLongToOSGB36 [%d]: Error: %s", cnt, err)
