@@ -22,15 +22,19 @@ type oSGB36StringToStructTest struct {
 	out *OSGB36Coord
 }
 
-func newNewOSGB36CoordHelper(zone string, easting, northing uint, prec OSGB36prec, relheight float64) *OSGB36Coord {
-	coord, _ := NewOSGB36Coord(zone, easting, northing, prec, relheight)
-	return coord
-}
-
 var oSGB36StringToStructTestssuc = []oSGB36StringToStructTest{
 	{
+		oSGB36StringToStructParam{"NN000500", OSGB36Auto},
+		NewOSGB36Coord("NN", 0, 500, OSGB36Auto, 0),
+	},
+	{
+		oSGB36StringToStructParam{"NN000510", OSGB36Auto},
+		NewOSGB36Coord("NN", 0, 510, OSGB36Auto, 0),
+	},
+
+	{
 		oSGB36StringToStructParam{"NN1660071200", OSGB36Auto},
-		newNewOSGB36CoordHelper("NN", 1660, 7120, OSGB36Auto, 0),
+		NewOSGB36Coord("NN", 1660, 7120, OSGB36Auto, 0),
 	},
 	{
 		oSGB36StringToStructParam{"NN", OSGB36Auto},
@@ -62,11 +66,11 @@ var oSGB36StringToStructTestssuc = []oSGB36StringToStructTest{
 	},
 	{
 		oSGB36StringToStructParam{"NN1234512345", OSGB36_2},
-		newNewOSGB36CoordHelper("NN", 12, 12, OSGB36Auto, 0),
+		NewOSGB36Coord("NN", 12, 12, OSGB36Auto, 0),
 	},
 	{
 		oSGB36StringToStructParam{"NN166712", OSGB36_5},
-		newNewOSGB36CoordHelper("NN", 1660, 7120, OSGB36_5, 0),
+		NewOSGB36Coord("NN", 1660, 7120, OSGB36_5, 0),
 	},
 }
 
@@ -81,9 +85,10 @@ func TestOSGB36StringToStruct(t *testing.T) {
 		out, err := AOSGB36ToStruct(test.in.osgb36coord, test.in.prec)
 
 		if err != nil {
-			t.Errorf("TestOSGB36StringToStruct [%d]: Error: %s", cnt, err)
+			t.Errorf("AOSGB36ToStruct [%d]: Error: %s", cnt, err)
 		} else {
-			formattspec := "TestOSGB36StringToStruct [%d]: Expected %s, got %s"
+			formattspec := "AOSGB36ToStruct [%d]: Expected %s, got %s"
+			// fmt.Printf(formattspec+"\n", cnt, test.out, out)
 			if !osgb36equal(test.out, out) {
 				t.Errorf(formattspec, cnt, test.out, out)
 			}
@@ -160,7 +165,7 @@ func TestWGS84LatLongToOSGB36(t *testing.T) {
 	for cnt, test := range wGS84LatLongToBMNTests {
 		out, err := WGS84LatLongToOSGB36(test.in)
 		if err != nil {
-			t.Errorf("OSGB36ToWGS84LatLong [%d]: Error: %s", cnt, err)
+			t.Errorf("WGS84LatLongToOSGB36 [%d]: Error: %s", cnt, err)
 		} else {
 			if !osgb36equal(test.out, out) {
 				t.Errorf("WGS84LatLongToOSGB36:%d [%s]: Expected %s, got %s", cnt, test.in, test.out, out)
