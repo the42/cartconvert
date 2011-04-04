@@ -111,7 +111,7 @@ func main() {
 				continue
 			}
 		case ifosgb36:
-			osgb36coord, err := osgb36.AOSGB36ToStruct(instring, osgb36.OSGB36Leave)
+			osgb36coord, err := osgb36.AOSGB36ToStruct(instring, osgb36.OSGB36Auto)
 
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "OSGB36: error on line %d: %s\n", lines, err)
