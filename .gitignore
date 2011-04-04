@@ -3,4 +3,4 @@ _obj/
 _*
 bin/
 *.exe
-examples/bmn2/bmn2
+examples/conv/conv

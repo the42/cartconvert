@@ -3,9 +3,9 @@
 
 include $(GOROOT)/src/Make.inc
 
-TARG=bmn2
+TARG=conv
 GOFILES=\
-	bmn2.go\
+	conv.go\
 
 # gb: this is the local install
 GBROOT=../..
@@ -23,7 +23,6 @@ include $(GOROOT)/src/Make.cmd
 $(GBROOT)/bin/$(TARG): $(TARG)
 	mkdir -p $(dir $@); cp -f $< $@
 command: $(GBROOT)/bin/$(TARG)
-
 
 # gb: local dependencies
 $(TARG): $(GBROOT)/_obj/github.com/the42/cartconvert/bmn.a

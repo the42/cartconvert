@@ -17,4 +17,3 @@ LD+= -L $(GBROOT)/_obj
 package: $(GBROOT)/_obj/$(TARG).a
 
 include $(GOROOT)/src/Make.pkg
-

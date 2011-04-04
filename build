@@ -8,8 +8,9 @@ echo Running goinstall \
 else
 echo Building \
 && echo "(in .)" && cd . && make $1 && cd - > /dev/null \
+&& echo "(in osgb36)" && cd osgb36 && make $1 && cd - > /dev/null \
 && echo "(in bmn)" && cd bmn && make $1 && cd - > /dev/null \
-&& echo "(in examples/bmn2)" && cd examples/bmn2 && make $1 && cd - > /dev/null \
+&& echo "(in examples/conv)" && cd examples/conv && make $1 && cd - > /dev/null \
 
 fi
 
