@@ -25,5 +25,6 @@ $(GBROOT)/bin/$(TARG): $(TARG)
 command: $(GBROOT)/bin/$(TARG)
 
 # gb: local dependencies
+$(TARG): $(GBROOT)/_obj/github.com/the42/cartconvert/osgb36.a
 $(TARG): $(GBROOT)/_obj/github.com/the42/cartconvert/bmn.a
 $(TARG): $(GBROOT)/_obj/github.com/the42/cartconvert.a
