@@ -2,12 +2,12 @@
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
-// This command reads coordinates in Bundesmeldenetz from stdin, performs a conversion,
+// This command reads coordinates from stdin, performs a conversion,
 // and writes to stdout. Errors are written to stderr.
 //
 // The target reference ellipsoid is always the WGS84Ellipsoid
 //
-// Usage of ./bmn2:
+// Usage of ./conv
 //  -of="deg": specify output format. Possible values are:  dms  geohash  utc  deg 
 //
 package main
@@ -15,6 +15,7 @@ package main
 import (
 	"github.com/the42/cartconvert"
 	"github.com/the42/cartconvert/bmn"
+	"github.com/the42/cartconvert/osgb36"
 	"encoding/line"
 	"fmt"
 	"flag"
@@ -22,41 +23,57 @@ import (
 	"strings"
 )
 
-type displayformat int
+type displayformat byte
 
 const (
-	fmtunknown displayformat = iota
-	deg
-	dms
-	utm
-	geohash
+	offmtunknown displayformat = iota
+	ofdeg
+	ofdms
+	ofutm
+	ofgeohash
 )
 
-var ofOptions = map[string]displayformat{"deg": deg, "dms": dms, "utm": utm, "geohash": geohash}
+type inputformat byte
+
+const (
+	ifbmn = iota
+	ifosgb36
+)
+
+var ofOptions = map[string]displayformat{"deg": ofdeg, "dms": ofdms, "utm": ofutm, "geohash": ofgeohash}
+var ifOptions = map[string]inputformat{"bmn": ifbmn, "osgb36": ifosgb36}
 
 
 func main() {
 
-	var ofcmdlinespec string
+	var ofcmdlinespec, ifcmdlinespec string
 	var of displayformat
+	var ifm inputformat
 	var lines uint
-	var instring, outstring, paramvalues string
+	var instring, outstring, ofparamvalues, ifparamvalues string
+	var pc *cartconvert.PolarCoord
 
 	for key, _ := range ofOptions {
-		paramvalues += fmt.Sprintf(" %s ", key)
+		ofparamvalues += fmt.Sprintf(" %s ", key)
 	}
 
-	flag.StringVar(&ofcmdlinespec, "of", "deg", "specify output format. Possible values are: "+paramvalues)
+	for key, _ := range ifOptions {
+		ifparamvalues += fmt.Sprintf(" %s ", key)
+	}
+
+	flag.StringVar(&ofcmdlinespec, "of", "deg", "specify output format. Possible values are: "+ofparamvalues)
+	flag.StringVar(&ifcmdlinespec, "if", "osgb36", "specify input format. Possible values are: "+ifparamvalues)
 	flag.Parse()
 
 	of = ofOptions[strings.ToLower(ofcmdlinespec)]
+	ifm = ifOptions[strings.ToLower(ifcmdlinespec)]
 
 	liner := line.NewReader(os.Stdin, 100)
 	longline := false
 
 	for data, prefix, err := liner.ReadLine(); err != os.EOF; data, prefix, err = liner.ReadLine() {
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "bmn2 %d: %s\n", lines, err)
+			fmt.Fprintf(os.Stderr, "conv %d: %s\n", lines, err)
 			continue
 		}
 
@@ -78,33 +95,44 @@ func main() {
 			continue
 		}
 
-		bcoord, err := bmn.ABMNToStruct(instring)
+		switch ifm {
+		case ifbmn:
 
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "bmn2: error on line %d: %s\n", lines, err)
-			continue
-		}
+			bmncoord, err := bmn.ABMNToStruct(instring)
 
-		pc, err := bmn.BMNToWGS84LatLong(bcoord)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "BMN: error on line %d: %s\n", lines, err)
+				continue
+			}
+			pc, err = bmn.BMNToWGS84LatLong(bmncoord)
 
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "bmn2: error on line %d: %s (BMN does not return a lat/long bearing)\n", lines, err)
-			continue
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "BMN: error on line %d: %s (BMN does not return a lat/long bearing)\n", lines, err)
+				continue
+			}
+		case ifosgb36:
+			osgb36coord, err := osgb36.AOSGB36ToStruct(instring, osgb36.OSGB36Leave)
+
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "OSGB36: error on line %d: %s\n", lines, err)
+				continue
+			}
+			pc = osgb36.OSGB36ToWGS84LatLong(osgb36coord)
 		}
 
 		switch of {
-		case deg:
+		case ofdeg:
 			outstring = cartconvert.LatLongToString(pc, cartconvert.LLFdeg)
-		case dms:
+		case ofdms:
 			outstring = cartconvert.LatLongToString(pc, cartconvert.LLFdms)
-		case utm:
+		case ofutm:
 			outstring = cartconvert.LatLongToUTM(pc).String()
-		case geohash:
+		case ofgeohash:
 			outstring = cartconvert.LatLongToGeoHash(pc)
 		default:
 			fmt.Fprintln(os.Stderr, "Unrecognized output specifier")
 			flag.Usage()
-			fmt.Fprintf(os.Stderr, "possible values are: [%s]\n", paramvalues)
+			fmt.Fprintf(os.Stderr, "possible values are: [%s]\n", ofparamvalues)
 			fmt.Fprintln(os.Stderr, "]")
 			os.Exit(2)
 		}
