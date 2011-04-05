@@ -123,7 +123,7 @@ L1:
 			height, err = strconv.Atof64(heights)
 			if err == nil {
 
-				return &BMNCoord{Right: right, Height: height, Meridian: meridian, el: cartconvert.BesselEllipsoid}, nil
+				return &BMNCoord{Right: right, Height: height, Meridian: meridian, el: cartconvert.Bessel1841MGIEllipsoid}, nil
 			}
 		}
 	}
@@ -179,7 +179,7 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCo
 
 	cart := cartconvert.PolarToCartesian(gc)
 	pt := cartconvert.HelmertWGS84ToMGI.Transform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
-	polar := cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.BesselEllipsoid})
+	polar := cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.Bessel1841MGIEllipsoid})
 
 	// Determine meridian stripe based on longitude
 	if meridian == BMNZoneDet {
@@ -219,5 +219,5 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCo
 }
 
 func NewBMNCoord(Meridian BMNMeridian, Right, Height, RelHeight float64) *BMNCoord {
-	return &BMNCoord{Right: Right, Height: Height, RelHeight: RelHeight, Meridian: Meridian, el: cartconvert.BesselEllipsoid}
+	return &BMNCoord{Right: Right, Height: Height, RelHeight: RelHeight, Meridian: Meridian, el: cartconvert.Bessel1841MGIEllipsoid}
 }

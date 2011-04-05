@@ -31,11 +31,12 @@ func (ce CartographyError) String() string {
 
 // Set of common ellipsoidal models regularly found in cartography 
 var (
-	BesselEllipsoid   = NewEllipsoid(6377397.155, 6356078.965)
-	GRS80Ellipsoid    = NewEllipsoid(6378137, 6356752.31414)
-	WGS84Ellipsoid    = NewEllipsoid(6378137, 6356752.31425)
-	Airy1830Ellipsoid = NewEllipsoid(6377563.396, 6356256.909)
-	DefaultEllipsoid  = WGS84Ellipsoid
+	Bessel1841MGIEllipsoid = NewEllipsoid(6377397.155, 6356078.965)
+	Bessel1841Ellipsoid    = NewEllipsoid(6377397.155, 6356078.962822)
+	GRS80Ellipsoid         = NewEllipsoid(6378137, 6356752.31414)
+	WGS84Ellipsoid         = NewEllipsoid(6378137, 6356752.31425)
+	Airy1830Ellipsoid      = NewEllipsoid(6377563.396, 6356256.909)
+	DefaultEllipsoid       = WGS84Ellipsoid
 )
 
 type Ellipsoid struct {
