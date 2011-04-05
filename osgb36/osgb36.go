@@ -222,19 +222,6 @@ func SanitizeOSGB36CoordToPrec(easting, northing *uint, inputprec byte, desiredp
 			*easting /= fact
 			*northing /= fact
 		}
-		/*
-			if byte(desiredprec) < inputpreclen {
-				fact := uint(math.Pow(10, float64(inputpreclen-byte(desiredprec))))
-				if fact != 0 {
-					*easting /= fact
-					*northing /= fact
-				}
-			} else {
-				fact := uint(math.Pow(10, float64(byte(desiredprec)-inputpreclen)))
-							if fact != 0 {
-							}
-
-			}*/
 	case OSGB36Leave:
 		desiredprec = OSGB36prec(inputprec)
 	}
@@ -301,13 +288,6 @@ func max(x, y int) int {
 		return x
 	}
 	return y
-}
-
-func uintlen(x uint) (len uint) {
-	for ; x > 0; x /= 10 {
-		len++
-	}
-	return
 }
 
 // Create a new OSGB36 coordinate from literals. The parameter prec plays an important role in how the literals
