@@ -14,7 +14,6 @@ echo Building \
 && echo "(in examples/conv)" && cd examples/conv && make $1 && cd - > /dev/null \
 && echo "(in examples/cartconvserv)" && cd examples/cartconvserv && make $1 && cd - > /dev/null \
 && echo "(in bmn)" && cd bmn && make $1 && cd - > /dev/null \
-&& echo "(in examples/httptempltest)" && cd examples/httptempltest && make $1 && cd - > /dev/null \
 && echo "(in examples/geotrans)" && cd examples/geotrans && make $1 && cd - > /dev/null \
 && echo "(in examples/templtest)" && cd examples/templtest && make $1 && cd - > /dev/null \
 
