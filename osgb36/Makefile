@@ -20,5 +20,6 @@ $(GBROOT)/_obj/$(TARG).a: _obj/$(TARG).a
 package: $(GBROOT)/_obj/$(TARG).a
 
 include $(GOROOT)/src/Make.pkg
+
 # gb: local dependencies
 _obj/$(TARG).a: $(GBROOT)/_obj/github.com/the42/cartconvert.a
