@@ -1,20 +1,24 @@
-bmn2 - Konvertiert Bundesmeldenetz Daten zu Längen/Breiten
-==========================================================
+conv - Konvertiert geografische Daten zu Längen/Breiten
+=======================================================
 
 Funktion
 --------
 
-bmn2 liest geografische Daten im Bundesmeldenetz von stdin, konvertiert diese
+conv liest geografische Daten von stdin, konvertiert diese
 Daten, und schreibt das Ergebnis nach stdout. Fehler werden nach stderr
 geschrieben.
 
 Verwendung
 ----------
 
-    Usage of ./bmn2:
-      -of="deg": specify output format. Possible values are:  dms  geohash  utc  deg
+    Usage of ./conv:
+      -if="osgb36": specify input format. Possible values are:  bmn  osgb36 
+      -of="deg": specify output format. Possible values are:  dms  geohash  utm  deg 
 
-Das Eingabeformat muss diese Konvention erfüllen:
+Eingabeformat Bundesmeldenetz
+-----------------------------
+
+Das BMN-Eingabeformat muss diese Konvention erfüllen:
 
 M28|M31|M34 xxx[.yyy] xxxx[.yyy]
 
@@ -27,7 +31,7 @@ z.B.: "infile.txt":
     M34 592269 272290.05
 
 
-bmn2 -of="deg" < infile.txt
+conv -if="bmn" -of="deg" < infile.txt
 
   Liest Koordinaten im BMN-Format aus der Datei "infile.txt" und schreibt das
   Ergebnis im Format Länge und Breite in Dezimalschreibweise nach stdout:
@@ -39,7 +43,7 @@ bmn2 -of="deg" < infile.txt
     lat: 47.570299°, long: 14.236188°
 
 
-bmn2 -of="dms" < infile.txt > outfile.txt
+conv -if="bmn" -of="dms" < infile.txt > outfile.txt
 
   Liest Koordinaten im BMN-Format aus der Datei "infile.txt" und schreibt das
   Ergebnis für Länge und Breite im Format Grad°Minuten'Sekunden.Komma'' in die
@@ -52,7 +56,7 @@ bmn2 -of="dms" < infile.txt > outfile.txt
     N 47°34'13.08'', E 14°14'10.28''
 
 
-bmn2 -of="utm" < infile.txt > outfile.txt
+conv -if="bmn" -of="utm" < infile.txt > outfile.txt
 
   Liest Koordinaten im BMN-Format aus der Datei "infile.txt" und schreibt das
   Ergebnis in UTM Koordinaten in die Datei "outfile.txt"
@@ -63,7 +67,7 @@ bmn2 -of="utm" < infile.txt > outfile.txt
     33U 551611 5372889
     33T 442552 5268825
 
-bmn2 -of="geohash" < infile.txt
+conv -if="bmn" -of="geohash" < infile.txt
 
   Liest Koordinaten im BMN-Format aus der Datei "infile.txt" und schreibt das
   Ergebnis als [Geohash](http://en.wikipedia.org/wiki/Geohash) nach stdout
@@ -74,6 +78,25 @@ bmn2 -of="geohash" < infile.txt
     u2e5vnrmz276
     u26negymp4rn
 
+
+Eingabeformat OSGB36 (UK)
+-------------------------
+
+Das OSGB36-Eingabeformat muss diese Konvention erfüllen:
+
+Z[Z][dddddnnnnn]
+
+Z ist die bis zu zwei Stellen lange Zonenspezifikation.
+d ist der bis zu fünf Stellen lange Rechtswert
+n ist der bis zu fünf Stellen lange Höhenwert
+
+z.B.: "osgtest.dat"
+
+    SV		Konvertiert den linken, unteren Punkt bei Zone SV
+    SV11		
+    NN166712
+    NN000500
+    HU396753
 
 Installation
 ------------

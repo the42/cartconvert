@@ -3,7 +3,7 @@ _obj/
 _*
 bin/
 *.exe
-examples/bmn2/bmn2
 examples/cartconvserv/cartconvserv
 examples/geotrans/geotrans
 examples/templtest/templtest
+examples/conv/conv
