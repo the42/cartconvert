@@ -191,16 +191,16 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCo
 
 	// Determine meridian stripe based on longitude
 	if meridian == BMNZoneDet {
-		switch  {
-		  case 11.0 + 0.5 / 6 * 10  >= polar.Longitude && polar.Longitude >= 8.0 + 0.5 / 6 * 10:
+		switch {
+		case 11.0+0.5/6*10 >= polar.Longitude && polar.Longitude >= 8.0+0.5/6*10:
 			meridian = BMNM28
-		  case 14.0 + 0.5 / 6 * 10 >= polar.Longitude && polar.Longitude >= 11.0 + 0.5 / 6 * 10:
+		case 14.0+0.5/6*10 >= polar.Longitude && polar.Longitude >= 11.0+0.5/6*10:
 			meridian = BMNM31
-		  case 17.0 + 0.5 / 6 * 10 >= polar.Longitude && polar.Longitude >= 14.0 + 0.5 / 6 * 10:
+		case 17.0+0.5/6*10 >= polar.Longitude && polar.Longitude >= 14.0+0.5/6*10:
 			meridian = BMNM34
 		}
 	}
-	
+
 	switch meridian {
 	case BMNM28:
 		long0 = 10.0 + 20.0/60.0
