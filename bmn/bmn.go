@@ -61,15 +61,15 @@ func (bc *BMNCoord) String() (fs string) {
 			next = bc.Height
 		}
 
-		fs += fmt.Sprintf("%.0f", next)
-		n := len(fs)
-		for n > 0 && fs[n-1] == '0' {
+		tmp := fmt.Sprintf("%.0f", next)
+		n := len(tmp)
+		for n > 0 && tmp[n-1] == '0' {
 			n--
 		}
-		if n > 0 && fs[n-1] == '.' {
+		if n > 0 && tmp[n-1] == '.' {
 			n--
 		}
-		fs = fs[:n]
+		fs = fs + tmp[:n]
 	}
 	return
 }
