@@ -7,8 +7,6 @@
 // This package provides a series of functions to deal with 
 // conversion and transformations of coordinates in the Datum Austria
 //
-// http://de.wikipedia.org/wiki/Datum_Austria
-//
 // and here specifically of the Bundesmeldenetz, the former federal cartographic datum
 // of Austria. The Bundesmeldenetz is already widely replaced by UTM coordinates but much legacy
 // data is still encoded in BMN coordinates. Unlike UTM, the BMN uses the Bessel reference ellipsoid
