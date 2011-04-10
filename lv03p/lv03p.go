@@ -37,7 +37,7 @@ type SwissCoord struct {
 	el                       *cartconvert.Ellipsoid
 }
 
-var coordliterals = [][]string{{"y: ", "x: "}, {"E: ", "N: "}}
+var coordliterals = [][]string{{"y:", "x:"}, {"E:", "N:"}}
 
 // Canonical representation of a SwissCoord-value
 func (bc *SwissCoord) String() (fs string) {
@@ -53,15 +53,15 @@ func (bc *SwissCoord) String() (fs string) {
 			next = bc.Northing
 		}
 
-		fs += fmt.Sprintf("%.0f", next)
-		n := len(fs)
-		for n > 0 && fs[n-1] == '0' {
+		tmp := fmt.Sprintf("%.0f", next)
+		n := len(tmp)
+		for n > 0 && tmp[n-1] == '0' {
 			n--
 		}
-		if n > 0 && fs[n-1] == '.' {
+		if n > 0 && tmp[n-1] == '.' {
 			n--
 		}
-		fs = fs[:n]
+		fs = fs + tmp[:n]
 	}
 	return
 }
