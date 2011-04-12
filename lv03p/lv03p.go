@@ -33,17 +33,20 @@ const (
 // A coordinate in Switzerland is specified by easting (right-value, x), and northing (height-value, y)
 type SwissCoord struct {
 	Easting, Northing, RelHeight float64
-	CoordType                 SwissCoordType
-	el                       *cartconvert.Ellipsoid
+	CoordType                    SwissCoordType
+	el                           *cartconvert.Ellipsoid
 }
 
-var coordliterals = [][]string{{"y:", "x:"}, {"E:", "N:"}}
+var coordliterals = [][]string{{"y:", " x:"}, {"E:", " N:"}}
 
 // Canonical representation of a SwissCoord-value
 func (bc *SwissCoord) String() (fs string) {
 
 	var next float64
 
+	if bc == nil {
+		return
+	}
 	for i := 0; i < 2; i++ {
 		fs += coordliterals[bc.CoordType][i]
 		switch i {
@@ -53,7 +56,7 @@ func (bc *SwissCoord) String() (fs string) {
 			next = bc.Northing
 		}
 
-		tmp := fmt.Sprintf("%.0f", next)
+		tmp := fmt.Sprintf("%f", next)
 		n := len(tmp)
 		for n > 0 && tmp[n-1] == '0' {
 			n--
@@ -70,39 +73,48 @@ func (bc *SwissCoord) String() (fs string) {
 // The reference ellipsoid of Swisscoord datum is always the GRS80 ellipsoid.
 func ASwissCoordToStruct(coord string) (*SwissCoord, os.Error) {
 
-	compact := strings.ToUpper(strings.TrimSpace(bmncoord))
+	compact := strings.ToUpper(strings.TrimSpace(coord))
 	var rights, heights string
-	var meridian BMNMeridian
+	var coordType, oldcoordType SwissCoordType
 	var right, height float64
 	var err os.Error
 
 L1:
-	for i, index := 0, 0; i < 3; i++ {
+	for i, index := 0, 0; i < 2; i++ {
 		index = strings.Index(compact, " ")
 		if index == -1 {
 			index = len(compact)
 		}
-		switch i {
-		case 0:
-			switch compact[:index] {
-			case "M28":
-				meridian = BMNM28
-			case "M31":
-				meridian = BMNM31
-			case "M34":
-				meridian = BMNM34
-			default:
-				err = os.EINVAL
-				break L1
-			}
-		case 1:
-			rights = compact[:index]
-		case 2:
-			heights = compact[:index]
+
+		switch compact[:2] {
+		case "X:":
+			coordType = LV03
+			heights = compact[2:index]
+		case "Y:":
+			coordType = LV03
+			rights = compact[2:index]
+		case "E:":
+			coordType = LV95
+			rights = compact[2:index]
+		case "N:":
+			coordType = LV95
+			heights = compact[2:index]
+		default:
+			err = os.EINVAL
+			break L1
+		}
+
+		if oldcoordType != coordType {
+			err = os.EINVAL
+			break L1
+		}
+
+		if i == 1 {
 			break L1
 		}
 		compact = compact[index+len(" "):]
 		compact = strings.TrimLeft(compact, " ")
+		oldcoordType = coordType
 	}
 
 	if err == nil {
@@ -112,8 +124,7 @@ L1:
 
 			height, err = strconv.Atof64(heights)
 			if err == nil {
-
-				return &BMNCoord{Easting: right, Northing: height, CoordType: ct, el: cartconvert.GRS80Ellipsoid}, nil
+				return &SwissCoord{Easting: right, Northing: height, CoordType: coordType, el: cartconvert.GRS80Ellipsoid}, nil
 			}
 		}
 	}
@@ -121,6 +132,7 @@ L1:
 	return nil, err
 }
 
+/*
 // Transform a BMN coordinate value to a WGS84 based latitude and longitude coordinate. Function returns
 // nil, if the meridian stripe of the bmn-coordinate is not set
 func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, os.Error) {
@@ -211,3 +223,4 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCo
 func NewBMNCoord(Meridian BMNMeridian, Right, Height, RelHeight float64) *BMNCoord {
 	return &BMNCoord{Right: Right, Height: Height, RelHeight: RelHeight, Meridian: Meridian, el: cartconvert.Bessel1841MGIEllipsoid}
 }
+*/

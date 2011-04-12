@@ -6,45 +6,85 @@
 package lv03p
 
 import (
-	"fmt"
-	"github.com/the42/cartconvert"
+	"os"
+	// "fmt"
+	//"github.com/the42/cartconvert"
 	"testing"
 )
 
-// ## BMNStringToStruct
-type bMNStringToStructTest struct {
-	in  string
-	out *BMNCoord
+type swissCoordRepresentation struct {
+	in  SwissCoord
+	out string
 }
 
-var bMNStringToStructTests = []bMNStringToStructTest{
+var swissCoordRepresentationTest = []swissCoordRepresentation{
 	{
-		"M31 592269 272290",
-		&BMNCoord{Meridian: BMNM31, Right: 592269.0, Height: 272290.0},
+		SwissCoord{Easting: 235.5, Northing: 20.0, CoordType: LV03}, "y:235.5 x:20",
 	},
 }
 
-func bmnequal(bmn1, bmn2 *BMNCoord) bool {
-	p1 := fmt.Sprintf("%s", bmn1)
-	p2 := fmt.Sprintf("%s", bmn2)
+func TestSwissCoordRepresentation(t *testing.T) {
+	for cnt, test := range swissCoordRepresentationTest {
+		out := test.in.String()
 
-	return p1 == p2
-}
-
-func TestBMNStringToStruct(t *testing.T) {
-	for _, test := range bMNStringToStructTests {
-		out, err := ABMNToStruct(test.in)
-
-		if err != nil {
-			t.Error(err)
-		}
-
-		if !bmnequal(test.out, out) {
-			t.Error("BMNStringToStruct")
+		if test.out != out {
+			t.Errorf("TestSwissCoordRepresentation [%d]: Expected: %s, got: %s", cnt, test.out, out)
 		}
 	}
 }
 
+// ## ASwissCoordToStruct
+type aSwissCoordToStructretparam struct {
+	coord *SwissCoord
+	err   os.Error
+}
+
+func (val *aSwissCoordToStructretparam) String() (fs string) {
+
+	if val.coord != nil {
+		fs = val.coord.String()
+	}
+
+	if val.err != nil {
+		fs += " " + val.err.String()
+	}
+	return
+}
+
+type aSwissCoordToStruct struct {
+	in  string
+	out aSwissCoordToStructretparam
+}
+
+var aSwissCoordToStructTests = []aSwissCoordToStruct{
+	{
+		in: "x:25 y:34.3", out: aSwissCoordToStructretparam{coord: &SwissCoord{Easting: 34.3, Northing: 25, CoordType: LV03}, err: nil},
+	},
+	{
+		in: "x:25.0 N:34.3", out: aSwissCoordToStructretparam{coord: nil, err: os.EINVAL},
+	},
+}
+
+func aswisscoordtostructequal(coord1, coord2 aSwissCoordToStructretparam) bool {
+	if coord1.coord != nil && coord2.coord != nil {
+		return coord1.coord.String() == coord2.coord.String()
+	}
+	return coord1.err == coord2.err
+}
+
+func TestASwissCoordToStruct(t *testing.T) {
+	for cnt, test := range aSwissCoordToStructTests {
+
+		out, erro := ASwissCoordToStruct(test.in)
+		retval := aSwissCoordToStructretparam{coord: out, err: erro}
+
+		if !aswisscoordtostructequal(test.out, retval) {
+			t.Errorf("ASwissCoordToStruct [%d]: expected %v, got %v", cnt, test.out, retval)
+		}
+	}
+}
+
+/*
 // ## BMNToWGS84LatLong
 type bMNToWGS84LatLongTest struct {
 	in  *BMNCoord
@@ -123,3 +163,4 @@ func TestWGS84LatLongToBMN(t *testing.T) {
 		}
 	}
 }
+*/
