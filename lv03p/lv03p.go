@@ -124,7 +124,7 @@ L1:
 
 			height, err = strconv.Atof64(heights)
 			if err == nil {
-				return &SwissCoord{Easting: right, Northing: height, CoordType: coordType, el: cartconvert.GRS80Ellipsoid}, nil
+				return &SwissCoord{Easting: right, Northing: height, CoordType: coordType, el: cartconvert.Bessel1841Ellipsoid}, nil
 			}
 		}
 	}
@@ -132,95 +132,85 @@ L1:
 	return nil, err
 }
 
-/*
-// Transform a BMN coordinate value to a WGS84 based latitude and longitude coordinate. Function returns
-// nil, if the meridian stripe of the bmn-coordinate is not set
-func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, os.Error) {
 
-	var long0, fe float64
+// Transform a Swiss coordinate value to a GRS80 based latitude and longitude coordinate. Function returns
+// EINVAL, if the swiss coordinate type is not one of LV03 or LV95
+func SwissCoordToGRS80LatLong(coord *SwissCoord) (*cartconvert.PolarCoord, os.Error) {
 
-	switch bmncoord.Meridian {
-	case BMNM28:
-		long0 = 10.0 + 20.0/60.0
-		fe = 150000
-	case BMNM31:
-		long0 = 13.0 + 20.0/60.0
-		fe = 450000
-	case BMNM34:
-		long0 = 16.0 + 20.0/60.0
-		fe = 750000
+	var fn, fe float64
+
+	switch coord.CoordType {
+	case LV03:
+		fe = 600000
+		fn = 200000
+	case LV95:
+		fe = -2600000
+		fn = -1200000
 	default:
 		return nil, os.EINVAL
 	}
 
 	gc := cartconvert.InverseTransverseMercator(
-		&cartconvert.GeoPoint{Y: bmncoord.Height, X: bmncoord.Right, El: bmncoord.el},
-		0,
-		long0,
+		&cartconvert.GeoPoint{Y: coord.Northing, X: coord.Easting, El: coord.el},
+		46.952406,	// lat0
+		7.439583,	// long0
 		1,
-		fe,
-		-5000000)
+		fe,			// fe
+		fn)			// fn
 
 	cart := cartconvert.PolarToCartesian(gc)
-	pt := cartconvert.HelmertWGS84ToMGI.InverseTransform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
+	// According to literature, the Granit87 parameters shall not be used in favour of
+	// higher accuracy of the following shift values
 
-	return cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.WGS84Ellipsoid}), nil
+	// pt := cartconvert.HelmertLV03ToWGS84Granit87.Transform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
+	pt := &cartconvert.Point3D{X:cart.X + 674.374, Y:cart.Y + 15.056, Z:cart.Z + 405.346}
+
+	return cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.GRS80Ellipsoid}), nil
 }
 
-// Transform a latitude / longitude coordinate datum into a BMN coordinate. Function returns
-// nil, if the meridian stripe of the bmn-coordinate is not set.
+// Transform a latitude / longitude coordinate datum into a Swiss coordinate. Function returns
+// EINVAL, if the coordinate type is not set.
 //
 // Important: The reference ellipsoid of the originating coordinate system will be assumed
-// to be the WGS84Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid.
-func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCoord, os.Error) {
+// to be the GRS80Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid.
+func GRS80LatLongToSwissCoord(gc *cartconvert.PolarCoord, coordType SwissCoordType) (*SwissCoord, os.Error) {
 
-	var long0, fe float64
+	var fn, fe float64
 
-	// This sets the Ellipsoid to WGS84, regardless of the actual value set
-	gc.El = cartconvert.WGS84Ellipsoid
+	// This sets the Ellipsoid to GRS80, regardless of the actual value set
+	gc.El = cartconvert.GRS80Ellipsoid
 
 	cart := cartconvert.PolarToCartesian(gc)
-	pt := cartconvert.HelmertWGS84ToMGI.Transform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
-	polar := cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.Bessel1841MGIEllipsoid})
+	// According to literature, the Granit87 parameters shall not be used in favour of
+	// higher accuracy of the following shift values
 
-	// Determine meridian stripe based on longitude
-	if meridian == BMNZoneDet {
-		switch {
-		case 11.0+0.5/6*10 >= polar.Longitude && polar.Longitude >= 8.0+0.5/6*10:
-			meridian = BMNM28
-		case 14.0+0.5/6*10 >= polar.Longitude && polar.Longitude >= 11.0+0.5/6*10:
-			meridian = BMNM31
-		case 17.0+0.5/6*10 >= polar.Longitude && polar.Longitude >= 14.0+0.5/6*10:
-			meridian = BMNM34
-		}
-	}
+	// pt := cartconvert.HelmertWGS84ToMGI.Transform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
+	pt := &cartconvert.Point3D{X:cart.X - 674.374, Y:cart.Y - 15.056, Z:cart.Z - 405.346}
+	polar := cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.Bessel1841Ellipsoid})
 
-	switch meridian {
-	case BMNM28:
-		long0 = 10.0 + 20.0/60.0
-		fe = 150000
-	case BMNM31:
-		long0 = 13.0 + 20.0/60.0
-		fe = 450000
-	case BMNM34:
-		long0 = 16.0 + 20.0/60.0
-		fe = 750000
+	switch coordType {
+	case LV03:
+		fe = 600000
+		fn = 200000
+	case LV95:
+		fe = -2600000
+		fn = -1200000
 	default:
 		return nil, os.EINVAL
 	}
 
 	gp := cartconvert.DirectTransverseMercator(
 		polar,
-		0,
-		long0,
+		46.952406,	// lat0
+		7.439583,	// long0
 		1,
-		fe,
-		-5000000)
+		fe,			// fe
+		fn)			// fn
 
-	return &BMNCoord{Meridian: meridian, Height: gp.Y, Right: gp.X, el: gp.El}, nil
+	return &SwissCoord{CoordType: coordType, Northing: gp.Y, Easting: gp.X, el: gp.El}, nil
 }
 
-func NewBMNCoord(Meridian BMNMeridian, Right, Height, RelHeight float64) *BMNCoord {
-	return &BMNCoord{Right: Right, Height: Height, RelHeight: RelHeight, Meridian: Meridian, el: cartconvert.Bessel1841MGIEllipsoid}
+func NewSwissCoord(CoordType SwissCoordType, Easting, Northing, RelHeight float64) *SwissCoord {
+	return &SwissCoord{Easting: Easting, Northing: Northing, RelHeight: RelHeight, CoordType: CoordType, el: cartconvert.Bessel1841Ellipsoid}
 }
-*/
+

@@ -7,8 +7,9 @@ package lv03p
 
 import (
 	"os"
-	// "fmt"
-	//"github.com/the42/cartconvert"
+	"fmt"
+	"math"
+	"github.com/the42/cartconvert"
 	"testing"
 )
 
@@ -84,83 +85,67 @@ func TestASwissCoordToStruct(t *testing.T) {
 	}
 }
 
-/*
-// ## BMNToWGS84LatLong
-type bMNToWGS84LatLongTest struct {
-	in  *BMNCoord
+// ## SwissCoordToGRS80LatLong
+type swissCoordToGRS80LatLongTest struct {
+	in  *SwissCoord
 	out *cartconvert.PolarCoord
 }
 
-func bMNStringToStructHelper(coord string) (bmncoord *BMNCoord) {
-	bmncoord, _ = ABMNToStruct(coord)
-	return
-}
-
-var bMNToWGS84LatLongTests = []bMNToWGS84LatLongTest{
+// http://www.swisstopo.admin.ch/internet/swisstopo/de/home/apps/calc/navref.html
+var swissCoordToGRS80LatLongTests = []swissCoordToGRS80LatLongTest{
 	{
-		NewBMNCoord(BMNM28, 592270.0, 272290, 0),
-		&cartconvert.PolarCoord{Latitude: 47.439212, Longitude: 16.197434},
-	},
-	{ // TODO: Ist das möglich??
-		bMNStringToStructHelper("M34 592269 272290"),
-		&cartconvert.PolarCoord{Latitude: 47.570299, Longitude: 14.236188},
-	},
-	{
-		bMNStringToStructHelper("M34 703168 374510"),
-		&cartconvert.PolarCoord{Latitude: 48.507001, Longitude: 15.698748},
+		&SwissCoord{Easting: 750536,  Northing:265013, CoordType:LV03, el:cartconvert.Bessel1841Ellipsoid},
+		&cartconvert.PolarCoord{Latitude: 47.518605, Longitude: 9.437422},
 	},
 }
 
 func latlongequal(pcp1, pcp2 *cartconvert.PolarCoord) bool {
-	pp1s := fmt.Sprintf("%.5g %.5g", pcp1.Latitude, pcp1.Longitude)
-	pp2s := fmt.Sprintf("%.5g %.5g", pcp2.Latitude, pcp2.Longitude)
+	pp1s := fmt.Sprintf("%.4g %.4g", pcp1.Latitude, pcp1.Longitude)
+	pp2s := fmt.Sprintf("%.4g %.4g", pcp2.Latitude, pcp2.Longitude)
 
 	return pp1s == pp2s
 }
 
-func TestBMNToWGS84LatLong(t *testing.T) {
-	for _, test := range bMNToWGS84LatLongTests {
+func TestSwissCoordToGRS80LatLong(t *testing.T) {
+	for cnt, test := range swissCoordToGRS80LatLongTests {
 
-		out, _ := BMNToWGS84LatLong(test.in)
+		out, _ := SwissCoordToGRS80LatLong(test.in)
 
 		if !latlongequal(test.out, out) {
-			t.Error("BMNToWGS84LatLong")
+			t.Errorf("SwissCoordToGRS80LatLong [%d]: Expteced %s, got %s", cnt, test.out, out)
 		}
 	}
 }
 
-// ## WGS84LatLongToBMN
-type wGS84LatLongToBMNParam struct {
+// ## GRS80LatLongToSwissCoord
+type gRS80LatLongToSwissCoordParam struct {
 	gc       *cartconvert.PolarCoord
-	meridian BMNMeridian
+	coordType SwissCoordType
 }
 
-type wGS84LatLongToBMNTest struct {
-	in  wGS84LatLongToBMNParam
-	out *BMNCoord
+type gRS80LatLongToSwissCoordTest struct {
+	in  gRS80LatLongToSwissCoordParam
+	out *SwissCoord
 }
 
-var wGS84LatLongToBMNTests = []wGS84LatLongToBMNTest{
+var gRS80LatLongToSwissCoordTests = []gRS80LatLongToSwissCoordTest{
 	{
-		wGS84LatLongToBMNParam{
-			gc:       &cartconvert.PolarCoord{Latitude: 47.570299, Longitude: 14.236188, El: cartconvert.WGS84Ellipsoid},
-			meridian: BMNM34},
-		NewBMNCoord(BMNM34, 592269, 272290.05, 0),
-	},
-	{
-		wGS84LatLongToBMNParam{
-			gc:       &cartconvert.PolarCoord{Latitude: 48.507001, Longitude: 15.698748, El: cartconvert.WGS84Ellipsoid},
-			meridian: BMNZoneDet},
-		NewBMNCoord(BMNM34, 703168, 374510, 0),
+		gRS80LatLongToSwissCoordParam{
+			gc:       &cartconvert.PolarCoord{Latitude: 47.518605, Longitude: 9.437422, El: cartconvert.GRS80Ellipsoid},
+			coordType: LV03},
+		NewSwissCoord(LV03, 750536, 265013, 0),
 	},
 }
 
-func TestWGS84LatLongToBMN(t *testing.T) {
-	for index, test := range wGS84LatLongToBMNTests {
-		out, _ := WGS84LatLongToBMN(test.in.gc, test.in.meridian)
-		if !bmnequal(test.out, out) {
-			t.Errorf("WGS84LatLongToBMN [%d]: expected %s, got %s", index, test.out, out)
+func swisscoordfuzzyequal(c1, c2 *SwissCoord) bool {
+  return math.Sqrt(math.Pow(c1.Easting - c2.Easting, 2) + math.Pow(c1.Northing - c2.Northing, 2)) < 2.0
+}
+
+func TestGRS80LatLongToSwissCoord(t *testing.T) {
+	for cnt, test := range gRS80LatLongToSwissCoordTests {
+		out, _ := GRS80LatLongToSwissCoord(test.in.gc, test.in.coordType)
+		if swisscoordfuzzyequal(test.out, out) {
+			t.Errorf("GRS80LatLongToSwissCoord [%d]: Expected %s, got %s", cnt, test.out, out)
 		}
 	}
 }
-*/
