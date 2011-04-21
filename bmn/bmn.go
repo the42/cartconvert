@@ -130,7 +130,7 @@ L1:
 }
 
 // Transform a BMN coordinate value to a WGS84 based latitude and longitude coordinate. Function returns
-// nil, if the meridian stripe of the bmn-coordinate is not set
+// EINVAL, if the meridian stripe of the bmn-coordinate is not set
 func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, os.Error) {
 
 	var long0, fe float64
@@ -164,7 +164,7 @@ func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, os.Error) {
 }
 
 // Transform a latitude / longitude coordinate datum into a BMN coordinate. Function returns
-// nil, if the meridian stripe of the bmn-coordinate is not set.
+// EINVAL, if the meridian stripe of the bmn-coordinate is not set.
 //
 // Important: The reference ellipsoid of the originating coordinate system will be assumed
 // to be the WGS84Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid.
