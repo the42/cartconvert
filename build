@@ -9,6 +9,7 @@ else
 echo Building \
 && echo "(in .)" && cd . && make $1 && cd - > /dev/null \
 && echo "(in osgb36)" && cd osgb36 && make $1 && cd - > /dev/null \
+&& echo "(in lv03p)" && cd lv03p && make $1 && cd - > /dev/null \
 && echo "(in bmn)" && cd bmn && make $1 && cd - > /dev/null \
 && echo "(in examples/conv)" && cd examples/conv && make $1 && cd - > /dev/null \
 
