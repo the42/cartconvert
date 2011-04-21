@@ -1032,7 +1032,7 @@ var (
 	HelmertWGS84ToMGI    = NewHelmertTransformer(-577.326, -90.129, -463.919, -2.4232, 5.1366, 1.4742, 5.2970, "WGS84toMGI")
 	HelmertWGS84ToOSGB36 = NewHelmertTransformer(-446.448, 125.157, -542.060, 20.4894, -0.1502, -0.2470, -0.8421, "WGS84toOSGB36")
 	// "Granit87" parameters
-	HelmertLV03ToWGS84Granit87   = NewHelmertTransformer(660.077, 13.551, 369.3444, 5.66, 2.2356, 1.6047, 2.6451, "LV03toWGS84")
+	HelmertLV03ToWGS84Granit87 = NewHelmertTransformer(660.077, 13.551, 369.3444, 5.66, 2.2356, 1.6047, 2.6451, "LV03toWGS84")
 )
 
 // Method to perform the Helmert transformation on a generic 3D datum and return a new datum.

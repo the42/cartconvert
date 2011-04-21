@@ -152,18 +152,18 @@ func SwissCoordToGRS80LatLong(coord *SwissCoord) (*cartconvert.PolarCoord, os.Er
 
 	gc := cartconvert.InverseTransverseMercator(
 		&cartconvert.GeoPoint{Y: coord.Northing, X: coord.Easting, El: coord.el},
-		46.952406,	// lat0
-		7.439583,	// long0
+		46.952406, // lat0
+		7.439583,  // long0
 		1,
-		fe,			// fe
-		fn)			// fn
+		fe, // fe
+		fn) // fn
 
 	cart := cartconvert.PolarToCartesian(gc)
 	// According to literature, the Granit87 parameters shall not be used in favour of
 	// higher accuracy of the following shift values
 
 	// pt := cartconvert.HelmertLV03ToWGS84Granit87.Transform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
-	pt := &cartconvert.Point3D{X:cart.X + 674.374, Y:cart.Y + 15.056, Z:cart.Z + 405.346}
+	pt := &cartconvert.Point3D{X: cart.X + 674.374, Y: cart.Y + 15.056, Z: cart.Z + 405.346}
 
 	return cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.GRS80Ellipsoid}), nil
 }
@@ -185,7 +185,7 @@ func GRS80LatLongToSwissCoord(gc *cartconvert.PolarCoord, coordType SwissCoordTy
 	// higher accuracy of the following shift values
 
 	// pt := cartconvert.HelmertWGS84ToMGI.Transform(&cartconvert.Point3D{X: cart.X, Y: cart.Y, Z: cart.Z})
-	pt := &cartconvert.Point3D{X:cart.X - 674.374, Y:cart.Y - 15.056, Z:cart.Z - 405.346}
+	pt := &cartconvert.Point3D{X: cart.X - 674.374, Y: cart.Y - 15.056, Z: cart.Z - 405.346}
 	polar := cartconvert.CartesianToPolar(&cartconvert.CartPoint{X: pt.X, Y: pt.Y, Z: pt.Z, El: cartconvert.Bessel1841Ellipsoid})
 
 	switch coordType {
@@ -201,11 +201,11 @@ func GRS80LatLongToSwissCoord(gc *cartconvert.PolarCoord, coordType SwissCoordTy
 
 	gp := cartconvert.DirectTransverseMercator(
 		polar,
-		46.952406,	// lat0
-		7.439583,	// long0
+		46.952406, // lat0
+		7.439583,  // long0
 		1,
-		fe,			// fe
-		fn)			// fn
+		fe, // fe
+		fn) // fn
 
 	return &SwissCoord{CoordType: coordType, Northing: gp.Y, Easting: gp.X, el: gp.El}, nil
 }
@@ -213,4 +213,3 @@ func GRS80LatLongToSwissCoord(gc *cartconvert.PolarCoord, coordType SwissCoordTy
 func NewSwissCoord(CoordType SwissCoordType, Easting, Northing, RelHeight float64) *SwissCoord {
 	return &SwissCoord{Easting: Easting, Northing: Northing, RelHeight: RelHeight, CoordType: CoordType, el: cartconvert.Bessel1841Ellipsoid}
 }
-

@@ -94,7 +94,7 @@ type swissCoordToGRS80LatLongTest struct {
 // http://www.swisstopo.admin.ch/internet/swisstopo/de/home/apps/calc/navref.html
 var swissCoordToGRS80LatLongTests = []swissCoordToGRS80LatLongTest{
 	{
-		&SwissCoord{Easting: 750536,  Northing:265013, CoordType:LV03, el:cartconvert.Bessel1841Ellipsoid},
+		&SwissCoord{Easting: 750536, Northing: 265013, CoordType: LV03, el: cartconvert.Bessel1841Ellipsoid},
 		&cartconvert.PolarCoord{Latitude: 47.518605, Longitude: 9.437422},
 	},
 }
@@ -119,7 +119,7 @@ func TestSwissCoordToGRS80LatLong(t *testing.T) {
 
 // ## GRS80LatLongToSwissCoord
 type gRS80LatLongToSwissCoordParam struct {
-	gc       *cartconvert.PolarCoord
+	gc        *cartconvert.PolarCoord
 	coordType SwissCoordType
 }
 
@@ -131,14 +131,14 @@ type gRS80LatLongToSwissCoordTest struct {
 var gRS80LatLongToSwissCoordTests = []gRS80LatLongToSwissCoordTest{
 	{
 		gRS80LatLongToSwissCoordParam{
-			gc:       &cartconvert.PolarCoord{Latitude: 47.518605, Longitude: 9.437422, El: cartconvert.GRS80Ellipsoid},
+			gc:        &cartconvert.PolarCoord{Latitude: 47.518605, Longitude: 9.437422, El: cartconvert.GRS80Ellipsoid},
 			coordType: LV03},
 		NewSwissCoord(LV03, 750536, 265013, 0),
 	},
 }
 
 func swisscoordfuzzyequal(c1, c2 *SwissCoord) bool {
-  return math.Sqrt(math.Pow(c1.Easting - c2.Easting, 2) + math.Pow(c1.Northing - c2.Northing, 2)) < 2.0
+	return math.Sqrt(math.Pow(c1.Easting-c2.Easting, 2)+math.Pow(c1.Northing-c2.Northing, 2)) < 2.0
 }
 
 func TestGRS80LatLongToSwissCoord(t *testing.T) {
