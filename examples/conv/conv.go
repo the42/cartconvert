@@ -16,7 +16,7 @@ import (
 	"github.com/the42/cartconvert"
 	"github.com/the42/cartconvert/bmn"
 	"github.com/the42/cartconvert/osgb36"
-	"encoding/line"
+	"bufio"
 	"fmt"
 	"flag"
 	"os"
@@ -68,7 +68,12 @@ func main() {
 	of = ofOptions[strings.ToLower(ofcmdlinespec)]
 	ifm = ifOptions[strings.ToLower(ifcmdlinespec)]
 
-	liner := line.NewReader(os.Stdin, 100)
+	liner, err := bufio.NewReaderSize(os.Stdin, 100)
+	if err != nil {
+	  fmt.Fprintf(os.Stderr, "conv: %s (exiting)\n", err)
+	  os.Exit(3)
+	}
+	
 	longline := false
 
 	for data, prefix, err := liner.ReadLine(); err != os.EOF; data, prefix, err = liner.ReadLine() {
