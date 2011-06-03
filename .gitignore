@@ -3,9 +3,6 @@ _obj/
 _*
 bin/
 *.exe
-examples/cartconvserv/cartconvserv
-examples/geotrans/geotrans
-examples/templtest/templtest
 examples/conv/conv
 examples/cartconvserv/cartconvserv
 examples/geotrans/geotrans
