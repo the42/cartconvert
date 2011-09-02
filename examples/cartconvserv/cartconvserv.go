@@ -26,7 +26,6 @@ func bundesmeldenetzHandler(w http.ResponseWriter, req *http.Request) {
 	// gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
 	w.Header().Set("Content-Type", "text/plain")
 	io.WriteString(w, req.URL.Path)
-
 }
 
 /*

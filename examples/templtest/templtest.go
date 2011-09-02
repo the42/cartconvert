@@ -27,7 +27,7 @@ Posted: {posted}
 
 
 import (
-	"template"
+	"old/template"
 	"os"
 	"io"
 )
