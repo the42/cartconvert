@@ -10,6 +10,7 @@ import (
 	//"json"
 	"http"
 	"io"
+	"path"
 )
 
 const (
@@ -24,8 +25,11 @@ func rootHandler(w http.ResponseWriter, req *http.Request) {
 func bundesmeldenetzHandler(w http.ResponseWriter, req *http.Request) {
 	// OSGB36 Datum transformation
 	// gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
+	urlpath := req.URL.Path
 	w.Header().Set("Content-Type", "text/plain")
-	io.WriteString(w, req.URL.Path)
+	
+	io.WriteString(w, urlpath)
+	io.WriteString(w, "<p>" + path.Ext(urlpath))
 }
 
 /*
