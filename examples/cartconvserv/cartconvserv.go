@@ -6,30 +6,61 @@
 package main
 
 import (
-	//"github.com/the42/cartconvert"
 	//"json"
 	"http"
-	"io"
+	"fmt"
 	"path"
+	"github.com/the42/cartconvert/bmn"
+	"github.com/the42/cartconvert"
 )
 
 const (
 	BMNHandler = "/bmn/"
+	JSONFormatSpec = ".json"
+	XMLFormatSpec = ".xml"
+	OutputFormatSpec = "outputformat"
+	OFUTM = "utm"
 )
+
+const httpc = "<html><head></head><body>%s</body></html>"
+
+func UTMToJson(utm *cartconvert.UTMCoord) string {
+  return "Yikes!"
+}
 
 func rootHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
-	io.WriteString(w, "Cartography transformation")
+	fmt.Fprintf(w, "Cartography transformation")
 }
 
 func bundesmeldenetzHandler(w http.ResponseWriter, req *http.Request) {
 	// OSGB36 Datum transformation
 	// gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
-	urlpath := req.URL.Path
-	w.Header().Set("Content-Type", "text/plain")
 	
-	io.WriteString(w, urlpath)
-	io.WriteString(w, "<p>" + path.Ext(urlpath))
+	bmnstrval := req.URL.Path[len(BMNHandler):]
+	serialformat := path.Ext(bmnstrval)
+	bmnstrval = bmnstrval[:len(bmnstrval)-len(serialformat)]
+	bmnval, err := bmn.ABMNToStruct(bmnstrval)
+	if err != nil {
+	  fmt.Fprint(w, err)
+	  return
+	}
+	
+	latlong, err := bmn.BMNToWGS84LatLong(bmnval)
+	if err != nil {
+  	  fmt.Fprint(w, err)
+	  return
+	}
+	
+	oformat := req.URL.Query().Get(OutputFormatSpec)
+	
+	switch oformat {
+	  case OFUTM: utm := cartconvert.LatLongToUTM(latlong)
+	    if serialformat == JSONFormatSpec {
+	    json := UTMToJson(utm)
+	    fmt.Fprintf(w, httpc, json)
+	    }
+	}
 }
 
 /*
