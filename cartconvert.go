@@ -31,16 +31,17 @@ func (ce CartographyError) String() string {
 
 // Set of common ellipsoidal models regularly found in cartography 
 var (
-	Bessel1841MGIEllipsoid = NewEllipsoid(6377397.155, 6356078.965)
-	Bessel1841Ellipsoid    = NewEllipsoid(6377397.155, 6356078.962822)
-	GRS80Ellipsoid         = NewEllipsoid(6378137, 6356752.31414)
-	WGS84Ellipsoid         = NewEllipsoid(6378137, 6356752.31425)
-	Airy1830Ellipsoid      = NewEllipsoid(6377563.396, 6356256.909)
+	Bessel1841MGIEllipsoid = NewEllipsoid(6377397.155, 6356078.965, "Bessel1841MGI")
+	Bessel1841Ellipsoid    = NewEllipsoid(6377397.155, 6356078.962822, "Bessel1841")
+	GRS80Ellipsoid         = NewEllipsoid(6378137, 6356752.31414, "GRS80")
+	WGS84Ellipsoid         = NewEllipsoid(6378137, 6356752.31425, "WGS84")
+	Airy1830Ellipsoid      = NewEllipsoid(6377563.396, 6356256.909, "Airy1830")
 	DefaultEllipsoid       = WGS84Ellipsoid
 )
 
 type Ellipsoid struct {
-	a, b float64
+	a, b       float64
+	CommonName string
 }
 
 // Holds latitude, longitude and ellipsoidal height, relative to El, the reference ellipsoid
@@ -122,7 +123,6 @@ func LatLongToString(pc *PolarCoord, format LatLongFormat) (pcs string) {
 func (pc *PolarCoord) String() string {
 	return LatLongToString(pc, LLFdeg)
 }
-
 
 // A generic representation of easting (right, Y) and northing (Height,X) of a 2D projection
 // relative to Ellipsoid El. The height H at Point X,Y is above defining ellipsoid 
@@ -1010,8 +1010,8 @@ func LatLongToGeoHashBits(pc *PolarCoord, bits byte) string {
 // HELMERT Transformation - http://en.wikipedia.org/wiki/Helmert_transformation
 
 // Returns a new ellipsoid by the given major axis a and major axis b in meters.
-func NewEllipsoid(a, b float64) *Ellipsoid {
-	return &Ellipsoid{a: a, b: b}
+func NewEllipsoid(a, b float64, CommonName string) *Ellipsoid {
+	return &Ellipsoid{a: a, b: b, CommonName: CommonName}
 }
 
 // ## Helmert transformation 
