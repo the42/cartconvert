@@ -43,7 +43,6 @@ const (
 var ofOptions = map[string]displayformat{"deg": ofdeg, "dms": ofdms, "utm": ofutm, "geohash": ofgeohash}
 var ifOptions = map[string]inputformat{"bmn": ifbmn, "osgb36": ifosgb36}
 
-
 func main() {
 
 	var ofcmdlinespec, ifcmdlinespec string

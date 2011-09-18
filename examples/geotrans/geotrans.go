@@ -32,7 +32,6 @@ func evalTemplate(wr io.Writer, formatter string, data ...interface{}) {
 	}
 }
 
-
 func initTemplates() {
 	fmap := template.FormatterMap{}
 
@@ -44,7 +43,6 @@ func initTemplates() {
 		templates[name] = template.MustParseFile(templateDir+name, fmap)
 	}
 }
-
 
 func transCoordinate(ct CoordinateTrans) (coord CoordinateTrans) {
 	coord = CoordinateTrans{ct.Xcoord, ct.Ycoord, "GSK", "UTM"}
@@ -69,7 +67,6 @@ func editHandler(w http.ResponseWriter, req *http.Request) {
 func staticFileHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, staticWebDir+r.URL.Path)
 }
-
 
 func main() {
 

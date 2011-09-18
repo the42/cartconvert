@@ -132,7 +132,6 @@ L1:
 	return nil, err
 }
 
-
 // Transform a Swiss coordinate value to a GRS80 based latitude and longitude coordinate. Function returns
 // EINVAL, if the swiss coordinate type is not one of LV03 or LV95
 func SwissCoordToGRS80LatLong(coord *SwissCoord) (*cartconvert.PolarCoord, os.Error) {

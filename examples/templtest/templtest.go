@@ -25,7 +25,6 @@ Consider the templates:
 Posted: {posted}
 */
 
-
 import (
 	"old/template"
 	"os"
