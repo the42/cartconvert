@@ -7,6 +7,8 @@ package main
 
 import (
 	"json"
+	"io"
+	"xml"
 	"http"
 	"fmt"
 	"path"
@@ -22,11 +24,18 @@ const (
 	OFUTM            = "utm"
 )
 
-const httpc = "<html><head></head><body>%s</body></html>"
+// const httpc = "<html><head></head><body>%s</body></html>"
 
-func UTMToJson(utm *cartconvert.UTMCoord) []byte {
-	json, _ := json.Marshal(*utm)
-	return json
+
+func UTMToSerial(w io.Writer, utm *cartconvert.UTMCoord, serialformat string) {
+	// Maybe UTMCoord shoul implement an interface for serialisation
+	switch serialformat {
+	case JSONFormatSpec:
+		json.NewEncoder(w).Encode(*utm)
+	case XMLFormatSpec:
+		io.WriteString(w, xml.Header)
+		xml.Marshal(w, *utm)
+	}
 }
 
 func rootHandler(w http.ResponseWriter, req *http.Request) {
@@ -55,13 +64,16 @@ func bundesmeldenetzHandler(w http.ResponseWriter, req *http.Request) {
 
 	oformat := req.URL.Query().Get(OutputFormatSpec)
 
+	switch serialformat {
+	case JSONFormatSpec:
+		w.Header().Set("Content-Type", "application/json")
+	case XMLFormatSpec:
+		w.Header().Set("Content-Type", "text/xml")
+	}
+
 	switch oformat {
 	case OFUTM:
-		utm := cartconvert.LatLongToUTM(latlong)
-		if serialformat == JSONFormatSpec {
-			json := UTMToJson(utm)
-			fmt.Fprintf(w, httpc, json)
-		}
+		UTMToSerial(w, cartconvert.LatLongToUTM(latlong), serialformat)
 	}
 }
 
