@@ -17,24 +17,46 @@ import (
 )
 
 const (
-	BMNHandler       = "/bmn/"
-	JSONFormatSpec   = ".json"
-	XMLFormatSpec    = ".xml"
+	BMNHandler = "/bmn/"
+
+	JSONFormatSpec = ".json"
+	XMLFormatSpec  = ".xml"
+
 	OutputFormatSpec = "outputformat"
 	OFUTM            = "utm"
+	OFgeohash        = "geohash"
 )
 
 // const httpc = "<html><head></head><body>%s</body></html>"
 
+type marshalUTMCoord struct {
+	XMLName  xml.Name `json:"-" xml:"payLoad"`
+	UTMCoord *cartconvert.UTMCoord
+}
+
+type marshalGeoHash struct {
+	XMLName xml.Name `json:"-" xml:"payLoad"`
+	GeoHash string
+}
 
 func UTMToSerial(w io.Writer, utm *cartconvert.UTMCoord, serialformat string) {
 	// Maybe UTMCoord shoul implement an interface for serialisation
 	switch serialformat {
 	case JSONFormatSpec:
-		json.NewEncoder(w).Encode(*utm)
+		json.NewEncoder(w).Encode(&marshalUTMCoord{UTMCoord: utm})
 	case XMLFormatSpec:
 		io.WriteString(w, xml.Header)
-		xml.Marshal(w, *utm)
+		xml.Marshal(w, &marshalUTMCoord{UTMCoord: utm})
+	}
+}
+
+func GeoHashToSerial(w io.Writer, geohash string, serialformat string) {
+	switch serialformat {
+	case JSONFormatSpec:
+		json.NewEncoder(w).Encode(&marshalGeoHash{GeoHash: geohash})
+	case XMLFormatSpec:
+		io.WriteString(w, xml.Header)
+		xml.Marshal(w, &marshalGeoHash{GeoHash: geohash})
 	}
 }
 
@@ -74,6 +96,8 @@ func bundesmeldenetzHandler(w http.ResponseWriter, req *http.Request) {
 	switch oformat {
 	case OFUTM:
 		UTMToSerial(w, cartconvert.LatLongToUTM(latlong), serialformat)
+	case OFgeohash:
+		GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong), serialformat)
 	}
 }
 
