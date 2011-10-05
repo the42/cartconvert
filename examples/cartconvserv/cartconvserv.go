@@ -23,8 +23,11 @@ const (
 	XMLFormatSpec  = ".xml"
 
 	OutputFormatSpec = "outputformat"
-	OFUTM            = "utm"
-	OFgeohash        = "geohash"
+
+	OFUTM          = "utm"
+	OFgeohash      = "geohash"
+	OFlatlongdeg   = "latlongdeg"
+	OFlatlongcomma = "latlongcomma"
 )
 
 // const httpc = "<html><head></head><body>%s</body></html>"
@@ -37,6 +40,11 @@ type marshalUTMCoord struct {
 type marshalGeoHash struct {
 	XMLName xml.Name `json:"-" xml:"payLoad"`
 	GeoHash string
+}
+
+type marshalLatLong struct {
+	XMLName xml.Name `json:"-" xml:"payLoad"`
+	LatLong string
 }
 
 func UTMToSerial(w io.Writer, utm *cartconvert.UTMCoord, serialformat string) {
@@ -57,6 +65,16 @@ func GeoHashToSerial(w io.Writer, geohash string, serialformat string) {
 	case XMLFormatSpec:
 		io.WriteString(w, xml.Header)
 		xml.Marshal(w, &marshalGeoHash{GeoHash: geohash})
+	}
+}
+
+func LatLongToSerial(w io.Writer, latlong string, serialformat string) {
+	switch serialformat {
+	case JSONFormatSpec:
+		json.NewEncoder(w).Encode(&marshalLatLong{LatLong: latlong})
+	case XMLFormatSpec:
+		io.WriteString(w, xml.Header)
+		xml.Marshal(w, &marshalLatLong{LatLong: latlong})
 	}
 }
 
@@ -98,6 +116,10 @@ func bundesmeldenetzHandler(w http.ResponseWriter, req *http.Request) {
 		UTMToSerial(w, cartconvert.LatLongToUTM(latlong), serialformat)
 	case OFgeohash:
 		GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong), serialformat)
+	case OFlatlongdeg:
+		LatLongToSerial(w, cartconvert.LatLongToString(latlong, cartconvert.LLFdeg), serialformat)
+	case OFlatlongcomma:
+		LatLongToSerial(w, cartconvert.LatLongToString(latlong, cartconvert.LLFdms), serialformat)
 	}
 }
 
