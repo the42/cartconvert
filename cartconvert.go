@@ -405,7 +405,7 @@ func CartesianToPolar(pt *CartPoint) *PolarCoord {
 
 	precision := 4.0 / el.a
 	var v float64
-	for math.Fabs(lat-lat0) > precision {
+	for math.Abs(lat-lat0) > precision {
 		v = el.a / math.Sqrt(1-esq*math.Pow(math.Sin(lat), 2))
 
 		lat0 = lat
@@ -582,7 +582,7 @@ func InverseTransverseMercator(pt *GeoPoint, latO, longO, scale, fe, fn float64)
 	Qiiold := Qi + (esq * math.Atanh(esq*math.Tanh(Qi)))
 	Qii := Qi + (esq * math.Atanh(esq*math.Tanh(Qiiold)))
 
-	for math.Fabs(Qiiold-Qii) > 1e-12 {
+	for math.Abs(Qiiold-Qii) > 1e-12 {
 		Qiiold = Qii
 		Qii = Qi + (esq * math.Atanh(esq*math.Tanh(Qiiold)))
 	}
@@ -855,7 +855,7 @@ func decodegeohashbitset(bitset string, floor, ceiling float64) float64 {
 		}
 	}
 	// rounding according to 
-	return round(mid, int(math.Fmax(1.0, -round(math.Log10(err), 0))-1))
+	return round(mid, int(math.Max(1.0, -round(math.Log10(err), 0))-1))
 }
 
 // Return latitude & longitude from a geohash-encoded string.
