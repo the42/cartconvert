@@ -18,6 +18,7 @@ import (
 
 const (
 	BMNHandler = "/bmn/"
+	GeoHashHandler = "/geohash/"
 
 	JSONFormatSpec = ".json"
 	XMLFormatSpec  = ".xml"
@@ -83,6 +84,47 @@ func rootHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "Cartography transformation")
 }
 
+func geohashHandler(w http.ResponseWriter, req *http.Request) {
+	// OSGB36 Datum transformation
+	// gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
+
+	bmnstrval := req.URL.Path[len(BMNHandler):]
+	serialformat := path.Ext(bmnstrval)
+	bmnstrval = bmnstrval[:len(bmnstrval)-len(serialformat)]
+	bmnval, err := bmn.ABMNToStruct(bmnstrval)
+	if err != nil {
+		fmt.Fprint(w, err)
+		return
+	}
+
+	latlong, err := bmn.BMNToWGS84LatLong(bmnval)
+	if err != nil {
+		fmt.Fprint(w, err)
+		return
+	}
+
+	oformat := req.URL.Query().Get(OutputFormatSpec)
+
+	switch serialformat {
+	case JSONFormatSpec:
+		w.Header().Set("Content-Type", "application/json")
+	case XMLFormatSpec:
+		w.Header().Set("Content-Type", "text/xml")
+	}
+
+	switch oformat {
+	case OFUTM:
+		UTMToSerial(w, cartconvert.LatLongToUTM(latlong), serialformat)
+	case OFgeohash:
+		GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong), serialformat)
+	case OFlatlongdeg:
+		LatLongToSerial(w, cartconvert.LatLongToString(latlong, cartconvert.LLFdeg), serialformat)
+	case OFlatlongcomma:
+		LatLongToSerial(w, cartconvert.LatLongToString(latlong, cartconvert.LLFdms), serialformat)
+	}
+}
+
+
 func bundesmeldenetzHandler(w http.ResponseWriter, req *http.Request) {
 	// OSGB36 Datum transformation
 	// gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
@@ -140,6 +182,7 @@ func main() {
 
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc(BMNHandler, bundesmeldenetzHandler)
+	http.HandleFunc(GeoHashHandler, geohashHandler)
 	// TODO: Read from config file
 	http.ListenAndServe(":1111", nil)
 }
