@@ -59,14 +59,15 @@ const (
 	LLFdms                   // format a lat/long coordinate in degrees, minutes and seconds with prepended main directions N, S, E, W
 )
 
-func LatLongToString(pc *PolarCoord, format LatLongFormat) (pcs string) {
+func LatLongToString(pc *PolarCoord, format LatLongFormat) (latitude, longitude string) {
 
 	var lat, long, latrem, longrem, latmin, longmin, latsec, longsec float64
-	var latitude, longitude string
 
 	switch format {
 	case LLFdeg:
-		pcs = "lat: " + f64toa(pc.Latitude, 6) + "°, long: " + f64toa(pc.Longitude, 6) + "°"
+		latitude = f64toa(pc.Latitude, 6)
+		longitude = f64toa(pc.Longitude, 6)
+
 	case LLFdms:
 		lat, latrem = math.Modf(pc.Latitude)
 
@@ -113,15 +114,14 @@ func LatLongToString(pc *PolarCoord, format LatLongFormat) (pcs string) {
 		if longsec != 0.0 {
 			longitude += fmt.Sprintf("%s''", f64toa(longsec, 2))
 		}
-
-		pcs = latitude + ", " + longitude
 	}
 	return
 }
 
 // Canonical representation of a lat/long bearing
 func (pc *PolarCoord) String() string {
-	return LatLongToString(pc, LLFdeg)
+	lat, long := LatLongToString(pc, LLFdeg)
+	return "lat: " + lat + "°, long: " + long + "°"
 }
 
 // A generic representation of easting (right, Y) and northing (Height,X) of a 2D projection

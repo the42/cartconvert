@@ -126,9 +126,10 @@ func main() {
 
 		switch of {
 		case ofdeg:
-			outstring = cartconvert.LatLongToString(pc, cartconvert.LLFdeg)
+			lat, long := cartconvert.LatLongToString(pc, cartconvert.LLFdeg)
+			outstring = lat + ", " + long
 		case ofdms:
-			outstring = cartconvert.LatLongToString(pc, cartconvert.LLFdms)
+			outstring = pc.String()
 		case ofutm:
 			outstring = cartconvert.LatLongToUTM(pc).String()
 		case ofgeohash:
