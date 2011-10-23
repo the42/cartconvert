@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	BMNHandler = "/bmn/"
+	BMNHandler     = "/bmn/"
 	GeoHashHandler = "/geohash/"
 
 	JSONFormatSpec = ".json"
@@ -44,8 +44,8 @@ type marshalGeoHash struct {
 }
 
 type marshalLatLong struct {
-	XMLName xml.Name `json:"-" xml:"payLoad"`
-	LatLong string
+	XMLName        xml.Name `json:"-" xml:"payLoad"`
+	Lat, Long, Fmt string
 }
 
 func UTMToSerial(w io.Writer, utm *cartconvert.UTMCoord, serialformat string) {
@@ -69,13 +69,15 @@ func GeoHashToSerial(w io.Writer, geohash string, serialformat string) {
 	}
 }
 
-func LatLongToSerial(w io.Writer, latlong string, serialformat string) {
+func LatLongToSerial(w io.Writer, latlong *cartconvert.PolarCoord, serialformat string, repformat cartconvert.LatLongFormat) {
+	lat, long := cartconvert.LatLongToString(latlong, repformat)
 	switch serialformat {
+
 	case JSONFormatSpec:
-		json.NewEncoder(w).Encode(&marshalLatLong{LatLong: latlong})
+		json.NewEncoder(w).Encode(&marshalLatLong{Lat: lat, Long: long, Fmt: string(repformat)})
 	case XMLFormatSpec:
 		io.WriteString(w, xml.Header)
-		xml.Marshal(w, &marshalLatLong{LatLong: latlong})
+		xml.Marshal(w, &marshalLatLong{Lat: lat, Long: long, Fmt: string(repformat)})
 	}
 }
 
@@ -88,6 +90,7 @@ func geohashHandler(w http.ResponseWriter, req *http.Request) {
 	// OSGB36 Datum transformation
 	// gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
 
+	// ONLY placeholders, REWRITE!
 	bmnstrval := req.URL.Path[len(BMNHandler):]
 	serialformat := path.Ext(bmnstrval)
 	bmnstrval = bmnstrval[:len(bmnstrval)-len(serialformat)]
@@ -118,16 +121,13 @@ func geohashHandler(w http.ResponseWriter, req *http.Request) {
 	case OFgeohash:
 		GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong), serialformat)
 	case OFlatlongdeg:
-		LatLongToSerial(w, cartconvert.LatLongToString(latlong, cartconvert.LLFdeg), serialformat)
+		LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdms)
 	case OFlatlongcomma:
-		LatLongToSerial(w, cartconvert.LatLongToString(latlong, cartconvert.LLFdms), serialformat)
+		LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdeg)
 	}
 }
 
-
-func bundesmeldenetzHandler(w http.ResponseWriter, req *http.Request) {
-	// OSGB36 Datum transformation
-	// gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
+func bmnHandler(w http.ResponseWriter, req *http.Request) {
 
 	bmnstrval := req.URL.Path[len(BMNHandler):]
 	serialformat := path.Ext(bmnstrval)
@@ -159,9 +159,9 @@ func bundesmeldenetzHandler(w http.ResponseWriter, req *http.Request) {
 	case OFgeohash:
 		GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong), serialformat)
 	case OFlatlongdeg:
-		LatLongToSerial(w, cartconvert.LatLongToString(latlong, cartconvert.LLFdeg), serialformat)
+		LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdms)
 	case OFlatlongcomma:
-		LatLongToSerial(w, cartconvert.LatLongToString(latlong, cartconvert.LLFdms), serialformat)
+		LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdeg)
 	}
 }
 
@@ -181,7 +181,7 @@ func (req *web.Request) {
 func main() {
 
 	http.HandleFunc("/", rootHandler)
-	http.HandleFunc(BMNHandler, bundesmeldenetzHandler)
+	http.HandleFunc(BMNHandler, bmnHandler)
 	http.HandleFunc(GeoHashHandler, geohashHandler)
 	// TODO: Read from config file
 	http.ListenAndServe(":1111", nil)
