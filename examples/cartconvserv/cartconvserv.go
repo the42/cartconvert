@@ -89,18 +89,12 @@ func rootHandler(w http.ResponseWriter, req *http.Request) {
 func geohashHandler(w http.ResponseWriter, req *http.Request) {
 	// OSGB36 Datum transformation
 	// gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
+	
+	geohashstrval := req.URL.Path[len(GeoHashHandler):]
+	serialformat := path.Ext(geohashstrval)
+	geohashstrval = geohashstrval[:len(geohashstrval)-len(serialformat)]
 
-	// ONLY placeholders, REWRITE!
-	bmnstrval := req.URL.Path[len(BMNHandler):]
-	serialformat := path.Ext(bmnstrval)
-	bmnstrval = bmnstrval[:len(bmnstrval)-len(serialformat)]
-	bmnval, err := bmn.ABMNToStruct(bmnstrval)
-	if err != nil {
-		fmt.Fprint(w, err)
-		return
-	}
-
-	latlong, err := bmn.BMNToWGS84LatLong(bmnval)
+	latlong, err := cartconvert.GeoHashToLatLong(geohashstrval, nil)
 	if err != nil {
 		fmt.Fprint(w, err)
 		return
@@ -116,10 +110,6 @@ func geohashHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	switch oformat {
-	case OFUTM:
-		UTMToSerial(w, cartconvert.LatLongToUTM(latlong), serialformat)
-	case OFgeohash:
-		GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong), serialformat)
 	case OFlatlongdeg:
 		LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdms)
 	case OFlatlongcomma:
