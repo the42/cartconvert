@@ -28,7 +28,7 @@ type CoordinateTrans struct {
 func evalTemplate(wr io.Writer, formatter string, data ...interface{}) {
 	err := templates[formatter].Execute(wr, data[0])
 	if err != nil {
-		print(err.String())
+		print(err.Error())
 	}
 }
 

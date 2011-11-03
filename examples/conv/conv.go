@@ -19,6 +19,7 @@ import (
 	"bufio"
 	"fmt"
 	"flag"
+	"io"
 	"os"
 	"strings"
 )
@@ -75,7 +76,7 @@ func main() {
 
 	longline := false
 
-	for data, prefix, err := liner.ReadLine(); err != os.EOF; data, prefix, err = liner.ReadLine() {
+	for data, prefix, err := liner.ReadLine(); err != io.EOF; data, prefix, err = liner.ReadLine() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "conv %d: %s\n", lines, err)
 			continue

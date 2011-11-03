@@ -37,7 +37,7 @@ func TestSwissCoordRepresentation(t *testing.T) {
 // ## ASwissCoordToStruct
 type aSwissCoordToStructretparam struct {
 	coord *SwissCoord
-	err   os.Error
+	err   error
 }
 
 func (val *aSwissCoordToStructretparam) String() (fs string) {
@@ -47,7 +47,7 @@ func (val *aSwissCoordToStructretparam) String() (fs string) {
 	}
 
 	if val.err != nil {
-		fs += " " + val.err.String()
+		fs += " " + val.err.Error()
 	}
 	return
 }

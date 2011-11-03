@@ -71,13 +71,13 @@ func (bc *SwissCoord) String() (fs string) {
 
 // Parses a string representation of a LV++ coordinate into a struct holding a SwissCoord coordinate value.
 // The reference ellipsoid of Swisscoord datum is always the GRS80 ellipsoid.
-func ASwissCoordToStruct(coord string) (*SwissCoord, os.Error) {
+func ASwissCoordToStruct(coord string) (*SwissCoord, error) {
 
 	compact := strings.ToUpper(strings.TrimSpace(coord))
 	var rights, heights string
 	var coordType, oldcoordType SwissCoordType
 	var right, height float64
-	var err os.Error
+	var err error
 
 L1:
 	for i, index := 0, 0; i < 2; i++ {
@@ -134,7 +134,7 @@ L1:
 
 // Transform a Swiss coordinate value to a GRS80 based latitude and longitude coordinate. Function returns
 // EINVAL, if the swiss coordinate type is not one of LV03 or LV95
-func SwissCoordToGRS80LatLong(coord *SwissCoord) (*cartconvert.PolarCoord, os.Error) {
+func SwissCoordToGRS80LatLong(coord *SwissCoord) (*cartconvert.PolarCoord, error) {
 
 	var fn, fe float64
 
@@ -172,7 +172,7 @@ func SwissCoordToGRS80LatLong(coord *SwissCoord) (*cartconvert.PolarCoord, os.Er
 //
 // Important: The reference ellipsoid of the originating coordinate system will be assumed
 // to be the GRS80Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid.
-func GRS80LatLongToSwissCoord(gc *cartconvert.PolarCoord, coordType SwissCoordType) (*SwissCoord, os.Error) {
+func GRS80LatLongToSwissCoord(gc *cartconvert.PolarCoord, coordType SwissCoordType) (*SwissCoord, error) {
 
 	var fn, fe float64
 

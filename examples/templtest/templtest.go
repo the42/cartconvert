@@ -57,7 +57,7 @@ var templates = make(map[string]*template.Template)
 func evalTemplate(wr io.Writer, formatter string, data ...interface{}) {
 	err := templates[formatter].Execute(wr, data[0])
 	if err != nil {
-		print(err.String())
+		print(err.Error())
 	}
 }
 
@@ -75,6 +75,6 @@ func main() {
 	page := Page{"test page", Content{[]string{"a", "b"}}, Footer{"today"}}
 	err := templates["layout.tpl"].Execute(os.Stdout, page)
 	if err != nil {
-		print(err.String())
+		print(err.Error())
 	}
 }
