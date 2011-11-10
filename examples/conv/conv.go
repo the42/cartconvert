@@ -13,12 +13,14 @@
 package main
 
 import (
+	"bufio"
+	"flag"
+	"fmt"
 	"github.com/the42/cartconvert"
 	"github.com/the42/cartconvert/bmn"
 	"github.com/the42/cartconvert/osgb36"
-	"bufio"
-	"fmt"
-	"flag"
+	"io"
+
 	"os"
 	"strings"
 )
@@ -42,7 +44,6 @@ const (
 
 var ofOptions = map[string]displayformat{"deg": ofdeg, "dms": ofdms, "utm": ofutm, "geohash": ofgeohash}
 var ifOptions = map[string]inputformat{"bmn": ifbmn, "osgb36": ifosgb36}
-
 
 func main() {
 
@@ -70,13 +71,13 @@ func main() {
 
 	liner, err := bufio.NewReaderSize(os.Stdin, 100)
 	if err != nil {
-	  fmt.Fprintf(os.Stderr, "conv: %s (exiting)\n", err)
-	  os.Exit(3)
+		fmt.Fprintf(os.Stderr, "conv: %s (exiting)\n", err)
+		os.Exit(3)
 	}
-	
+
 	longline := false
 
-	for data, prefix, err := liner.ReadLine(); err != os.EOF; data, prefix, err = liner.ReadLine() {
+	for data, prefix, err := liner.ReadLine(); err != io.EOF; data, prefix, err = liner.ReadLine() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "conv %d: %s\n", lines, err)
 			continue

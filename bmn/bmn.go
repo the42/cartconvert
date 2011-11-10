@@ -16,11 +16,11 @@
 package bmn
 
 import (
-	"github.com/the42/cartconvert"
-	"strings"
-	"strconv"
 	"fmt"
+	"github.com/the42/cartconvert"
 	"os"
+	"strconv"
+	"strings"
 )
 
 // Meridian Coordinates of the Bundesmeldenetz, three values describing false easting and false northing.
@@ -74,13 +74,13 @@ func (bc *BMNCoord) String() (fs string) {
 
 // Parses a string representation of a BMN-Coordinate into a struct holding a BMN coordinate value.
 // The reference ellipsoid of BMN coordinates is always the Bessel ellipsoid.
-func ABMNToStruct(bmncoord string) (*BMNCoord, os.Error) {
+func ABMNToStruct(bmncoord string) (*BMNCoord, error) {
 
 	compact := strings.ToUpper(strings.TrimSpace(bmncoord))
 	var rights, heights string
 	var meridian BMNMeridian
 	var right, height float64
-	var err os.Error
+	var err error
 
 L1:
 	for i, index := 0, 0; i < 3; i++ {
@@ -129,7 +129,7 @@ L1:
 
 // Transform a BMN coordinate value to a WGS84 based latitude and longitude coordinate. Function returns
 // EINVAL, if the meridian stripe of the bmn-coordinate is not set
-func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, os.Error) {
+func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, error) {
 
 	var long0, fe float64
 
@@ -166,7 +166,7 @@ func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, os.Error) {
 //
 // Important: The reference ellipsoid of the originating coordinate system will be assumed
 // to be the WGS84Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid.
-func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCoord, os.Error) {
+func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCoord, error) {
 
 	var long0, fe float64
 

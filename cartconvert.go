@@ -9,24 +9,24 @@
 package cartconvert
 
 import (
-	"math"
-	"strings"
-	"strconv"
 	"fmt"
+	"math"
 	"os"
+	"strconv"
+	"strings"
 )
 
 // A CartographyError is yielded when a literal can not be parsed as a bearing specifier.
 // In this case the following values may be set and carry the meaning:
 type CartographyError struct {
-	Coord string   // a fragment of the coordinate literal containing the error.
-	Val   float64  // The value parsed so far
-	Index int      // Position at which the error occured
-	Error os.Error // inherited error from an attempt of strconv to parse a number
+	Coord string  // a fragment of the coordinate literal containing the error.
+	Val   float64 // The value parsed so far
+	Index int     // Position at which the error occured
+	Err   error   // inherited error from an attempt of strconv to parse a number
 }
 
-func (ce CartographyError) String() string {
-	return fmt.Sprintf("unable to parse fragment \"%s\". Partial value: %f. The additional error was: %s", ce.Coord, ce.Val, ce.Error.String())
+func (ce CartographyError) Error() string {
+	return fmt.Sprintf("unable to parse fragment \"%s\". Partial value: %f. The additional error was: %s", ce.Coord, ce.Val, ce.Err.Error())
 }
 
 // Set of common ellipsoidal models regularly found in cartography 
@@ -123,7 +123,6 @@ func (pc *PolarCoord) String() string {
 	return LatLongToString(pc, LLFdeg)
 }
 
-
 // A generic representation of easting (right, Y) and northing (Height,X) of a 2D projection
 // relative to Ellipsoid El. The height H at Point X,Y is above defining ellipsoid 
 type GeoPoint struct {
@@ -167,7 +166,7 @@ func removeblank(input string) (accu string) {
 // the signs '+' or '-' may be used.
 //
 // [N|E|S|W|+|-]ddd°[dd'[dd'']]
-func ADegMMSSToNum(DegMMSS string) (degf float64, err os.Error) {
+func ADegMMSSToNum(DegMMSS string) (degf float64, err error) {
 
 	var accu string
 	var i, position int
@@ -202,7 +201,7 @@ L2:
 			accu = ""
 			break L2
 		default:
-			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Error: os.EINVAL}
+			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
 		}
 	}
 
@@ -226,7 +225,7 @@ L4:
 			accu = ""
 			break L4
 		default:
-			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Error: os.EINVAL}
+			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
 		}
 	}
 
@@ -249,11 +248,11 @@ L6:
 			position += i
 
 			if !(position < slen && degree[0] == '\'') {
-				return 0, CartographyError{Val: degf, Index: i, Coord: degree, Error: os.EINVAL}
+				return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
 			}
 			break L6
 		default:
-			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Error: os.EINVAL}
+			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
 		}
 	}
 
@@ -272,7 +271,7 @@ L6:
 // the signs '+' or '-' may be used.
 //
 // [N|E|S|W|+|-]ddd[.suffix]°
-func ADegCommaToNum(DegComma string) (degf float64, err os.Error) {
+func ADegCommaToNum(DegComma string) (degf float64, err error) {
 
 	var accu string
 	var i, token int
@@ -302,7 +301,7 @@ L2:
 			accu = ""
 			break L2
 		default:
-			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Error: os.EINVAL}
+			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
 		}
 	}
 L4:
@@ -322,12 +321,12 @@ L4:
 			accu = ""
 			break L4
 		default:
-			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Error: os.EINVAL}
+			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
 		}
 	}
 
 	if len(accu) > 0 {
-		return 0, CartographyError{Val: degf, Index: i, Coord: degree, Error: os.EINVAL}
+		return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
 	}
 
 	if negate {
@@ -342,7 +341,7 @@ L4:
 // Function accepts two bearing datum as Deg°MM'SS'' (typically northing and easting)
 // and height at bearing relative to reference ellipsoid and returns a polar coordinate type.
 // If the reference ellipsoid is nil, the DefaultEllipsoid will be set in the resulting polar coordinate.
-func ADegMMSSToPolar(Northing, Easting string, Height float64, El *Ellipsoid) (*PolarCoord, os.Error) {
+func ADegMMSSToPolar(Northing, Easting string, Height float64, El *Ellipsoid) (*PolarCoord, error) {
 
 	northing, err := ADegMMSSToNum(Northing)
 
@@ -617,11 +616,11 @@ func (utm *UTMCoord) String() string {
 // Zone is the UTM meridian zone specifier and must be specified in the unambiguous
 // way of zone number and latitude band. Easting and northing are specified as decimal meters.
 // If the reference ellipsoid is nil, the DefaultEllipsoid is assumed.  
-func AUTMToStruct(utmcoord string, el *Ellipsoid) (*UTMCoord, os.Error) {
+func AUTMToStruct(utmcoord string, el *Ellipsoid) (*UTMCoord, error) {
 
 	var zone, northing, easting string
 	var north, east float64
-	var err os.Error
+	var err error
 
 	compact := strings.TrimSpace(utmcoord)
 
@@ -666,7 +665,7 @@ L1:
 // reference ellipsoid, the WGS84Ellipsoid is assumed and copied to the resulting polar coordinates.
 //
 // Inspired by http://www.gpsy.com/gpsinfo/geotoutm/gantz/LatLong-UTMconversion.cpp.txt
-func UTMToLatLong(coord *UTMCoord) (*PolarCoord, os.Error) {
+func UTMToLatLong(coord *UTMCoord) (*PolarCoord, error) {
 
 	zonelength := len(coord.Zone)
 	utmLetter := int8(coord.Zone[zonelength-1:][0])
@@ -808,7 +807,7 @@ func asciiindex(s string, ch byte) int16 {
 	return -1
 }
 
-func abase32tobitset(sval, codeset string) (bitset string, err os.Error) {
+func abase32tobitset(sval, codeset string) (bitset string, err error) {
 
 	var bval int16
 	sval = strings.TrimSpace(sval)
@@ -861,7 +860,7 @@ func decodegeohashbitset(bitset string, floor, ceiling float64) float64 {
 // Return latitude & longitude from a geohash-encoded string.
 // If the reference ellipsoid is nil, the default Ellipsoid will be returned.
 // If the string is not a geohash, err will be set to EINVAL.
-func GeoHashToLatLong(geohash string, el *Ellipsoid) (pc *PolarCoord, err os.Error) {
+func GeoHashToLatLong(geohash string, el *Ellipsoid) (pc *PolarCoord, err error) {
 
 	var bitfield, lats, longs string
 
