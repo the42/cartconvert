@@ -6,14 +6,14 @@
 package main
 
 import (
-	"json"
-	"io"
-	"xml"
-	"http"
+	"encoding/json"
+	"encoding/xml"
 	"fmt"
-	"path"
-	"github.com/the42/cartconvert/bmn"
 	"github.com/the42/cartconvert"
+	"github.com/the42/cartconvert/bmn"
+	"io"
+	"net/http"
+	"path"
 )
 
 const (
@@ -89,7 +89,7 @@ func rootHandler(w http.ResponseWriter, req *http.Request) {
 func geohashHandler(w http.ResponseWriter, req *http.Request) {
 	// OSGB36 Datum transformation
 	// gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
-	
+
 	geohashstrval := req.URL.Path[len(GeoHashHandler):]
 	serialformat := path.Ext(geohashstrval)
 	geohashstrval = geohashstrval[:len(geohashstrval)-len(serialformat)]
