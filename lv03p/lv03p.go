@@ -119,10 +119,10 @@ L1:
 
 	if err == nil {
 
-		right, err = strconv.Atof64(rights)
+		right, err = strconv.ParseFloat(rights, 64)
 		if err == nil {
 
-			height, err = strconv.Atof64(heights)
+			height, err = strconv.ParseFloat(heights, 64)
 			if err == nil {
 				return &SwissCoord{Easting: right, Northing: height, CoordType: coordType, el: cartconvert.Bessel1841Ellipsoid}, nil
 			}

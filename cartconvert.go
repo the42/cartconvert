@@ -189,7 +189,7 @@ L2:
 		case 'N', 'E', '+':
 			continue
 		case '°':
-			degf, err = strconv.Atof64(accu)
+			degf, err = strconv.ParseFloat(accu, 64)
 
 			if err != nil {
 				return degf, err
@@ -212,7 +212,7 @@ L4:
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			accu += string(token)
 		case '\'':
-			tf, err = strconv.Atof64(accu)
+			tf, err = strconv.ParseFloat(accu, 64)
 
 			if err != nil {
 				return tf, err
@@ -236,7 +236,7 @@ L6:
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.':
 			accu += string(token)
 		case '\'':
-			tf, err = strconv.Atof64(accu)
+			tf, err = strconv.ParseFloat(accu, 64)
 
 			if err != nil {
 				return tf, err
@@ -291,7 +291,7 @@ L2:
 		case 'N', 'E', '+':
 			continue
 		case '.', '°':
-			degf, err = strconv.Atof64(accu)
+			degf, err = strconv.ParseFloat(accu, 64)
 
 			if err != nil {
 				return degf, err
@@ -311,7 +311,7 @@ L4:
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			accu += string(token)
 		case '°':
-			tf, err = strconv.Atof64("0." + accu)
+			tf, err = strconv.ParseFloat("0."+accu, 64)
 
 			if err != nil {
 				return tf, err
@@ -643,13 +643,13 @@ L1:
 		compact = strings.TrimLeft(compact, " ")
 	}
 
-	north, err = strconv.Atof64(northing)
+	north, err = strconv.ParseFloat(northing, 64)
 
 	if err != nil {
 		return nil, err
 	}
 
-	east, err = strconv.Atof64(easting)
+	east, err = strconv.ParseFloat(easting, 64)
 
 	if err != nil {
 		return nil, err
@@ -669,7 +669,7 @@ func UTMToLatLong(coord *UTMCoord) (*PolarCoord, error) {
 
 	zonelength := len(coord.Zone)
 	utmLetter := int8(coord.Zone[zonelength-1:][0])
-	zonenumber, err := strconv.Atoui(coord.Zone[:zonelength-1])
+	zonenumber, err := strconv.ParseUint(coord.Zone[:zonelength-1], 10, 0)
 
 	if err != nil {
 		return nil, err
@@ -724,7 +724,7 @@ func LatLongToUTM(gcin *PolarCoord) *UTMCoord {
 
 	pt := DirectTransverseMercator(&gc, 0, (float64(zonenumber)-1)*6-180+3, 0.9996, 500000, 0)
 
-	utm.Zone = strconv.Uitoa(zonenumber) + string(utmLetterDesignator(gc.Latitude))
+	utm.Zone = strconv.FormatUint(uint64(zonenumber), 10) + string(utmLetterDesignator(gc.Latitude))
 	utm.Northing = pt.Y
 	utm.Easting = pt.X
 
@@ -1000,7 +1000,7 @@ func LatLongToGeoHashBits(pc *PolarCoord, bits byte) string {
 		base32fragment = bitstring[:5]
 
 		// An error is entirely the algorithms fault, so we ignore it here
-		base32index, _ = strconv.Btoui64(base32fragment, 2)
+		base32index, _ = strconv.ParseUint(base32fragment, 2, 64)
 		accu += string(Base32GeohashCode[uint8(base32index)])
 	}
 	return accu
