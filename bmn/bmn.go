@@ -16,11 +16,11 @@
 package bmn
 
 import (
-	"github.com/the42/cartconvert"
-	"strings"
-	"strconv"
 	"fmt"
+	"github.com/the42/cartconvert"
 	"os"
+	"strconv"
+	"strings"
 )
 
 // Meridian Coordinates of the Bundesmeldenetz, three values describing false easting and false northing.
@@ -113,10 +113,10 @@ L1:
 
 	if err == nil {
 
-		right, err = strconv.Atof64(rights)
+		right, err = strconv.ParseFloat(rights, 64)
 		if err == nil {
 
-			height, err = strconv.Atof64(heights)
+			height, err = strconv.ParseFloat(heights, 64)
 			if err == nil {
 
 				return &BMNCoord{Right: right, Height: height, Meridian: meridian, el: cartconvert.Bessel1841MGIEllipsoid}, nil
