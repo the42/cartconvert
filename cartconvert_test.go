@@ -43,7 +43,6 @@ func geopointequal(gp1, gp2 *GeoPoint) bool {
 	return gp1s == gp2s
 }
 
-
 func TestDirectTransverseMercator(t *testing.T) {
 	for cnt, test := range directtransversemercatorTests {
 		out := DirectTransverseMercator(test.in.pc, test.in.lat0, test.in.long0, test.in.scale, test.in.fe, test.in.fn)

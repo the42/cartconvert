@@ -96,7 +96,6 @@ func TestOSGB36StringToStruct(t *testing.T) {
 	}
 }
 
-
 // ## OSGB36ToWGS84LatLong
 type oSGB36ToWGS84LatLongTest struct {
 	in  *OSGB36Coord
