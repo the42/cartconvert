@@ -171,7 +171,7 @@ func ADegMMSSToNum(DegMMSS string) (degf float64, err error) {
 
 	var accu string
 	var i, position int
-	var token int
+	var token rune
 	var tf float64
 
 	degree := strings.ToUpper(removeblank(DegMMSS))
@@ -275,7 +275,8 @@ L6:
 func ADegCommaToNum(DegComma string) (degf float64, err error) {
 
 	var accu string
-	var i, token int
+	var i int
+	var token rune
 	var tf float64
 
 	degree := strings.ToUpper(removeblank(DegComma))
