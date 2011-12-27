@@ -2,8 +2,6 @@
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
-//target:github.com/the42/cartconvert
-
 // This package provides a series of functions to deal with 
 // conversion, transformation and projection of coordinate systems.
 package cartconvert

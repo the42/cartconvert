@@ -3,8 +3,8 @@ _obj/
 _*
 bin/
 *.exe
-examples/conv/conv
-examples/cartconvserv/cartconvserv
-examples/geotrans/geotrans
-examples/templtest/templtest
+src/github.com/the42/conv/conv
+src/github.com/the42/cartconvserv/cartconvserv
+src/github.com/the42/geotrans/geotrans
+src/github.com/the42/templtest/templtest
 
