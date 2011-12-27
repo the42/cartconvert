@@ -11,7 +11,6 @@ import (
 const staticWebDir = "../static/"
 const templateDir = "../templates/"
 
-
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, staticWebDir+r.URL.Path)
 }
