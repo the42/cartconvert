@@ -34,20 +34,34 @@ const (
 	BMNM34
 )
 
-var bmnStrings = map[BMNMeridian]string{BMNM28: "M28", BMNM31: "M31", BMNM34: "M34"}
+func (bm *BMNMeridian) String() (rep string) {
+	switch *bm {
+	case BMNM28:
+		rep = "M28"
+	case BMNM31:
+		rep = "M31"
+	case BMNM34:
+		rep = "M34"
+	case BMNZoneDet:
+		rep = "autodetect"
+	default:
+		rep = "#unknown"
+	}
+	return
+}
 
 // A BMN coordinate is specified by right-value (easting), height-value (northing)
 // and the meridian stripe, 28°, 31° or 34° West of Hierro 
 type BMNCoord struct {
 	Right, Height, RelHeight float64
 	Meridian                 BMNMeridian
-	el                       *cartconvert.Ellipsoid
+	El                       *cartconvert.Ellipsoid
 }
 
 // Canonical representation of a BMN-value
 func (bc *BMNCoord) String() (fs string) {
 
-	fs = bmnStrings[bc.Meridian]
+	fs = bc.Meridian.String()
 	var next float64
 
 	for i := 0; i < 2; i++ {
@@ -119,7 +133,7 @@ L1:
 			height, err = strconv.ParseFloat(heights, 64)
 			if err == nil {
 
-				return &BMNCoord{Right: right, Height: height, Meridian: meridian, el: cartconvert.Bessel1841MGIEllipsoid}, nil
+				return &BMNCoord{Right: right, Height: height, Meridian: meridian, El: cartconvert.Bessel1841MGIEllipsoid}, nil
 			}
 		}
 	}
@@ -148,7 +162,7 @@ func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, error) {
 	}
 
 	gc := cartconvert.InverseTransverseMercator(
-		&cartconvert.GeoPoint{Y: bmncoord.Height, X: bmncoord.Right, El: bmncoord.el},
+		&cartconvert.GeoPoint{Y: bmncoord.Height, X: bmncoord.Right, El: bmncoord.El},
 		0,
 		long0,
 		1,
@@ -189,18 +203,6 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCo
 		}
 	}
 
-	// Determine meridian stripe based on longitude
-	if meridian == BMNZoneDet {
-		switch {
-		case 11.0+0.5/6*10 >= polar.Longitude && polar.Longitude >= 8.0+0.5/6*10:
-			meridian = BMNM28
-		case 14.0+0.5/6*10 >= polar.Longitude && polar.Longitude >= 11.0+0.5/6*10:
-			meridian = BMNM31
-		case 17.0+0.5/6*10 >= polar.Longitude && polar.Longitude >= 14.0+0.5/6*10:
-			meridian = BMNM34
-		}
-	}
-
 	switch meridian {
 	case BMNM28:
 		long0 = 10.0 + 20.0/60.0
@@ -223,9 +225,9 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCo
 		fe,
 		-5000000)
 
-	return &BMNCoord{Meridian: meridian, Height: gp.Y, Right: gp.X, el: gp.El}, nil
+	return &BMNCoord{Meridian: meridian, Height: gp.Y, Right: gp.X, El: gp.El}, nil
 }
 
 func NewBMNCoord(Meridian BMNMeridian, Right, Height, RelHeight float64) *BMNCoord {
-	return &BMNCoord{Right: Right, Height: Height, RelHeight: RelHeight, Meridian: Meridian, el: cartconvert.Bessel1841MGIEllipsoid}
+	return &BMNCoord{Right: Right, Height: Height, RelHeight: RelHeight, Meridian: Meridian, El: cartconvert.Bessel1841MGIEllipsoid}
 }

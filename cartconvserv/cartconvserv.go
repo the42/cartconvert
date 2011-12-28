@@ -8,10 +8,10 @@ package main
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"github.com/the42/cartconvert"
 	"github.com/the42/cartconvert/bmn"
 	"io"
-	"fmt"
 	"net/http"
 	"path"
 )
@@ -30,11 +30,19 @@ const (
 	OFgeohash      = "geohash"
 	OFlatlongdeg   = "latlongdeg"
 	OFlatlongcomma = "latlongcomma"
+	OFBMN          = "bmn"
 )
 
 type marshalUTMCoord struct {
-	XMLName  xml.Name `json:"-" xml:"payLoad"`
-	UTMCoord *cartconvert.UTMCoord
+	XMLName   xml.Name `json:"-" xml:"payLoad"`
+	UTMCoord  *cartconvert.UTMCoord
+	UTMString string
+}
+
+type marshalBMN struct {
+	XMLName   xml.Name `json:"-" xml:"payLoad"`
+	BMNCoord  *bmn.BMNCoord
+	BMNString string
 }
 
 type marshalGeoHash struct {
@@ -45,17 +53,18 @@ type marshalGeoHash struct {
 type marshalLatLong struct {
 	XMLName        xml.Name `json:"-" xml:"payLoad"`
 	Lat, Long, Fmt string
+	LatLongString  string
 }
 
 func UTMToSerial(w io.Writer, utm *cartconvert.UTMCoord, serialformat string) (err error) {
 	switch serialformat {
 	case JSONFormatSpec:
-		err = json.NewEncoder(w).Encode(&marshalUTMCoord{UTMCoord: utm})
+		err = json.NewEncoder(w).Encode(&marshalUTMCoord{UTMCoord: utm, UTMString: utm.String()})
 	case XMLFormatSpec:
 		io.WriteString(w, xml.Header)
-		err = xml.Marshal(w, &marshalUTMCoord{UTMCoord: utm})
+		err = xml.Marshal(w, &marshalUTMCoord{UTMCoord: utm, UTMString: utm.String()})
 	default:
-	    err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
+		err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
 	}
 	return
 }
@@ -68,23 +77,37 @@ func GeoHashToSerial(w io.Writer, geohash string, serialformat string) (err erro
 		io.WriteString(w, xml.Header)
 		err = xml.Marshal(w, &marshalGeoHash{GeoHash: geohash})
 	default:
-	  err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
+		err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
 	}
 	return
 }
 
 func LatLongToSerial(w io.Writer, latlong *cartconvert.PolarCoord, serialformat string, repformat cartconvert.LatLongFormat) (err error) {
-  
+
 	lat, long := cartconvert.LatLongToString(latlong, repformat)
 
 	switch serialformat {
 	case JSONFormatSpec:
-		err = json.NewEncoder(w).Encode(&marshalLatLong{Lat: lat, Long: long, Fmt: repformat.String()})
+		err = json.NewEncoder(w).Encode(&marshalLatLong{Lat: lat, Long: long, Fmt: repformat.String(), LatLongString: latlong.String()})
 	case XMLFormatSpec:
 		io.WriteString(w, xml.Header)
-		err = xml.Marshal(w, &marshalLatLong{Lat: lat, Long: long, Fmt: repformat.String()})
+		err = xml.Marshal(w, &marshalLatLong{Lat: lat, Long: long, Fmt: repformat.String(), LatLongString: latlong.String()})
 	default:
-	  	  err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
+		err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
+	}
+	return
+}
+
+func BMNToSerial(w io.Writer, bmn *bmn.BMNCoord, serialformat string) (err error) {
+
+	switch serialformat {
+	case JSONFormatSpec:
+		err = json.NewEncoder(w).Encode(&marshalBMN{BMNCoord: bmn, BMNString: bmn.String()})
+	case XMLFormatSpec:
+		io.WriteString(w, xml.Header)
+		err = xml.Marshal(w, &marshalBMN{BMNCoord: bmn, BMNString: bmn.String()})
+	default:
+		err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
 	}
 	return
 }
@@ -97,29 +120,29 @@ func rootHandler(w http.ResponseWriter, req *http.Request) {
 type restHandler func(http.ResponseWriter, *http.Request, string, string, string) error
 
 func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-  
+
 	val := path.Base(req.URL.Path)
 	serialformat := path.Ext(val)
 	val = val[:len(val)-len(serialformat)]
-	
+
 	oformat := req.URL.Query().Get(OutputFormatSpec)
-	
+
 	switch serialformat {
 	case JSONFormatSpec:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	case XMLFormatSpec:
 		w.Header().Set("Content-Type", "text/xml")
 	}
-	
+
 	if err := fn(w, req, val, serialformat, oformat); err != nil {
-	  http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), 500)
 	}
 }
 
 func geohashHandler(w http.ResponseWriter, req *http.Request, geohashstrval, serialformat, oformat string) (err error) {
 
-	latlong, err := cartconvert.GeoHashToLatLong(geohashstrval, nil)
-	if err != nil {
+	var latlong *cartconvert.PolarCoord
+	if latlong, err = cartconvert.GeoHashToLatLong(geohashstrval, nil); err != nil {
 		return
 	}
 
@@ -129,20 +152,19 @@ func geohashHandler(w http.ResponseWriter, req *http.Request, geohashstrval, ser
 	case OFlatlongcomma:
 		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdeg)
 	default:
-	  err = fmt.Errorf("Unsupported output format: '%s'", oformat)
+		err = fmt.Errorf("Unsupported output format: '%s'", oformat)
 	}
 	return
 }
 
 func bmnHandler(w http.ResponseWriter, req *http.Request, bmnstrval, serialformat, oformat string) (err error) {
-
-	bmnval, err := bmn.ABMNToStruct(bmnstrval)
-	if err != nil {
+	var bmnval *bmn.BMNCoord
+	if bmnval, err = bmn.ABMNToStruct(bmnstrval); err != nil {
 		return
 	}
 
-	latlong, err := bmn.BMNToWGS84LatLong(bmnval)
-	if err != nil {
+	var latlong *cartconvert.PolarCoord
+	if latlong, err = bmn.BMNToWGS84LatLong(bmnval); err != nil {
 		return
 	}
 
@@ -156,32 +178,39 @@ func bmnHandler(w http.ResponseWriter, req *http.Request, bmnstrval, serialforma
 	case OFlatlongcomma:
 		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdeg)
 	default:
-	  err = fmt.Errorf("Unsupported output format: '%s'", oformat)
+		err = fmt.Errorf("Unsupported output format: '%s'", oformat)
 	}
-	
+
 	return
 }
 
 func latlongHandler(w http.ResponseWriter, req *http.Request, latlongstrval, serialformat, oformat string) (err error) {
 
-  if len(latlongstrval) > 0 {
-    return fmt.Errorf("Latlong doesn't support an input value. Use parameters instead")
-  }
-  
-  var slat, slong string
-  slat = req.URL.Query().Get("lat")
-  slong = req.URL.Query().Get("long")
-  _,_ = slat, slong
-  
-  bmnval, err := bmn.ABMNToStruct(latlongstrval)
-	if err != nil {
-		return
+	if len(latlongstrval) > 0 {
+		return fmt.Errorf("Latlong doesn't accept an input value. Use parameters instead")
 	}
 
-	latlong, err := bmn.BMNToWGS84LatLong(bmnval)
+	slat := req.URL.Query().Get("lat")
+	slong := req.URL.Query().Get("long")
+
+	var lat, long float64
+	lat, err = cartconvert.ADegMMSSToNum(slat)
 	if err != nil {
-		return
+		lat, err = cartconvert.ADegCommaToNum(slat)
+		if err != nil {
+			return fmt.Errorf("Not a bearing: '%s'", slat)
+		}
 	}
+
+	long, err = cartconvert.ADegMMSSToNum(slong)
+	if err != nil {
+		long, err = cartconvert.ADegCommaToNum(slong)
+		if err != nil {
+			return fmt.Errorf("Not a bearing: '%s'", slong)
+		}
+	}
+
+	latlong := &cartconvert.PolarCoord{Latitude: lat, Longitude: long, El: cartconvert.DefaultEllipsoid}
 
 	switch oformat {
 	case OFUTM:
@@ -192,10 +221,16 @@ func latlongHandler(w http.ResponseWriter, req *http.Request, latlongstrval, ser
 		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdms)
 	case OFlatlongcomma:
 		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdeg)
+	case OFBMN:
+		var bmnval *bmn.BMNCoord
+		bmnval, err = bmn.WGS84LatLongToBMN(latlong, bmn.BMNZoneDet)
+		if err == nil {
+			err = BMNToSerial(w, bmnval, serialformat)
+		}
 	default:
-	  err = fmt.Errorf("Unsupported output format: '%s'", oformat)
+		err = fmt.Errorf("Unsupported output format: '%s'", oformat)
 	}
-	
+
 	return
 }
 
