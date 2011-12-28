@@ -8,10 +8,10 @@ package main
 import (
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"github.com/the42/cartconvert"
 	"github.com/the42/cartconvert/bmn"
 	"io"
+	"fmt"
 	"net/http"
 	"path"
 )
@@ -19,6 +19,7 @@ import (
 const (
 	BMNHandler     = "/bmn/"
 	GeoHashHandler = "/geohash/"
+	LatLongHandler = "/latlong/"
 
 	JSONFormatSpec = ".json"
 	XMLFormatSpec  = ".xml"
@@ -30,8 +31,6 @@ const (
 	OFlatlongdeg   = "latlongdeg"
 	OFlatlongcomma = "latlongcomma"
 )
-
-// const httpc = "<html><head></head><body>%s</body></html>"
 
 type marshalUTMCoord struct {
 	XMLName  xml.Name `json:"-" xml:"payLoad"`
@@ -48,131 +47,164 @@ type marshalLatLong struct {
 	Lat, Long, Fmt string
 }
 
-func UTMToSerial(w io.Writer, utm *cartconvert.UTMCoord, serialformat string) {
-	// Maybe UTMCoord shoul implement an interface for serialisation
+func UTMToSerial(w io.Writer, utm *cartconvert.UTMCoord, serialformat string) (err error) {
 	switch serialformat {
 	case JSONFormatSpec:
-		json.NewEncoder(w).Encode(&marshalUTMCoord{UTMCoord: utm})
+		err = json.NewEncoder(w).Encode(&marshalUTMCoord{UTMCoord: utm})
 	case XMLFormatSpec:
 		io.WriteString(w, xml.Header)
-		xml.Marshal(w, &marshalUTMCoord{UTMCoord: utm})
+		err = xml.Marshal(w, &marshalUTMCoord{UTMCoord: utm})
+	default:
+	    err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
 	}
+	return
 }
 
-func GeoHashToSerial(w io.Writer, geohash string, serialformat string) {
+func GeoHashToSerial(w io.Writer, geohash string, serialformat string) (err error) {
 	switch serialformat {
 	case JSONFormatSpec:
-		json.NewEncoder(w).Encode(&marshalGeoHash{GeoHash: geohash})
+		err = json.NewEncoder(w).Encode(&marshalGeoHash{GeoHash: geohash})
 	case XMLFormatSpec:
 		io.WriteString(w, xml.Header)
-		xml.Marshal(w, &marshalGeoHash{GeoHash: geohash})
+		err = xml.Marshal(w, &marshalGeoHash{GeoHash: geohash})
+	default:
+	  err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
 	}
+	return
 }
 
-func LatLongToSerial(w io.Writer, latlong *cartconvert.PolarCoord, serialformat string, repformat cartconvert.LatLongFormat) {
+func LatLongToSerial(w io.Writer, latlong *cartconvert.PolarCoord, serialformat string, repformat cartconvert.LatLongFormat) (err error) {
+  
 	lat, long := cartconvert.LatLongToString(latlong, repformat)
-	switch serialformat {
 
+	switch serialformat {
 	case JSONFormatSpec:
-		json.NewEncoder(w).Encode(&marshalLatLong{Lat: lat, Long: long, Fmt: string(repformat)})
+		err = json.NewEncoder(w).Encode(&marshalLatLong{Lat: lat, Long: long, Fmt: repformat.String()})
 	case XMLFormatSpec:
 		io.WriteString(w, xml.Header)
-		xml.Marshal(w, &marshalLatLong{Lat: lat, Long: long, Fmt: string(repformat)})
+		err = xml.Marshal(w, &marshalLatLong{Lat: lat, Long: long, Fmt: repformat.String()})
+	default:
+	  	  err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
 	}
+	return
 }
 
 func rootHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprintf(w, "Cartography transformation")
+	io.WriteString(w, "Cartography transformation")
 }
 
-func geohashHandler(w http.ResponseWriter, req *http.Request) {
-	// OSGB36 Datum transformation
-	// gc := cartconvert.DirectTransverseMercator(&cartconvert.PolarCoord{Latitude: flat, Longitude: flong, El: cartconvert.Airy1830Ellipsoid}, 49, -2, 0.9996012717, 400000, -100000)
+type restHandler func(http.ResponseWriter, *http.Request, string, string, string) error
 
-	geohashstrval := req.URL.Path[len(GeoHashHandler):]
-	serialformat := path.Ext(geohashstrval)
-	geohashstrval = geohashstrval[:len(geohashstrval)-len(serialformat)]
+func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+  
+	val := path.Base(req.URL.Path)
+	serialformat := path.Ext(val)
+	val = val[:len(val)-len(serialformat)]
+	
+	oformat := req.URL.Query().Get(OutputFormatSpec)
+	
+	switch serialformat {
+	case JSONFormatSpec:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	case XMLFormatSpec:
+		w.Header().Set("Content-Type", "text/xml")
+	}
+	
+	if err := fn(w, req, val, serialformat, oformat); err != nil {
+	  http.Error(w, err.Error(), 500)
+	}
+}
+
+func geohashHandler(w http.ResponseWriter, req *http.Request, geohashstrval, serialformat, oformat string) (err error) {
 
 	latlong, err := cartconvert.GeoHashToLatLong(geohashstrval, nil)
 	if err != nil {
-		fmt.Fprint(w, err)
 		return
-	}
-
-	oformat := req.URL.Query().Get(OutputFormatSpec)
-
-	switch serialformat {
-	case JSONFormatSpec:
-		w.Header().Set("Content-Type", "application/json")
-	case XMLFormatSpec:
-		w.Header().Set("Content-Type", "text/xml")
 	}
 
 	switch oformat {
 	case OFlatlongdeg:
-		LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdms)
+		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdms)
 	case OFlatlongcomma:
-		LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdeg)
+		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdeg)
+	default:
+	  err = fmt.Errorf("Unsupported output format: '%s'", oformat)
 	}
+	return
 }
 
-func bmnHandler(w http.ResponseWriter, req *http.Request) {
+func bmnHandler(w http.ResponseWriter, req *http.Request, bmnstrval, serialformat, oformat string) (err error) {
 
-	bmnstrval := req.URL.Path[len(BMNHandler):]
-	serialformat := path.Ext(bmnstrval)
-	bmnstrval = bmnstrval[:len(bmnstrval)-len(serialformat)]
 	bmnval, err := bmn.ABMNToStruct(bmnstrval)
 	if err != nil {
-		fmt.Fprint(w, err)
 		return
 	}
 
 	latlong, err := bmn.BMNToWGS84LatLong(bmnval)
 	if err != nil {
-		fmt.Fprint(w, err)
 		return
-	}
-
-	oformat := req.URL.Query().Get(OutputFormatSpec)
-
-	switch serialformat {
-	case JSONFormatSpec:
-		w.Header().Set("Content-Type", "application/json")
-	case XMLFormatSpec:
-		w.Header().Set("Content-Type", "text/xml")
 	}
 
 	switch oformat {
 	case OFUTM:
-		UTMToSerial(w, cartconvert.LatLongToUTM(latlong), serialformat)
+		err = UTMToSerial(w, cartconvert.LatLongToUTM(latlong), serialformat)
 	case OFgeohash:
-		GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong), serialformat)
+		err = GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong), serialformat)
 	case OFlatlongdeg:
-		LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdms)
+		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdms)
 	case OFlatlongcomma:
-		LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdeg)
+		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdeg)
+	default:
+	  err = fmt.Errorf("Unsupported output format: '%s'", oformat)
 	}
+	
+	return
 }
 
-/*
-func (req *web.Request) {
-	w := req.Respond(web.StatusOK, web.HeaderContentType, "text/html")
-	x, err := json.Marshal(cartconvert.LatLongToGeoHash(&cartconvert.PolarCoord{Latitude: 49.3, Longitude: 20.0}))
-	if err == nil {
-		io.WriteString(w, string(x))
-	} else {
-		io.WriteString(w, "Error: "+err.String())
+func latlongHandler(w http.ResponseWriter, req *http.Request, latlongstrval, serialformat, oformat string) (err error) {
+
+  if len(latlongstrval) > 0 {
+    return fmt.Errorf("Latlong doesn't support an input value. Use parameters instead")
+  }
+  
+  var slat, slong string
+  slat = req.URL.Query().Get("lat")
+  slong = req.URL.Query().Get("long")
+  _,_ = slat, slong
+  
+  bmnval, err := bmn.ABMNToStruct(latlongstrval)
+	if err != nil {
+		return
 	}
 
+	latlong, err := bmn.BMNToWGS84LatLong(bmnval)
+	if err != nil {
+		return
+	}
+
+	switch oformat {
+	case OFUTM:
+		err = UTMToSerial(w, cartconvert.LatLongToUTM(latlong), serialformat)
+	case OFgeohash:
+		err = GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong), serialformat)
+	case OFlatlongdeg:
+		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdms)
+	case OFlatlongcomma:
+		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdeg)
+	default:
+	  err = fmt.Errorf("Unsupported output format: '%s'", oformat)
+	}
+	
+	return
 }
-*/
 
 func main() {
 
 	http.HandleFunc("/", rootHandler)
-	http.HandleFunc(BMNHandler, bmnHandler)
-	http.HandleFunc(GeoHashHandler, geohashHandler)
+	http.Handle(BMNHandler, restHandler(bmnHandler))
+	http.Handle(GeoHashHandler, restHandler(geohashHandler))
+	http.Handle(LatLongHandler, restHandler(latlongHandler))
 	// TODO: Read from config file
 	http.ListenAndServe(":1111", nil)
 }
