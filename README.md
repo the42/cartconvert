@@ -67,6 +67,9 @@ Testing
 To run the tests:
 
   go test github.com/the42/cartconvert
+
   go test github.com/the42/cartconvert/bmn
+
   go test github.com/the42/cartconvert/osgb36
+
   go test github.com/the42/cartconvert/lv03p

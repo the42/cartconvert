@@ -101,7 +101,7 @@ z.B.: "osgtest.dat"
 Installation
 ------------
 
-  make install
+  go install github.com/the42/conv
 
 
 Lizenz
