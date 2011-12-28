@@ -34,8 +34,8 @@ const (
 	BMNM34
 )
 
-func (bm *BMNMeridian) String() (rep string) {
-	switch *bm {
+func (bm BMNMeridian) String() (rep string) {
+	switch bm {
 	case BMNM28:
 		rep = "M28"
 	case BMNM31:
