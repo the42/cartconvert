@@ -26,9 +26,9 @@ Posted: {posted}
 */
 
 import (
+	"io"
 	"old/template"
 	"os"
-	"io"
 )
 
 type Content struct {

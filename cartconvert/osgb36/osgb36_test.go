@@ -7,8 +7,8 @@ package osgb36
 
 import (
 	"fmt"
-	"math"
 	"github.com/the42/cartconvert"
+	"math"
 	"testing"
 )
 

@@ -13,12 +13,12 @@
 package main
 
 import (
+	"bufio"
+	"flag"
+	"fmt"
 	"github.com/the42/cartconvert"
 	"github.com/the42/cartconvert/bmn"
 	"github.com/the42/cartconvert/osgb36"
-	"bufio"
-	"fmt"
-	"flag"
 	"io"
 	"os"
 	"strings"

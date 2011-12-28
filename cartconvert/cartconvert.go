@@ -57,6 +57,18 @@ const (
 	LLFdms                   // format a lat/long coordinate in degrees, minutes and seconds with prepended main directions N, S, E, W
 )
 
+func (spec LatLongFormat) String() (ret string) {
+	switch spec {
+	case LLFdeg:
+		ret = "LLFdeg"
+	case LLFdms:
+		ret = "LLFdms"
+	default:
+		ret = "#unknown"
+	}
+	return
+}
+
 func LatLongToString(pc *PolarCoord, format LatLongFormat) (latitude, longitude string) {
 
 	var lat, long, latrem, longrem, latmin, longmin, latsec, longsec float64

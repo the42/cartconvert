@@ -15,12 +15,12 @@
 package osgb36
 
 import (
-	"github.com/the42/cartconvert"
-	"strings"
-	"strconv"
 	"fmt"
-	"os"
+	"github.com/the42/cartconvert"
 	"math"
+	"os"
+	"strconv"
+	"strings"
 )
 
 // A OSGB36 coordinate is specified by zone, easting and northing. 
