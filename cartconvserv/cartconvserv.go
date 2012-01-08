@@ -62,10 +62,7 @@ func UTMToSerial(w io.Writer, utm *cartconvert.UTMCoord, serialformat string) (e
 	case JSONFormatSpec:
 		err = json.NewEncoder(w).Encode(&marshalUTMCoord{UTMCoord: utm, UTMString: utm.String()})
 	case XMLFormatSpec:
-		io.WriteString(w, xml.Header)
 		err = xml.Marshal(w, &marshalUTMCoord{UTMCoord: utm, UTMString: utm.String()})
-	default:
-		err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
 	}
 	return
 }
@@ -75,10 +72,7 @@ func GeoHashToSerial(w io.Writer, geohash string, serialformat string) (err erro
 	case JSONFormatSpec:
 		err = json.NewEncoder(w).Encode(&marshalGeoHash{GeoHash: geohash})
 	case XMLFormatSpec:
-		io.WriteString(w, xml.Header)
 		err = xml.Marshal(w, &marshalGeoHash{GeoHash: geohash})
-	default:
-		err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
 	}
 	return
 }
@@ -91,10 +85,7 @@ func LatLongToSerial(w io.Writer, latlong *cartconvert.PolarCoord, serialformat 
 	case JSONFormatSpec:
 		err = json.NewEncoder(w).Encode(&marshalLatLong{Lat: lat, Long: long, Fmt: repformat.String(), LatLongString: latlong.String()})
 	case XMLFormatSpec:
-		io.WriteString(w, xml.Header)
 		err = xml.Marshal(w, &marshalLatLong{Lat: lat, Long: long, Fmt: repformat.String(), LatLongString: latlong.String()})
-	default:
-		err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
 	}
 	return
 }
@@ -105,10 +96,7 @@ func BMNToSerial(w io.Writer, bmn *bmn.BMNCoord, serialformat string) (err error
 	case JSONFormatSpec:
 		err = json.NewEncoder(w).Encode(&marshalBMN{BMNCoord: bmn, BMNString: bmn.String()})
 	case XMLFormatSpec:
-		io.WriteString(w, xml.Header)
 		err = xml.Marshal(w, &marshalBMN{BMNCoord: bmn, BMNString: bmn.String()})
-	default:
-		err = fmt.Errorf("Unsupported serialisation format: '%s'", serialformat)
 	}
 	return
 }
@@ -129,10 +117,14 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	oformat := req.URL.Query().Get(OutputFormatSpec)
 
 	switch serialformat {
-	case JSONFormatSpec:
+	case JSONFormatSpec, "":
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	case XMLFormatSpec:
 		w.Header().Set("Content-Type", "text/xml")
+		io.WriteString(w, xml.Header)
+	default:
+		http.Error(w, fmt.Sprintf("Unsupported serialisation format: '%s'", serialformat), 500)
+		return
 	}
 
 	// Recover from panic by setting http error 500 and letting the user know the reason
