@@ -34,71 +34,42 @@ const (
 	OFBMN          = "bmn"
 )
 
-type marshalUTMCoord struct {
-	XMLName   xml.Name `json:"-" xml:"payLoad"`
+type Encoder interface {
+	Encode(v interface{}) error
+}
+
+type UTMCoord struct {
 	UTMCoord  *cartconvert.UTMCoord
 	UTMString string
 }
 
-type marshalBMN struct {
-	XMLName   xml.Name `json:"-" xml:"payLoad"`
+type BMN struct {
 	BMNCoord  *bmn.BMNCoord
 	BMNString string
 }
 
-type marshalGeoHash struct {
-	XMLName xml.Name `json:"-" xml:"payLoad"`
-	GeoHash string
-}
-
-type marshalLatLong struct {
-	XMLName        xml.Name `json:"-" xml:"payLoad"`
+type LatLong struct {
 	Lat, Long, Fmt string
 	LatLongString  string
 }
 
-func UTMToSerial(w io.Writer, utm *cartconvert.UTMCoord, serialformat string) (err error) {
-	switch serialformat {
-	case JSONFormatSpec:
-		err = json.NewEncoder(w).Encode(&marshalUTMCoord{UTMCoord: utm, UTMString: utm.String()})
-	case XMLFormatSpec:
-		err = xml.Marshal(w, &marshalUTMCoord{UTMCoord: utm, UTMString: utm.String()})
-	}
-	return
+func UTMToSerial(w Encoder, utm *cartconvert.UTMCoord) error {
+	return w.Encode(&UTMCoord{UTMCoord: utm, UTMString: utm.String()})
 }
 
-func GeoHashToSerial(w io.Writer, geohash string, serialformat string) (err error) {
-	switch serialformat {
-	case JSONFormatSpec:
-		err = json.NewEncoder(w).Encode(&marshalGeoHash{GeoHash: geohash})
-	case XMLFormatSpec:
-		err = xml.Marshal(w, &marshalGeoHash{GeoHash: geohash})
-	}
-	return
+func GeoHashToSerial(w Encoder, geohash string) error {
+	return w.Encode(geohash)
 }
 
-func LatLongToSerial(w io.Writer, latlong *cartconvert.PolarCoord, serialformat string, repformat cartconvert.LatLongFormat) (err error) {
+func LatLongToSerial(w Encoder, latlong *cartconvert.PolarCoord, repformat cartconvert.LatLongFormat) (err error) {
 
 	lat, long := cartconvert.LatLongToString(latlong, repformat)
-
-	switch serialformat {
-	case JSONFormatSpec:
-		err = json.NewEncoder(w).Encode(&marshalLatLong{Lat: lat, Long: long, Fmt: repformat.String(), LatLongString: latlong.String()})
-	case XMLFormatSpec:
-		err = xml.Marshal(w, &marshalLatLong{Lat: lat, Long: long, Fmt: repformat.String(), LatLongString: latlong.String()})
-	}
-	return
+	return w.Encode(&LatLong{Lat: lat, Long: long, Fmt: repformat.String(), LatLongString: latlong.String()})
 }
 
-func BMNToSerial(w io.Writer, bmn *bmn.BMNCoord, serialformat string) (err error) {
+func BMNToSerial(w Encoder, bmn *bmn.BMNCoord) error {
 
-	switch serialformat {
-	case JSONFormatSpec:
-		err = json.NewEncoder(w).Encode(&marshalBMN{BMNCoord: bmn, BMNString: bmn.String()})
-	case XMLFormatSpec:
-		err = xml.Marshal(w, &marshalBMN{BMNCoord: bmn, BMNString: bmn.String()})
-	}
-	return
+	return  w.Encode(&BMN{BMNCoord: bmn, BMNString: bmn.String()})
 }
 
 func rootHandler(w http.ResponseWriter, req *http.Request) {
@@ -106,10 +77,11 @@ func rootHandler(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, "Cartography transformation")
 }
 
-type restHandler func(http.ResponseWriter, *http.Request, string, string, string) error
+type restHandler func(Encoder, *http.Request, string, string) error
 
 func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
+	var enc Encoder
 	val := path.Base(req.URL.Path)
 	serialformat := path.Ext(val)
 	val = val[:len(val)-len(serialformat)]
@@ -119,9 +91,11 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	switch serialformat {
 	case JSONFormatSpec, "":
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		enc = json.NewEncoder(w)
 	case XMLFormatSpec:
 		w.Header().Set("Content-Type", "text/xml")
 		io.WriteString(w, xml.Header)
+		enc = xml.NewEncoder(w)
 	default:
 		http.Error(w, fmt.Sprintf("Unsupported serialisation format: '%s'", serialformat), 500)
 		return
@@ -134,27 +108,27 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 	}()
 
-	if err := fn(w, req, val, serialformat, oformat); err != nil {
+	if err := fn(enc, req, val, oformat); err != nil {
 		// might as well panic(err) but maybe treat different
 		http.Error(w, fmt.Sprint(err), 500)
 	}
 }
 
-func serialiser(w http.ResponseWriter, latlong *cartconvert.PolarCoord, oformat, serialformat string) (err error) {
+func serialiser(w Encoder, latlong *cartconvert.PolarCoord, oformat string) (err error) {
 	switch oformat {
 	case OFlatlongdeg:
-		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdms)
+		err = LatLongToSerial(w, latlong, cartconvert.LLFdms)
 	case OFlatlongcomma:
-		err = LatLongToSerial(w, latlong, serialformat, cartconvert.LLFdeg)
+		err = LatLongToSerial(w, latlong, cartconvert.LLFdeg)
 	case OFUTM:
-		err = UTMToSerial(w, cartconvert.LatLongToUTM(latlong), serialformat)
+		err = UTMToSerial(w, cartconvert.LatLongToUTM(latlong))
 	case OFgeohash:
-		err = GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong), serialformat)
+		err = GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong))
 	case OFBMN:
 		var bmnval *bmn.BMNCoord
 		bmnval, err = bmn.WGS84LatLongToBMN(latlong, bmn.BMNZoneDet)
 		if err == nil {
-			err = BMNToSerial(w, bmnval, serialformat)
+			err = BMNToSerial(w, bmnval)
 		}
 	default:
 		err = fmt.Errorf("Unsupported output format: '%s'", oformat)
@@ -162,17 +136,17 @@ func serialiser(w http.ResponseWriter, latlong *cartconvert.PolarCoord, oformat,
 	return
 }
 
-func geohashHandler(w http.ResponseWriter, req *http.Request, geohashstrval, serialformat, oformat string) (err error) {
+func geohashHandler(w Encoder, req *http.Request, geohashstrval, oformat string) (err error) {
 
 	var latlong *cartconvert.PolarCoord
 
 	if latlong, err = cartconvert.GeoHashToLatLong(geohashstrval, nil); err != nil {
 		return
 	}
-	return serialiser(w, latlong, oformat, serialformat)
+	return serialiser(w, latlong, oformat)
 }
 
-func bmnHandler(w http.ResponseWriter, req *http.Request, bmnstrval, serialformat, oformat string) (err error) {
+func bmnHandler(w Encoder, req *http.Request, bmnstrval, oformat string) (err error) {
 	var bmnval *bmn.BMNCoord
 	if bmnval, err = bmn.ABMNToStruct(bmnstrval); err != nil {
 		return
@@ -182,10 +156,10 @@ func bmnHandler(w http.ResponseWriter, req *http.Request, bmnstrval, serialforma
 	if latlong, err = bmn.BMNToWGS84LatLong(bmnval); err != nil {
 		return
 	}
-	return serialiser(w, latlong, oformat, serialformat)
+	return serialiser(w, latlong, oformat)
 }
 
-func latlongHandler(w http.ResponseWriter, req *http.Request, latlongstrval, serialformat, oformat string) (err error) {
+func latlongHandler(w Encoder, req *http.Request, latlongstrval, oformat string) (err error) {
 
 	if len(latlongstrval) > 0 {
 		return fmt.Errorf("Latlong doesn't accept an input value. Use parameters instead")
@@ -213,10 +187,10 @@ func latlongHandler(w http.ResponseWriter, req *http.Request, latlongstrval, ser
 
 	latlong := &cartconvert.PolarCoord{Latitude: lat, Longitude: long, El: cartconvert.DefaultEllipsoid}
 
-	return serialiser(w, latlong, oformat, serialformat)
+	return serialiser(w, latlong, oformat)
 }
 
-func utmHandler(w http.ResponseWriter, req *http.Request, utmstrval, serialformat, oformat string) (err error) {
+func utmHandler(w Encoder, req *http.Request, utmstrval, oformat string) (err error) {
 	var utmval *cartconvert.UTMCoord
 	if utmval, err = cartconvert.AUTMToStruct(utmstrval, nil); err != nil {
 		return
@@ -226,7 +200,7 @@ func utmHandler(w http.ResponseWriter, req *http.Request, utmstrval, serialforma
 	if latlong, err = cartconvert.UTMToLatLong(utmval); err != nil {
 		return
 	}
-	return serialiser(w, latlong, oformat, serialformat)
+	return serialiser(w, latlong, oformat)
 }
 
 func main() {
