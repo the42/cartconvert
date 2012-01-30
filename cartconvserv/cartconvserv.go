@@ -69,7 +69,7 @@ func LatLongToSerial(w Encoder, latlong *cartconvert.PolarCoord, repformat cartc
 
 func BMNToSerial(w Encoder, bmn *bmn.BMNCoord) error {
 
-	return  w.Encode(&BMN{BMNCoord: bmn, BMNString: bmn.String()})
+	return w.Encode(&BMN{BMNCoord: bmn, BMNString: bmn.String()})
 }
 
 func rootHandler(w http.ResponseWriter, req *http.Request) {

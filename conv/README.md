@@ -1,15 +1,13 @@
-conv - Konvertiert geografische Daten zu Längen/Breiten
-=======================================================
+conv - converts geographic bearings into latitude and longitude
+===============================================================
 
-Funktion
---------
+Functionality
+-------------
 
-conv liest geografische Daten von stdin, konvertiert diese
-Daten, und schreibt das Ergebnis nach stdout. Fehler werden nach stderr
-geschrieben.
+conv reads geographic bearings from stdin, converting according to paramters and writting the result to stdout. Errors get written to stderr.
 
-Verwendung
-----------
+Usage
+-----
 
     Usage of ./conv:
       -if="osgb36": specify input format. Possible values are:  bmn  osgb36 
@@ -79,24 +77,25 @@ conv -if="bmn" -of="geohash" < infile.txt
     u26negymp4rn
 
 
-Eingabeformat OSGB36 (UK)
+Format OSGB36 (UK)
 -------------------------
 
-Das OSGB36-Eingabeformat muss diese Konvention erfüllen:
+The OSGB36-entry format has to fulfil these conventions:
 
 Z[Z][dddddnnnnn]
 
-Z ist die bis zu zwei Stellen lange Zonenspezifikation.
-d ist der bis zu fünf Stellen lange Rechtswert
-n ist der bis zu fünf Stellen lange Höhenwert
+Z Zone identifier, maximum two characters
+d right value, upto five digits
+n height value, upto five digits
 
-z.B.: "osgtest.dat"
+eg: "osgbtest.dat"
 
-    SV		Konvertiert den linken, unteren Punkt bei Zone SV
+    SV		converts the leftmost, lower point of zone SV
     SV11		
     NN166712
     NN000500
     HU396753
+
 
 Installation
 ------------
@@ -104,9 +103,7 @@ Installation
   go install github.com/the42/conv
 
 
-Lizenz
+License
 -------
 
-Dieses Programm und der Quellcode wird unter der [Simplified BSD
-License](http://www.freebsd.org/copyright/freebsd-license.html) Lizenz zur
-Verfügung gestellt. Siehe "LICENSE"
+See the file LICENSE of the root package.

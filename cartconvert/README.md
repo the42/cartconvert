@@ -40,12 +40,6 @@ Usage
 
 All features provided by the package are covered by test cases.
 
-License
--------
-
-The package is released under the [Simplified BSD
-License](http://www.freebsd.org/copyright/freebsd-license.html) See file
-"LICENSE"
 
 Room for improvement
 ---------------------

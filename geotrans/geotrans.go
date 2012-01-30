@@ -1,10 +1,7 @@
 package main
 
 import (
-	// "github.com/the42/cartconvert"
-	// "io"
 	"net/http"
-	// "old/template"
 )
 
 // Better read it from an INI-File
