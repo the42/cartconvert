@@ -84,9 +84,9 @@ The OSGB36-entry format has to fulfil these conventions:
 
 Z[Z][dddddnnnnn]
 
-  Z Zone identifier, maximum two characters
-  d right value, upto five digits
-  n height value, upto five digits
+    Z Zone identifier, maximum two characters
+    d right value, upto five digits
+    n height value, upto five digits
 
 eg: "osgbtest.dat"
 
