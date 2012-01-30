@@ -33,7 +33,7 @@ The package provides the following functionality:
 Installation
 ------------
 
-  go install github.com/the42/cartconvert
+  go install github.com/the42/cartconvert/cartconvert
 
 Usage
 -----
@@ -60,10 +60,4 @@ Testing
 
 To run the tests:
 
-  go test github.com/the42/cartconvert
-
-  go test github.com/the42/cartconvert/bmn
-
-  go test github.com/the42/cartconvert/osgb36
-
-  go test github.com/the42/cartconvert/lv03p
+  go test github.com/the42/cartconvert/cartconvert/...

@@ -15,7 +15,6 @@ and uses lat0 at Hierro (canary islands), which makes transformations tedious.
 For more information see
 
 DE: [http://www.topsoft.at](http://www.topsoft.at/pstrainer/entwicklung/algorithm/karto/oek/austria_oek.htm#bmn)
-
 EN: [http://www.asprs.org](http://www.asprs.org/resources/grids/03-2004-austria.pdf)
 
 Usage is covered by test cases. For installation and further info navigate to the parent package.
