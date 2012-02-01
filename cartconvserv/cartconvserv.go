@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	BMNHandler     = "/bmn/"
-	GeoHashHandler = "/geohash/"
-	LatLongHandler = "/latlong/"
-	UTMHandler     = "/utm/"
+	BMNHandler     = "bmn/"
+	GeoHashHandler = "geohash/"
+	LatLongHandler = "latlong/"
+	UTMHandler     = "utm/"
 
 	JSONFormatSpec = ".json"
 	XMLFormatSpec  = ".xml"
@@ -68,7 +68,6 @@ func LatLongToSerial(w Encoder, latlong *cartconvert.PolarCoord, repformat cartc
 }
 
 func BMNToSerial(w Encoder, bmn *bmn.BMNCoord) error {
-
 	return w.Encode(&BMN{BMNCoord: bmn, BMNString: bmn.String()})
 }
 
@@ -203,14 +202,20 @@ func utmHandler(w Encoder, req *http.Request, utmstrval, oformat string) (err er
 	return serialiser(w, latlong, oformat)
 }
 
-func main() {
+type config struct {
+	APIRoot string
+	Binding string
+}
+
+var conf *config
+
+func init() {
+
+	apiroot := apiroot()
 
 	http.HandleFunc("/", rootHandler)
-	http.Handle(BMNHandler, restHandler(bmnHandler))
-	http.Handle(GeoHashHandler, restHandler(geohashHandler))
-	http.Handle(LatLongHandler, restHandler(latlongHandler))
-	http.Handle(UTMHandler, restHandler(utmHandler))
-
-	// TODO: Read from config file
-	http.ListenAndServe(":1111", nil)
+	http.Handle(apiroot+BMNHandler, restHandler(bmnHandler))
+	http.Handle(apiroot+GeoHashHandler, restHandler(geohashHandler))
+	http.Handle(apiroot+LatLongHandler, restHandler(latlongHandler))
+	http.Handle(apiroot+UTMHandler, restHandler(utmHandler))
 }
