@@ -1,0 +1,4 @@
+{
+        "APIRoot": "/api/",
+        "Binding": ":1111"
+}
