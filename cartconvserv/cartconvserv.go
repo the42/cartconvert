@@ -202,13 +202,6 @@ func utmHandler(w Encoder, req *http.Request, utmstrval, oformat string) (err er
 	return serialiser(w, latlong, oformat)
 }
 
-type config struct {
-	APIRoot string
-	Binding string
-}
-
-var conf *config
-
 func init() {
 
 	apiroot := apiroot()
