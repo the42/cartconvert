@@ -38,13 +38,17 @@ type Encoder interface {
 	Encode(v interface{}) error
 }
 
+type GeoHash struct {
+	GeoHash string
+}
+
 type UTMCoord struct {
-	UTMCoord  *cartconvert.UTMCoord
+	*cartconvert.UTMCoord
 	UTMString string
 }
 
 type BMN struct {
-	BMNCoord  *bmn.BMNCoord
+	*bmn.BMNCoord
 	BMNString string
 }
 
@@ -58,7 +62,7 @@ func UTMToSerial(w Encoder, utm *cartconvert.UTMCoord) error {
 }
 
 func GeoHashToSerial(w Encoder, geohash string) error {
-	return w.Encode(geohash)
+	return w.Encode(&GeoHash{GeoHash: geohash})
 }
 
 func LatLongToSerial(w Encoder, latlong *cartconvert.PolarCoord, repformat cartconvert.LatLongFormat) (err error) {
