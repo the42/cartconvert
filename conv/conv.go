@@ -1,4 +1,4 @@
-// Copyright 2011 Johann Höchtl. All rights reserved.
+// Copyright 2011,2012 Johann Höchtl. All rights reserved.
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
