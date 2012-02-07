@@ -6,6 +6,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -36,6 +37,10 @@ const (
 
 type Encoder interface {
 	Encode(v interface{}) error
+}
+
+type Error struct {
+	Error string
 }
 
 type GeoHash struct {
@@ -90,15 +95,15 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	val = val[:len(val)-len(serialformat)]
 
 	oformat := req.URL.Query().Get(OutputFormatSpec)
+	buf := new(bytes.Buffer)
 
 	switch serialformat {
 	case JSONFormatSpec, "":
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		enc = json.NewEncoder(w)
+		enc = json.NewEncoder(buf)
 	case XMLFormatSpec:
 		w.Header().Set("Content-Type", "text/xml")
-		io.WriteString(w, xml.Header)
-		enc = xml.NewEncoder(w)
+		enc = xml.NewEncoder(buf)
 	default:
 		http.Error(w, fmt.Sprintf("Unsupported serialisation format: '%s'", serialformat), 500)
 		return
@@ -114,6 +119,9 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err := fn(enc, req, val, oformat); err != nil {
 		// might as well panic(err) but maybe treat different
 		http.Error(w, fmt.Sprint(err), 500)
+	} else {
+		// The conversion went fine, write to the response stream
+		buf.WriteTo(w)
 	}
 }
 
