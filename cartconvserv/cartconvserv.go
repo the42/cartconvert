@@ -48,12 +48,12 @@ type GeoHash struct {
 }
 
 type UTMCoord struct {
-	*cartconvert.UTMCoord
+	UTMCoord *cartconvert.UTMCoord
 	UTMString string
 }
 
 type BMN struct {
-	*bmn.BMNCoord
+	BMNCoord *bmn.BMNCoord
 	BMNString string
 }
 
@@ -117,8 +117,11 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}()
 
 	if err := fn(enc, req, val, oformat); err != nil {
-		// might as well panic(err) but maybe treat different
-		http.Error(w, fmt.Sprint(err), 500)
+		// might as well panic(err) but we add some more info
+		// we  serialize the error here in the chosen encoding
+		enc.Encode(&Error{Error: fmt.Sprint(err)})
+		w.WriteHeader(500)
+		fmt.Fprintln(w, buf.String())
 	} else {
 		// The conversion went fine, write to the response stream
 		buf.WriteTo(w)
