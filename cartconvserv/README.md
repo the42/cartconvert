@@ -1,5 +1,5 @@
-cartconvserv - A RESTFul service for coordinate transformation
-==============================================================
+cartconvserv - A RESTFul service for coordinate transformations
+===============================================================
 
 Purpose
 -------
@@ -23,8 +23,7 @@ UTM - Conversions
 
 Base Url for UTM operations:
    
-URL/APIRoot/utm/<VALUE>[.xml|.json]?outputformat=<utm|geohash|latlongdeg|
-latlongcomma|bmn>
+    URL/APIRoot/utm/<VALUE>[.xml|.json]?outputformat=<utm|geohash|latlongdeg|latlongcomma|bmn>
 
 Value is a coordinate in UTM representation. The reference ellipsoid is always
 the WGS84Ellipsoid.
@@ -47,8 +46,7 @@ The value to the parameter "outputformat" is either
 * bmn: Serialization of the value as BMN-coordinate (see below)
 
 ### Examples
-#### Output requested as latitude and longitude in [arc
-degrees](http://en.wikipedia.org/wiki/Minute_of_arc)
+#### Output requested as latitude and longitude in [arc degrees](http://en.wikipedia.org/wiki/Minute_of_arc)
 
 Call
     http://localhost:1111/api/utm/17 630084 4833438.xml?outputformat=latlongdeg
@@ -73,18 +71,18 @@ Output serialized as JSON:
      "LatLongString":"lat: 43.642562°, long: -79.387143°"}
 
 * Lat, Long: Latitude, Longitude of converted coordinate, in degrees. Full
-degrees are separated by "°" from the minutes, which are separated by "'" from
-the seconds, which are postfixed by "''". All zero minutes or seconds are
+degrees are separated by "°" from the minutes, which are separated by " ' " from
+the seconds, which are postfixed by " '' ". All zero minutes or seconds are
 omitted.
 * Fmt: For serialization as arc seconds and arc minutes, the string "LLFdms"
 denotes, how "Lat" and "Long" shall be interpreted.
 * LatLongString: A canonical representation of latitude and longitude as decimal
 degrees.
 
-#### Output requested as latitude and longitude in
-[degrees](http://en.wikipedia.org/wiki/Degree_(angle))
+#### Output requested as latitude and longitude in [degrees](http://en.wikipedia.org/wiki/Degree_(angle))
 
 Call
+
     http://localhost:1111/api/utm/17T 630084 4833438.xml?outputformat=latlongcomma
 
 Output serialized as XML:
@@ -102,6 +100,7 @@ Output serialized as XML:
 #### Output requested as [Geohash](http://en.wikipedia.org/wiki/Geohash)
 
 Call
+
     http://localhost:1111/api/utm/17T 630084 4833438.json?outputformat=geohash
 
 Output serialized as JSON:
@@ -109,6 +108,7 @@ Output serialized as JSON:
     {"GeoHash":"dpz838bh37pv"}
 
 Call
+
     http://localhost:1111/api/utm/17T 630084 4833438.xml?outputformat=geohash
 
 Output serialized as XML:
@@ -117,11 +117,11 @@ Output serialized as XML:
       <GeoHash>dpz838bh37pv</GeoHash>
     </GeoHash>
 
-#### Output requested as
-[BMN](http://homepage.ntlworld.com/anton.helm/bmn_mgi.html)
-, [Bundesmeldenetz](http://de.wikipedia.org/wiki/Bundesmeldenetz)
+#### Output requested as [BMN](http://homepage.ntlworld.com/anton.helm/bmn_mgi.html)
+[Bundesmeldenetz](http://de.wikipedia.org/wiki/Bundesmeldenetz)
 
 Call
+
     http://localhost:1111/api/utm/17T 630084 4833438.xml?outputformat=bmn
 
 Output
@@ -146,6 +146,7 @@ serialized in the requested encoding, unless the serialization itself fails. In
 that case the error is returned text/plain encoded. Valid calls would be:
 
 Call
+
     http://localhost:1111/api/utm/33T 442552 5268825.xml?outputformat=bmn
 
 Output serialized as XML:
@@ -163,10 +164,12 @@ Output serialized as XML:
       <BMNString>M31 517966 270555</BMNString>
     </BMN>
 
-The reference ellipsoid of a BMN bearing is always the [Bessel1841MGI](http://de.wikipedia.org/wiki/Geod%C3%A4tisches_Datum#Deutschland_und_.C3.96sterreich) ellipsoid,
-which requires a helmert transformation from WGS84 to Bessel.
+The reference ellipsoid of a BMN bearing is always the
+[Bessel1841MGI](http://de.wikipedia.org/wiki/Geod%C3%A4tisches_Datum#Deutschland_und_.C3.96sterreich)
+ellipsoid, which requires a helmert transformation from WGS84 to Bessel.
 
 Call
+
     http://localhost:1111/api/utm/33T 442552 5268825.json?outputformat=bmn
 
 Output serialized as JSON:
@@ -184,8 +187,7 @@ All following conversions have the same output specifier as described by the UTM
 
 Base Url for Geohash operations:
    
-URL/APIRoot/geohash/<VALUE>[.xml|.json]?outputformat=<utm|geohash|latlongdeg|
-latlongcomma|bmn>
+    URL/APIRoot/geohash/<VALUE>[.xml|.json]?outputformat=<utm|geohash|latlongdeg|latlongcomma|bmn>
 
 Value is a coordinate in Geohash representation. The reference ellipsoid is always
 the WGS84Ellipsoid.
@@ -196,6 +198,7 @@ Examples of valid input values:
     ezs42
 
 Call
+
     http://localhost:1111/api/geohash/u4pruydqqvj.xml?outputformat=latlongdeg
 
 Output serialized as XML:
@@ -208,6 +211,7 @@ Output serialized as XML:
     </LatLong>
 
 Call
+
     http://localhost:1111/api/geohash/ezs42.json?outputformat=latlongcomma
 
 Output serialized as JSON:
