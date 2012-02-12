@@ -1,4 +1,4 @@
-// Copyright 2011 Johann Höchtl. All rights reserved.
+// Copyright 2011,2012 Johann Höchtl. All rights reserved.
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
@@ -68,15 +68,10 @@ func main() {
 	of = ofOptions[strings.ToLower(ofcmdlinespec)]
 	ifm = ifOptions[strings.ToLower(ifcmdlinespec)]
 
-	liner, err := bufio.NewReaderSize(os.Stdin, 100)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "conv: %s (exiting)\n", err)
-		os.Exit(3)
-	}
-
+	reader := bufio.NewReaderSize(os.Stdin, 100)
 	longline := false
 
-	for data, prefix, err := liner.ReadLine(); err != io.EOF; data, prefix, err = liner.ReadLine() {
+	for data, prefix, err := reader.ReadLine(); err != io.EOF; data, prefix, err = reader.ReadLine() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "conv %d: %s\n", lines, err)
 			continue

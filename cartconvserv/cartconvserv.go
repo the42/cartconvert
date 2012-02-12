@@ -1,4 +1,4 @@
-// Copyright 2011 Johann Höchtl. All rights reserved.
+// Copyright 2011,2012 Johann Höchtl. All rights reserved.
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
@@ -6,6 +6,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -38,13 +39,21 @@ type Encoder interface {
 	Encode(v interface{}) error
 }
 
+type Error struct {
+	Error string
+}
+
+type GeoHash struct {
+	GeoHash string
+}
+
 type UTMCoord struct {
-	UTMCoord  *cartconvert.UTMCoord
+	UTMCoord *cartconvert.UTMCoord
 	UTMString string
 }
 
 type BMN struct {
-	BMNCoord  *bmn.BMNCoord
+	BMNCoord *bmn.BMNCoord
 	BMNString string
 }
 
@@ -58,7 +67,7 @@ func UTMToSerial(w Encoder, utm *cartconvert.UTMCoord) error {
 }
 
 func GeoHashToSerial(w Encoder, geohash string) error {
-	return w.Encode(geohash)
+	return w.Encode(&GeoHash{GeoHash: geohash})
 }
 
 func LatLongToSerial(w Encoder, latlong *cartconvert.PolarCoord, repformat cartconvert.LatLongFormat) (err error) {
@@ -86,15 +95,15 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	val = val[:len(val)-len(serialformat)]
 
 	oformat := req.URL.Query().Get(OutputFormatSpec)
+	buf := new(bytes.Buffer)
 
 	switch serialformat {
 	case JSONFormatSpec, "":
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		enc = json.NewEncoder(w)
+		enc = json.NewEncoder(buf)
 	case XMLFormatSpec:
 		w.Header().Set("Content-Type", "text/xml")
-		io.WriteString(w, xml.Header)
-		enc = xml.NewEncoder(w)
+		enc = xml.NewEncoder(buf)
 	default:
 		http.Error(w, fmt.Sprintf("Unsupported serialisation format: '%s'", serialformat), 500)
 		return
@@ -108,8 +117,14 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}()
 
 	if err := fn(enc, req, val, oformat); err != nil {
-		// might as well panic(err) but maybe treat different
-		http.Error(w, fmt.Sprint(err), 500)
+		// might as well panic(err) but we add some more info
+		// we  serialize the error here in the chosen encoding
+		enc.Encode(&Error{Error: fmt.Sprint(err)})
+		w.WriteHeader(500)
+		fmt.Fprintln(w, buf.String())
+	} else {
+		// The conversion went fine, write to the response stream
+		buf.WriteTo(w)
 	}
 }
 
