@@ -121,7 +121,7 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		// we  serialize the error here in the chosen encoding
 		enc.Encode(&Error{Error: fmt.Sprint(err)})
 		w.WriteHeader(500)
-		fmt.Fprintln(w, buf.String())
+		buf.WriteTo(w)
 	} else {
 		// The conversion went fine, write to the response stream
 		buf.WriteTo(w)
