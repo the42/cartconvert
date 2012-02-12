@@ -14,6 +14,13 @@ import (
 	"os"
 )
 
+type config struct {
+	APIRoot string
+	Binding string
+}
+
+var conf *config
+
 func readConfig(conf *config) {
 	b, err := ioutil.ReadFile("config.json")
 	if err != nil {

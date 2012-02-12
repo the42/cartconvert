@@ -1,9 +1,0 @@
-_test/
-_obj/
-_*
-bin/
-*.exe
-conv/conv
-cartconvserv/cartconvserv
-geotrans/geotrans
-templtest/templtest
