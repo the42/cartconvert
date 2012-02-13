@@ -17,15 +17,22 @@ import (
 	"path"
 )
 
+// restful methods, signaling the http handlers
 const (
 	BMNHandler     = "bmn/"
 	GeoHashHandler = "geohash/"
 	LatLongHandler = "latlong/"
 	UTMHandler     = "utm/"
+)
 
+// supported serialization formats
+const (
 	JSONFormatSpec = ".json"
 	XMLFormatSpec  = ".xml"
+)
 
+// supported representation/transformation formats
+const (
 	OutputFormatSpec = "outputformat"
 
 	OFUTM          = "utm"
@@ -35,114 +42,77 @@ const (
 	OFBMN          = "bmn"
 )
 
+// Interface type for transparent XML / JSON Encoding
 type Encoder interface {
 	Encode(v interface{}) error
 }
 
-type Error struct {
-	Error string
-}
+// --------------------------------------------------------------------
+// Serialization struct definitions
+type (
+	// Errors will be put back to the caller in the requested encoding, encapsulated in an error struct
+	Error struct {
+		Error string
+	}
 
-type GeoHash struct {
-	GeoHash string
-}
+	LatLong struct {
+		Lat, Long, Fmt string
+		LatLongString  string
+	}
 
-type UTMCoord struct {
-	UTMCoord *cartconvert.UTMCoord
-	UTMString string
-}
+	GeoHash struct {
+		GeoHash string
+	}
 
-type BMN struct {
-	BMNCoord *bmn.BMNCoord
-	BMNString string
-}
+	UTMCoord struct {
+		UTMCoord  *cartconvert.UTMCoord // MIND: UTMCoord is named, because XML and JSON serialization behave differently. An unnamed struct element will NOT be serialized by the XML encoder
+		UTMString string
+	}
 
-type LatLong struct {
-	Lat, Long, Fmt string
-	LatLongString  string
-}
+	BMN struct {
+		BMNCoord  *bmn.BMNCoord // MIND: BMNCoord is named, because XML and JSON serialization behave differently. An unnamed struct element will NOT be serialized by the XML encoder
+		BMNString string
+	}
+)
 
-func UTMToSerial(w Encoder, utm *cartconvert.UTMCoord) error {
-	return w.Encode(&UTMCoord{UTMCoord: utm, UTMString: utm.String()})
-}
+// --------------------------------------------------------------------
+// Serialisation helper functions. The coordinates will be serialized according to the encoder in enc
+//
 
-func GeoHashToSerial(w Encoder, geohash string) error {
-	return w.Encode(&GeoHash{GeoHash: geohash})
-}
-
-func LatLongToSerial(w Encoder, latlong *cartconvert.PolarCoord, repformat cartconvert.LatLongFormat) (err error) {
+func latlongToSerial(enc Encoder, latlong *cartconvert.PolarCoord, repformat cartconvert.LatLongFormat) (err error) {
 
 	lat, long := cartconvert.LatLongToString(latlong, repformat)
-	return w.Encode(&LatLong{Lat: lat, Long: long, Fmt: repformat.String(), LatLongString: latlong.String()})
+	return enc.Encode(&LatLong{Lat: lat, Long: long, Fmt: repformat.String(), LatLongString: latlong.String()})
 }
 
-func BMNToSerial(w Encoder, bmn *bmn.BMNCoord) error {
-	return w.Encode(&BMN{BMNCoord: bmn, BMNString: bmn.String()})
+func geoHashToSerial(enc Encoder, geohash string) error {
+	return enc.Encode(&GeoHash{GeoHash: geohash})
 }
 
-func rootHandler(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	io.WriteString(w, "Cartography transformation")
+func utmToSerial(enc Encoder, utm *cartconvert.UTMCoord) error {
+	return enc.Encode(&UTMCoord{UTMCoord: utm, UTMString: utm.String()})
 }
 
-type restHandler func(Encoder, *http.Request, string, string) error
-
-func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-
-	var enc Encoder
-	val := path.Base(req.URL.Path)
-	serialformat := path.Ext(val)
-	val = val[:len(val)-len(serialformat)]
-
-	oformat := req.URL.Query().Get(OutputFormatSpec)
-	buf := new(bytes.Buffer)
-
-	switch serialformat {
-	case JSONFormatSpec, "":
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		enc = json.NewEncoder(buf)
-	case XMLFormatSpec:
-		w.Header().Set("Content-Type", "text/xml")
-		enc = xml.NewEncoder(buf)
-	default:
-		http.Error(w, fmt.Sprintf("Unsupported serialisation format: '%s'", serialformat), 500)
-		return
-	}
-
-	// Recover from panic by setting http error 500 and letting the user know the reason
-	defer func() {
-		if err := recover(); err != nil {
-			http.Error(w, fmt.Sprint(err), 500)
-		}
-	}()
-
-	if err := fn(enc, req, val, oformat); err != nil {
-		// might as well panic(err) but we add some more info
-		// we  serialize the error here in the chosen encoding
-		enc.Encode(&Error{Error: fmt.Sprint(err)})
-		w.WriteHeader(500)
-		buf.WriteTo(w)
-	} else {
-		// The conversion went fine, write to the response stream
-		buf.WriteTo(w)
-	}
+func bmnToSerial(enc Encoder, bmn *bmn.BMNCoord) error {
+	return enc.Encode(&BMN{BMNCoord: bmn, BMNString: bmn.String()})
 }
 
-func serialiser(w Encoder, latlong *cartconvert.PolarCoord, oformat string) (err error) {
+// serializer gets called by the respective handler methods to perform the serialization in the requested output representation
+func serialize(enc Encoder, latlong *cartconvert.PolarCoord, oformat string) (err error) {
 	switch oformat {
 	case OFlatlongdeg:
-		err = LatLongToSerial(w, latlong, cartconvert.LLFdms)
+		err = latlongToSerial(enc, latlong, cartconvert.LLFdms)
 	case OFlatlongcomma:
-		err = LatLongToSerial(w, latlong, cartconvert.LLFdeg)
+		err = latlongToSerial(enc, latlong, cartconvert.LLFdeg)
 	case OFUTM:
-		err = UTMToSerial(w, cartconvert.LatLongToUTM(latlong))
+		err = utmToSerial(enc, cartconvert.LatLongToUTM(latlong))
 	case OFgeohash:
-		err = GeoHashToSerial(w, cartconvert.LatLongToGeoHash(latlong))
+		err = geoHashToSerial(enc, cartconvert.LatLongToGeoHash(latlong))
 	case OFBMN:
 		var bmnval *bmn.BMNCoord
 		bmnval, err = bmn.WGS84LatLongToBMN(latlong, bmn.BMNZoneDet)
 		if err == nil {
-			err = BMNToSerial(w, bmnval)
+			err = bmnToSerial(enc, bmnval)
 		}
 	default:
 		err = fmt.Errorf("Unsupported output format: '%s'", oformat)
@@ -150,17 +120,21 @@ func serialiser(w Encoder, latlong *cartconvert.PolarCoord, oformat string) (err
 	return
 }
 
-func geohashHandler(w Encoder, req *http.Request, geohashstrval, oformat string) (err error) {
+// --------------------------------------------------------------------
+// http handler methods corresponding to the restful methods
+//
+
+func geohashHandler(enc Encoder, req *http.Request, geohashstrval, oformat string) (err error) {
 
 	var latlong *cartconvert.PolarCoord
 
 	if latlong, err = cartconvert.GeoHashToLatLong(geohashstrval, nil); err != nil {
 		return
 	}
-	return serialiser(w, latlong, oformat)
+	return serialize(enc, latlong, oformat)
 }
 
-func bmnHandler(w Encoder, req *http.Request, bmnstrval, oformat string) (err error) {
+func bmnHandler(enc Encoder, req *http.Request, bmnstrval, oformat string) (err error) {
 	var bmnval *bmn.BMNCoord
 	if bmnval, err = bmn.ABMNToStruct(bmnstrval); err != nil {
 		return
@@ -170,10 +144,10 @@ func bmnHandler(w Encoder, req *http.Request, bmnstrval, oformat string) (err er
 	if latlong, err = bmn.BMNToWGS84LatLong(bmnval); err != nil {
 		return
 	}
-	return serialiser(w, latlong, oformat)
+	return serialize(enc, latlong, oformat)
 }
 
-func latlongHandler(w Encoder, req *http.Request, latlongstrval, oformat string) (err error) {
+func latlongHandler(enc Encoder, req *http.Request, latlongstrval, oformat string) (err error) {
 
 	if len(latlongstrval) > 0 {
 		return fmt.Errorf("Latlong doesn't accept an input value. Use parameters instead")
@@ -200,11 +174,10 @@ func latlongHandler(w Encoder, req *http.Request, latlongstrval, oformat string)
 	}
 
 	latlong := &cartconvert.PolarCoord{Latitude: lat, Longitude: long, El: cartconvert.DefaultEllipsoid}
-
-	return serialiser(w, latlong, oformat)
+	return serialize(enc, latlong, oformat)
 }
 
-func utmHandler(w Encoder, req *http.Request, utmstrval, oformat string) (err error) {
+func utmHandler(enc Encoder, req *http.Request, utmstrval, oformat string) (err error) {
 	var utmval *cartconvert.UTMCoord
 	if utmval, err = cartconvert.AUTMToStruct(utmstrval, nil); err != nil {
 		return
@@ -214,7 +187,65 @@ func utmHandler(w Encoder, req *http.Request, utmstrval, oformat string) (err er
 	if latlong, err = cartconvert.UTMToLatLong(utmval); err != nil {
 		return
 	}
-	return serialiser(w, latlong, oformat)
+	return serialize(enc, latlong, oformat)
+}
+
+// closure of the restful methods
+//    enc: requested encoding scheme
+//    req: calling context
+//    value: coordinate value to be transformed
+//    oformat: requested transformation representation, eg. utm, geohash
+type restHandler func(enc Encoder, req *http.Request, value, oformat string) error
+
+func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+
+	// enc keeps the requested encoding scheme as requested by content negotiation
+	var enc Encoder
+	// allocate buffer to which the http stream is written, until it gets responded. By doing so we keep the chance to trap errors and respond them to the caller
+	buf := new(bytes.Buffer)
+
+	// val: coordinate value
+	// serialformat: serialization format
+	// oformat: requested output format
+	val := path.Base(req.URL.Path)
+	serialformat := path.Ext(val)
+	val = val[:len(val)-len(serialformat)]
+	oformat := req.URL.Query().Get(OutputFormatSpec)
+
+	switch serialformat {
+	case JSONFormatSpec, "":
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		enc = json.NewEncoder(buf)
+	case XMLFormatSpec:
+		w.Header().Set("Content-Type", "text/xml")
+		enc = xml.NewEncoder(buf)
+	default:
+		http.Error(w, fmt.Sprintf("Unsupported serialization format: '%s'", serialformat), 500)
+		return
+	}
+
+	// Recover from panic by setting http error 500 and letting the user know the reason
+	defer func() {
+		if err := recover(); err != nil {
+			http.Error(w, fmt.Sprint(err), 500)
+		}
+	}()
+
+	if err := fn(enc, req, val, oformat); err != nil {
+		// might as well panic(err) but we add some more info
+		// we  serialize the error here in the chosen encoding
+		enc.Encode(&Error{Error: fmt.Sprint(err)})
+		w.WriteHeader(500)
+		buf.WriteTo(w)
+	} else {
+		// The conversion went fine, write to the response stream
+		buf.WriteTo(w)
+	}
+}
+
+func rootHandler(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	io.WriteString(w, "Cartography transformation")
 }
 
 func init() {
