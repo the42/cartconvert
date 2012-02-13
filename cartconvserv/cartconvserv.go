@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/the42/cartconvert"
 	"github.com/the42/cartconvert/bmn"
+	"github.com/the42/cartconvert/osgb36"
 	"io"
 	"net/http"
 	"path"
@@ -19,10 +20,11 @@ import (
 
 // restful methods, signaling the http handlers
 const (
-	BMNHandler     = "bmn/"
-	GeoHashHandler = "geohash/"
 	LatLongHandler = "latlong/"
+	GeoHashHandler = "geohash/"
 	UTMHandler     = "utm/"
+	BMNHandler     = "bmn/"
+	OSGBHandler    = "osgb/"
 )
 
 // supported serialization formats
@@ -35,11 +37,12 @@ const (
 const (
 	OutputFormatSpec = "outputformat"
 
-	OFUTM          = "utm"
-	OFgeohash      = "geohash"
 	OFlatlongdeg   = "latlongdeg"
 	OFlatlongcomma = "latlongcomma"
+	OFgeohash      = "geohash"
+	OFUTM          = "utm"
 	OFBMN          = "bmn"
+	OFOSGB         = "osgb"
 )
 
 // Interface type for transparent XML / JSON Encoding
@@ -73,10 +76,15 @@ type (
 		BMNCoord  *bmn.BMNCoord // MIND: BMNCoord is named, because XML and JSON serialization behave differently. An unnamed struct element will NOT be serialized by the XML encoder
 		BMNString string
 	}
+
+	OSGB36 struct {
+		OSGB36Coord  *osgb36.OSGB36Coord // MIND: OSGB36Coord is named, because XML and JSON serialization behave differently. An unnamed struct element will NOT be serialized by the XML encoder
+		OSGB36String string
+	}
 )
 
 // --------------------------------------------------------------------
-// Serialisation helper functions. The coordinates will be serialized according to the encoder in enc
+// Serialization helper functions. The coordinates will be serialized according to the encoder in enc
 //
 
 func latlongToSerial(enc Encoder, latlong *cartconvert.PolarCoord, repformat cartconvert.LatLongFormat) (err error) {
@@ -97,22 +105,32 @@ func bmnToSerial(enc Encoder, bmn *bmn.BMNCoord) error {
 	return enc.Encode(&BMN{BMNCoord: bmn, BMNString: bmn.String()})
 }
 
-// serializer gets called by the respective handler methods to perform the serialization in the requested output representation
+func osgb36ToSerial(enc Encoder, osgb36 *osgb36.OSGB36Coord) error {
+	return enc.Encode(&OSGB36{OSGB36Coord: osgb36, OSGB36String: osgb36.String()})
+}
+
+// serialize gets called by the respective handler methods to perform the serialization in the requested output representation
 func serialize(enc Encoder, latlong *cartconvert.PolarCoord, oformat string) (err error) {
 	switch oformat {
 	case OFlatlongdeg:
 		err = latlongToSerial(enc, latlong, cartconvert.LLFdms)
 	case OFlatlongcomma:
 		err = latlongToSerial(enc, latlong, cartconvert.LLFdeg)
-	case OFUTM:
-		err = utmToSerial(enc, cartconvert.LatLongToUTM(latlong))
 	case OFgeohash:
 		err = geoHashToSerial(enc, cartconvert.LatLongToGeoHash(latlong))
+	case OFUTM:
+		err = utmToSerial(enc, cartconvert.LatLongToUTM(latlong))
 	case OFBMN:
 		var bmnval *bmn.BMNCoord
 		bmnval, err = bmn.WGS84LatLongToBMN(latlong, bmn.BMNZoneDet)
 		if err == nil {
 			err = bmnToSerial(enc, bmnval)
+		}
+	case OFOSGB:
+		var osgb36val *osgb36.OSGB36Coord
+		osgb36val, err = osgb36.WGS84LatLongToOSGB36(latlong)
+		if err == nil {
+			err = osgb36ToSerial(enc, osgb36val)
 		}
 	default:
 		err = fmt.Errorf("Unsupported output format: '%s'", oformat)
@@ -124,33 +142,10 @@ func serialize(enc Encoder, latlong *cartconvert.PolarCoord, oformat string) (er
 // http handler methods corresponding to the restful methods
 //
 
-func geohashHandler(enc Encoder, req *http.Request, geohashstrval, oformat string) (err error) {
-
-	var latlong *cartconvert.PolarCoord
-
-	if latlong, err = cartconvert.GeoHashToLatLong(geohashstrval, nil); err != nil {
-		return
-	}
-	return serialize(enc, latlong, oformat)
-}
-
-func bmnHandler(enc Encoder, req *http.Request, bmnstrval, oformat string) (err error) {
-	var bmnval *bmn.BMNCoord
-	if bmnval, err = bmn.ABMNToStruct(bmnstrval); err != nil {
-		return
-	}
-
-	var latlong *cartconvert.PolarCoord
-	if latlong, err = bmn.BMNToWGS84LatLong(bmnval); err != nil {
-		return
-	}
-	return serialize(enc, latlong, oformat)
-}
-
 func latlongHandler(enc Encoder, req *http.Request, latlongstrval, oformat string) (err error) {
 
 	if len(latlongstrval) > 0 {
-		return fmt.Errorf("Latlong doesn't accept an input value. Use parameters instead")
+		return fmt.Errorf("Latlong doesn't accept an input value. Use the parameters 'lat' and 'long' instead")
 	}
 
 	slat := req.URL.Query().Get("lat")
@@ -177,6 +172,16 @@ func latlongHandler(enc Encoder, req *http.Request, latlongstrval, oformat strin
 	return serialize(enc, latlong, oformat)
 }
 
+func geohashHandler(enc Encoder, req *http.Request, geohashstrval, oformat string) (err error) {
+
+	var latlong *cartconvert.PolarCoord
+
+	if latlong, err = cartconvert.GeoHashToLatLong(geohashstrval, nil); err != nil {
+		return
+	}
+	return serialize(enc, latlong, oformat)
+}
+
 func utmHandler(enc Encoder, req *http.Request, utmstrval, oformat string) (err error) {
 	var utmval *cartconvert.UTMCoord
 	if utmval, err = cartconvert.AUTMToStruct(utmstrval, nil); err != nil {
@@ -188,6 +193,27 @@ func utmHandler(enc Encoder, req *http.Request, utmstrval, oformat string) (err 
 		return
 	}
 	return serialize(enc, latlong, oformat)
+}
+
+func bmnHandler(enc Encoder, req *http.Request, bmnstrval, oformat string) (err error) {
+	var bmnval *bmn.BMNCoord
+	if bmnval, err = bmn.ABMNToStruct(bmnstrval); err != nil {
+		return
+	}
+
+	var latlong *cartconvert.PolarCoord
+	if latlong, err = bmn.BMNToWGS84LatLong(bmnval); err != nil {
+		return
+	}
+	return serialize(enc, latlong, oformat)
+}
+
+func osgbHandler(enc Encoder, req *http.Request, osgb36strval, oformat string) (err error) {
+	var osgb36val *osgb36.OSGB36Coord
+	if osgb36val, err = osgb36.AOSGB36ToStruct(osgb36strval, osgb36.OSGB36Leave); err != nil {
+		return
+	}
+	return serialize(enc, osgb36.OSGB36ToWGS84LatLong(osgb36val), oformat)
 }
 
 // closure of the restful methods
@@ -253,8 +279,10 @@ func init() {
 	apiroot := apiroot()
 
 	http.HandleFunc("/", rootHandler)
-	http.Handle(apiroot+BMNHandler, restHandler(bmnHandler))
-	http.Handle(apiroot+GeoHashHandler, restHandler(geohashHandler))
+
 	http.Handle(apiroot+LatLongHandler, restHandler(latlongHandler))
+	http.Handle(apiroot+GeoHashHandler, restHandler(geohashHandler))
 	http.Handle(apiroot+UTMHandler, restHandler(utmHandler))
+	http.Handle(apiroot+BMNHandler, restHandler(bmnHandler))
+	http.Handle(apiroot+OSGBHandler, restHandler(osgbHandler))
 }
