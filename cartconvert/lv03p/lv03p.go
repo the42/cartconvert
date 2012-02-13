@@ -34,7 +34,7 @@ const (
 type SwissCoord struct {
 	Easting, Northing, RelHeight float64
 	CoordType                    SwissCoordType
-	el                           *cartconvert.Ellipsoid
+	El                           *cartconvert.Ellipsoid
 }
 
 var coordliterals = [][]string{{"y:", " x:"}, {"E:", " N:"}}
@@ -124,7 +124,7 @@ L1:
 
 			height, err = strconv.ParseFloat(heights, 64)
 			if err == nil {
-				return &SwissCoord{Easting: right, Northing: height, CoordType: coordType, el: cartconvert.Bessel1841Ellipsoid}, nil
+				return &SwissCoord{Easting: right, Northing: height, CoordType: coordType, El: cartconvert.Bessel1841Ellipsoid}, nil
 			}
 		}
 	}
@@ -150,7 +150,7 @@ func SwissCoordToGRS80LatLong(coord *SwissCoord) (*cartconvert.PolarCoord, error
 	}
 
 	gc := cartconvert.InverseTransverseMercator(
-		&cartconvert.GeoPoint{Y: coord.Northing, X: coord.Easting, El: coord.el},
+		&cartconvert.GeoPoint{Y: coord.Northing, X: coord.Easting, El: coord.El},
 		46.952406, // lat0
 		7.439583,  // long0
 		1,
@@ -206,9 +206,9 @@ func GRS80LatLongToSwissCoord(gc *cartconvert.PolarCoord, coordType SwissCoordTy
 		fe, // fe
 		fn) // fn
 
-	return &SwissCoord{CoordType: coordType, Northing: gp.Y, Easting: gp.X, el: gp.El}, nil
+	return &SwissCoord{CoordType: coordType, Northing: gp.Y, Easting: gp.X, El: gp.El}, nil
 }
 
 func NewSwissCoord(CoordType SwissCoordType, Easting, Northing, RelHeight float64) *SwissCoord {
-	return &SwissCoord{Easting: Easting, Northing: Northing, RelHeight: RelHeight, CoordType: CoordType, el: cartconvert.Bessel1841Ellipsoid}
+	return &SwissCoord{Easting: Easting, Northing: Northing, RelHeight: RelHeight, CoordType: CoordType, El: cartconvert.Bessel1841Ellipsoid}
 }

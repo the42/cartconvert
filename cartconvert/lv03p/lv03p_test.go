@@ -94,7 +94,7 @@ type swissCoordToGRS80LatLongTest struct {
 // http://www.swisstopo.admin.ch/internet/swisstopo/de/home/apps/calc/navref.html
 var swissCoordToGRS80LatLongTests = []swissCoordToGRS80LatLongTest{
 	{
-		&SwissCoord{Easting: 750536, Northing: 265013, CoordType: LV03, el: cartconvert.Bessel1841Ellipsoid},
+		&SwissCoord{Easting: 750536, Northing: 265013, CoordType: LV03, El: cartconvert.Bessel1841Ellipsoid},
 		&cartconvert.PolarCoord{Latitude: 47.518605, Longitude: 9.437422},
 	},
 }

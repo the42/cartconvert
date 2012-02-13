@@ -105,27 +105,27 @@ type oSGB36ToWGS84LatLongTest struct {
 // Values taken from http://gridreferencefinder.com/
 var oSGB36ToWGS84LatLongTests = []oSGB36ToWGS84LatLongTest{
 	{
-		&OSGB36Coord{Zone: "SE", Easting: 29793, Northing: 33798, gridLen: 5, el: cartconvert.Airy1830Ellipsoid},
+		&OSGB36Coord{Zone: "SE", Easting: 29793, Northing: 33798, gridLen: 5, El: cartconvert.Airy1830Ellipsoid},
 		&cartconvert.PolarCoord{Latitude: 53.799638, Longitude: -1.5491515},
 	},
 	{
-		&OSGB36Coord{Zone: "NN", Easting: 16600, Northing: 71200, gridLen: 3, el: cartconvert.Airy1830Ellipsoid},
+		&OSGB36Coord{Zone: "NN", Easting: 16600, Northing: 71200, gridLen: 3, El: cartconvert.Airy1830Ellipsoid},
 		&cartconvert.PolarCoord{Latitude: 56.796557, Longitude: -5.0039304},
 	},
 	{
-		&OSGB36Coord{Zone: "NN", Easting: 1, Northing: 7, gridLen: 5, el: cartconvert.Airy1830Ellipsoid},
+		&OSGB36Coord{Zone: "NN", Easting: 1, Northing: 7, gridLen: 5, El: cartconvert.Airy1830Ellipsoid},
 		&cartconvert.PolarCoord{Latitude: 56.150684, Longitude: -5.2214376},
 	},
 	{
-		&OSGB36Coord{Zone: "NN", Easting: 16600, Northing: 71200, gridLen: 5, el: cartconvert.Airy1830Ellipsoid},
+		&OSGB36Coord{Zone: "NN", Easting: 16600, Northing: 71200, gridLen: 5, El: cartconvert.Airy1830Ellipsoid},
 		&cartconvert.PolarCoord{Latitude: 56.796088, Longitude: -5.0047120},
 	},
 	{
-		&OSGB36Coord{Zone: "NN", Easting: 16650, Northing: 71250, gridLen: 5, el: cartconvert.Airy1830Ellipsoid},
+		&OSGB36Coord{Zone: "NN", Easting: 16650, Northing: 71250, gridLen: 5, El: cartconvert.Airy1830Ellipsoid},
 		&cartconvert.PolarCoord{Latitude: 56.796557, Longitude: -5.0039304},
 	},
 	{
-		&OSGB36Coord{Zone: "SV", Easting: 0, Northing: 0, gridLen: 0, el: cartconvert.Airy1830Ellipsoid},
+		&OSGB36Coord{Zone: "SV", Easting: 0, Northing: 0, gridLen: 0, El: cartconvert.Airy1830Ellipsoid},
 		&cartconvert.PolarCoord{Latitude: 49.766809, Longitude: -7.5571598},
 	},
 }
@@ -161,11 +161,11 @@ type wGS84LatLongToOSGB36Test struct {
 var wGS84LatLongToOSGB36Tests = []wGS84LatLongToOSGB36Test{
 	{
 		&cartconvert.PolarCoord{Latitude: 53.799638, Longitude: -1.5491515},
-		&OSGB36Coord{Zone: "SE", Easting: 29793, Northing: 33798, gridLen: 5, el: cartconvert.Airy1830Ellipsoid},
+		&OSGB36Coord{Zone: "SE", Easting: 29793, Northing: 33798, gridLen: 5, El: cartconvert.Airy1830Ellipsoid},
 	},
 	{
 		&cartconvert.PolarCoord{Latitude: 56.796557, Longitude: -5.0039304},
-		&OSGB36Coord{Zone: "NN", Easting: 16650, Northing: 71250, gridLen: 5, el: cartconvert.Airy1830Ellipsoid},
+		&OSGB36Coord{Zone: "NN", Easting: 16650, Northing: 71250, gridLen: 5, El: cartconvert.Airy1830Ellipsoid},
 	},
 }
 

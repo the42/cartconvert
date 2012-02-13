@@ -28,7 +28,7 @@ type OSGB36Coord struct {
 	Easting, Northing uint
 	RelHeight         float64
 	Zone              string
-	el                *cartconvert.Ellipsoid
+	El                *cartconvert.Ellipsoid
 	gridLen           byte
 }
 
@@ -170,7 +170,7 @@ func OSGB36ToWGS84LatLong(coord *OSGB36Coord) *cartconvert.PolarCoord {
 	easting, northing := OSGB36ZoneToRefCoords(coord)
 
 	gc := cartconvert.InverseTransverseMercator(
-		&cartconvert.GeoPoint{Y: float64(northing), X: float64(easting), El: coord.el},
+		&cartconvert.GeoPoint{Y: float64(northing), X: float64(easting), El: coord.El},
 		49,
 		-2,
 		0.9996012717,
@@ -300,5 +300,5 @@ func max(x, y int) int {
 //
 func NewOSGB36Coord(Zone string, easting, northing uint, relheight float64, inputprec byte, desiredprec OSGB36prec) *OSGB36Coord {
 	effbytes := SanitizeOSGB36CoordToPrec(&easting, &northing, inputprec, desiredprec)
-	return &OSGB36Coord{Easting: easting, Northing: northing, RelHeight: relheight, Zone: Zone, gridLen: effbytes, el: cartconvert.Airy1830Ellipsoid}
+	return &OSGB36Coord{Easting: easting, Northing: northing, RelHeight: relheight, Zone: Zone, gridLen: effbytes, El: cartconvert.Airy1830Ellipsoid}
 }
