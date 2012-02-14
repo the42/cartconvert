@@ -7,23 +7,30 @@ Purpose
 cartconvserv is a RESTFul service to the cartconv - package. It may be installed
 as a stand-alone service or executed in the [Appengine](http://code.google.com/appengine/docs/go/) environment.
 
+
 Functionality
 -------------
 
-* Conversion between coordinate systems and bearing representations.
+* Conversion between coordinate systems and bearing representations. Valid representations are
+  [Latitude and Longitude](http://en.wikipedia.org/wiki/Geographic_coordinate_system#Geographic_latitude_and_longitude),
+  [UTM](http://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system),
+  [geohash](http://en.wikipedia.org/wiki/Geohash),
+  [Bundesmeldenetz](http://de.wikipedia.org/wiki/Bundesmeldenetz) used in Austria and
+  [OSGB36, Ordnance Survey National Grid](http://en.wikipedia.org/wiki/OSGB) used in the UK.
 * Serialization as XML or JSON by content negotiation.
 
 Convention for this help:
 
-* URL: Base url to service
+* Binding: Base url to service (configurable)
 * APIRoot: Root of the RESTFul API (configurable)
+
 
 UTM - Conversions
 -----------------
 
-Base Url for UTM operations:
+Base url for UTM operations:
    
-    URL/APIRoot/utm/<VALUE>[.xml|.json]?outputformat=<utm|geohash|latlongdeg|latlongcomma|bmn>
+    Binding/APIRoot/utm/<VALUE>.[xml|json]?outputformat=<latlongdeg|latlongcomma|utm|geohash|bmn|osgb>
 
 Value is a coordinate in UTM representation. The reference ellipsoid is always
 the WGS84Ellipsoid.
@@ -39,18 +46,21 @@ output format is JSON-encoded.
 If the extension to value is ".xml", the result of the requested output format
 is XML-encoded.
 
-The value to the parameter "outputformat" is either
+The value to the parameter "outputformat" is one of
 
 * latlongdeg: Latitude and longitude with fractions in degrees
 * latlongcomma: Latitude and longitude with decimal fractions
 * geohash: Geohash-encoded value of latitude and longitude
-* bmn: Serialization of the value as BMN-coordinate (see below)
+* bmn: Serialization of the value as BMN-coordinate
+* osgb: Serialization of the value as OSGB36-coordinate
 
-### Examples
-#### Output requested as latitude and longitude in [arc degrees](http://en.wikipedia.org/wiki/Minute_of_arc)
+
+### Output requested as latitude and longitude in [arc degrees](http://en.wikipedia.org/wiki/Minute_of_arc)
 
 Call
     http://localhost:1111/api/utm/17 630084 4833438.xml?outputformat=latlongdeg
+
+Note: When running on GAE, the port may not be specified!
 
 Output serialized as XML:
 
@@ -80,7 +90,8 @@ Output serialized as JSON:
 * LatLongString: A canonical representation of latitude and longitude as decimal
   degrees.
 
-#### Output requested as latitude and longitude in [degrees](http://en.wikipedia.org/wiki/Degree_(angle))
+
+### Output requested as latitude and longitude in [degrees](http://en.wikipedia.org/wiki/Degree_(angle))
 
 Call
 
@@ -98,7 +109,8 @@ Output serialized as XML:
 * Lat, Long: Latitude, Longitude of converted coordinate, in decimal degrees.
 * Fmt: For serialization as a decimal, the string "LLFdeg"
 
-#### Output requested as [Geohash](http://en.wikipedia.org/wiki/Geohash)
+
+### Output requested as [Geohash](http://en.wikipedia.org/wiki/Geohash)
 
 Call
 
@@ -118,7 +130,8 @@ Output serialized as XML:
       <GeoHash>dpz838bh37pv</GeoHash>
     </GeoHash>
 
-#### Output requested as [BMN](http://homepage.ntlworld.com/anton.helm/bmn_mgi.html)
+
+### Output requested as [BMN](http://homepage.ntlworld.com/anton.helm/bmn_mgi.html)
 [Bundesmeldenetz](http://de.wikipedia.org/wiki/Bundesmeldenetz)
 
 Call
@@ -177,18 +190,45 @@ Output serialized as JSON:
 
     {"BMNCoord":{"Right":517965.58808025334,"Height":270554.81500793993,"RelHeight":0,"Meridian":2,"El":{"CommonName":"Bessel1841MGI"}},"BMNString":"M31 517966 270555"}
 
+
+### Output requested as [OSGB36](http://en.wikipedia.org/wiki/OSGB)
+
+Call
+
+    http://localhost:1111/api/utm/31U 365166 5684564.xml?outputformat=osgb
+
+Output serialized as XML:
+
+    <OSGB36>
+      <OSGB36Coord>
+        <Easting>13862</Easting>
+        <Northing>59718</Northing>
+        <RelHeight>0</RelHeight>
+        <Zone>TR</Zone>
+        <El>
+           <CommonName>Airy1830</CommonName>
+        </El>
+      </OSGB36Coord>
+      <OSGB36String>TR1386259718</OSGB36String>
+    </OSGB36>
+
+The reference ellipsoid of a OSGB36 bearing is always the
+[Airy1830](http://en.wikipedia.org/wiki/Ordnance_Survey_National_Grid#General)
+ellipsoid, which requires a helmert transformation from WGS84 to Airy1830.
+
+
 Geohash - Conversions
 ---------------------
 
 All following conversions have the same output specifier as described by the UTM conversion.
 
-* Output specifiers are utm, geohash, latlongdeg, latlongcomma bmn
+* Output specifiers are utm, geohash, latlongdeg, latlongcomma, bmn or osgb
 * Errors are encoded in the requested encoding (XML, JSON), unless the encoding itself fails,
   which means the error is encoded as text/plain.
 
-Base Url for Geohash operations:
+Base url for Geohash operations:
    
-    URL/APIRoot/geohash/<VALUE>[.xml|.json]?outputformat=<utm|geohash|latlongdeg|latlongcomma|bmn>
+    Binding/APIRoot/geohash/<VALUE>.[xml|json]?outputformat=<utm|geohash|latlongdeg|latlongcomma|bmn|osgb>
 
 Value is a coordinate in Geohash representation. The reference ellipsoid is always
 the WGS84Ellipsoid.
@@ -218,6 +258,7 @@ Call
 Output serialized as JSON:
 
     {"Lat":"42.6","Long":"-5.6","Fmt":"LLFdeg","LatLongString":"lat: 42.6°, long: -5.6°"}
+
 
 Latitude / Longitude - Conversions
 ----------------------------------
@@ -305,6 +346,14 @@ which case " E " or " S " means a negative bearing.
   </tr>
 </table>
 
+* Output specifiers are utm, geohash, latlongdeg, latlongcomma, bmn or osgb
+* Errors are encoded in the requested encoding (XML, JSON), unless the encoding itself fails,
+  which means the error is encoded as text/plain.
+
+Base url for latitude, longitude operations:
+   
+    Binding/APIRoot/latlong/.[xml|json]?outputformat=<utm|geohash|latlongdeg|latlongcomma|bmn|osgb>
+
 Call
 
     http://localhost:1111/api/latlong/.json?lat=47.57°&long=14°0'27''&outputformat=latlongdeg
@@ -327,6 +376,7 @@ Output:
       <LatLongString>lat: 47.57°, long: 14.0075°</LatLongString>
     </LatLong>
 
+
 BMN - Conversions
 -----------------
 
@@ -338,13 +388,13 @@ the Austrian provinces still carries this datum and is unlikely to get
 converted. For more information see the [bmn package](https://github.com/the42/cartconvert/tree/master/cartconvert/bmn).
 Coordinates are only valid within the longitude of 8°50' and 17°50'.
 
-* Output specifiers are utm, geohash, latlongdeg, latlongcomma or bmn
+* Output specifiers are utm, geohash, latlongdeg, latlongcomma, bmn or osgb
 * Errors are encoded in the requested encoding (XML, JSON), unless the encoding itself fails,
   which means the error is encoded as text/plain.
 
-Base Url for BMN operations:
+Base url for BMN operations:
    
-    URL/APIRoot/bmn/<VALUE>[.xml|.json]?outputformat=<utm|geohash|latlongdeg|latlongcomma|bmn>
+    Binding/APIRoot/bmn/<VALUE>.[xml|json]?outputformat=<utm|geohash|latlongdeg|latlongcomma|bmn|osgb>
 
 Value is a coordinate in BMN representation, which is always uses the . The reference ellipsoid is always
 the [Bessel1841MGI](http://de.wikipedia.org/wiki/Geod%C3%A4tisches_Datum#Deutschland_und_.C3.96sterreich)
@@ -381,10 +431,133 @@ Output serialized as XML:
       <UTMString>33U 551611 5372889</UTMString>
     </UTMCoord>
 
+
+OSGB36 - Conversions
+-----------------
+
+Base url for osgb36 operations:
+   
+    Binding/APIRoot/osgb/<VALUE>.[xml|json]?outputformat=<utm|geohash|latlongdeg|latlongcomma|bmn|osgb>
+
+Value is a coordinate in [OSGB36 representation](). The reference ellipsoid is always
+the [Airy1830](http://en.wikipedia.org/wiki/Ordnance_Survey_National_Grid#cite_note-5) ellipsoid.
+
+Examples of
+[valid](http://en.wikipedia.org/wiki/Ordnance_Survey_National_Grid#Grid_letters)
+[input](http://en.wikipedia.org/wiki/Ordnance_Survey_National_Grid#Grid_digits) values:
+
+
+<table>
+  <tr>
+    <th>Input specifier</th>
+    <th>Actual value</th>
+    <th>Remarks</th>
+  </tr>
+  <tr>
+    <td>NN or N N</td> <td>NN 0 0</td>
+    <td>Point at NN 00000 00000 (30V 361994 6225065)</td>
+  <tr>
+    <td>NN11 or NN 1 1</td> <td>NN1000010000</td>
+    <td>Point at NN1000010000 (30V 371845 6235206)</td>
+  </tr>
+  <tr>
+    <td>NN1010 or NN 10 10</td> <td>NN1050010500</td>
+    <td>Point at NN1050010500 (30V 372337 6235713)</td>
+  </tr>
+  <tr>
+    <td>NN123123 or NN 123 123</td> <td>NN1235012350</td>
+    <td>Point at NN1235012350 (30V 374160 6237590)</td>
+  </tr>
+  <tr>
+    <td>NN12321232 or NN 1232 1232</td> <td>NN1232512325</td>
+    <td>Point at NN1232512325 (30V 374135 6237564)</td>
+  </tr>
+  <tr>
+    <td>NN1232112321 or NN 12321 12321</td> <td>NN1232112321</td>
+    <td>Point at NN1232112321 (30V 374131 6237560)</td>
+  </tr>
+  <tr>
+    <td>NN1230012300 or NN 12300 12300</td> <td>NN1230012300</td>
+    <td>Point at NN1230012300 (30V 374110 6237539)</td>
+  </tr>
+</table>
+
+In the case of `CCdddd`, `CCdddddd`, `CCdddddddd` the remaining digits for a fully qualified
+OSGB36 datum are set to the middle of the rectangle, which is implicitly spanned by the inaccuracy
+of the point specification. So `CC dd dd` gets `CC dd500 dd500`, `CC ddd ddd` gets `CC ddd50 ddd50`.
+Trailing zeros prevent the automatic averaging towards the rectangles center:
+
+NN 123 123 means NN 12350 12350 (30V 374160 6237590), whereas
+NN 12300 12300 really specifies the point at NN 12300 12300 (30V 374110 6237539).
+
+if only the
+[letter designators](http://en.wikipedia.org/wiki/Ordnance_Survey_National_Grid#Grid_letters) `CC`
+or one additional northing / easting `CC d d` is specified, automatic averaging towards the middle
+of the rectangle is not performed.
+
+Call
+
+    http://localhost:1111/api/osgb/NN123123.json?outputformat=osgb
+    http://localhost:1111/api/osgb/NN 123 123.json?outputformat=osgb
+
+Output serialized as JSON:
+
+    {"OSGB36Coord":{"Easting":12350,"Northing":12350,"RelHeight":0,"Zone":"NN","El":{"CommonName":"Airy1830"}},"OSGB36String":"NN1235012350"}
+
+Call
+
+    http://localhost:1111/api/osgb/NN1238812388.xml?outputformat=utm
+
+Output serialized as XML:
+
+    <UTMCoord>
+      <UTMCoord>
+        <Northing>6.237628180629014e+06</Northing>
+        <Easting>374197.17282885656</Easting>
+        <Zone>30V</Zone>
+        <El>
+          <CommonName>WGS84</CommonName>
+        </El>
+      </UTMCoord>
+      <UTMString>30V 374197 6237628</UTMString>
+    </UTMCoord>
+
+
+Configuration
+-------------
+
+### Stand alone application
+
+Both `URL` (base url to service) and the `APIRoot` (root of the RESTFul API)
+can be configured. The default values are
+
+* Binding: `:1111`, that is listening on TCP/IP port 1111
+* APIRoot: `/api/`
+
+which means the RESTFul handlers base Url listen at `:1111/api/`.
+
+If a file named `config.json` is located within the directory in which the RESTFul service is started,
+the contents gets parsed and the respective default values for `APIRoot` and `Binding` are replaced by
+the corresponding values of keys named `APIRoot` and `Binding`. Example:
+
+    {
+        "APIRoot": "/",
+        "Binding": "www.example.com:8080"
+    }
+
+A call might look like
+
+    http://www.example.com:8080/utm/17T 630084 4833438.xml?&outputformat=bmn
+
+### Google App Engine
+Not yet (20120214) tested on GAE.
+
+
 Installation
 ------------
 
 go get github.com/the42/cartconv/cartconvserv
+
 
 Test
 ----
