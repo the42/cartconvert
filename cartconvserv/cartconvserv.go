@@ -18,15 +18,6 @@ import (
 	"path"
 )
 
-// restful methods, signaling the http handlers
-const (
-	LatLongHandler = "latlong/"
-	GeoHashHandler = "geohash/"
-	UTMHandler     = "utm/"
-	BMNHandler     = "bmn/"
-	OSGBHandler    = "osgb/"
-)
-
 // supported serialization formats
 const (
 	JSONFormatSpec = ".json"
@@ -173,9 +164,7 @@ func latlongHandler(enc Encoder, req *http.Request, latlongstrval, oformat strin
 }
 
 func geohashHandler(enc Encoder, req *http.Request, geohashstrval, oformat string) (err error) {
-
 	var latlong *cartconvert.PolarCoord
-
 	if latlong, err = cartconvert.GeoHashToLatLong(geohashstrval, nil); err != nil {
 		return
 	}
@@ -246,14 +235,14 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "text/xml")
 		enc = xml.NewEncoder(buf)
 	default:
-		http.Error(w, fmt.Sprintf("Unsupported serialization format: '%s'", serialformat), 500)
+		http.Error(w, fmt.Sprintf("Unsupported serialization format: '%s'", serialformat), http.StatusInternalServerError)
 		return
 	}
 
 	// Recover from panic by setting http error 500 and letting the user know the reason
 	defer func() {
 		if err := recover(); err != nil {
-			http.Error(w, fmt.Sprint(err), 500)
+			http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
 		}
 	}()
 
@@ -261,7 +250,7 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		// might as well panic(err) but we add some more info
 		// we  serialize the error here in the chosen encoding
 		enc.Encode(&Error{Error: fmt.Sprint(err)})
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		buf.WriteTo(w)
 	} else {
 		// The conversion went fine, write to the response stream
@@ -274,15 +263,28 @@ func rootHandler(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, "Cartography transformation")
 }
 
+// Definition of restful methods: combine API URI with handler method.
+// For every API URI,there may be a corresponding documentation URI
+type httphandlerfunc struct {
+	specifier string
+	restHandler
+}
+
+var httphandlerfuncs = []httphandlerfunc{
+	{"latlong/", latlongHandler},
+	{"geohash/", geohashHandler},
+	{"utm/", utmHandler},
+	{"bmn/", bmnHandler},
+	{"osgb/", osgbHandler},
+}
+
 func init() {
 
 	apiroot := apiroot()
 
 	http.HandleFunc("/", rootHandler)
 
-	http.Handle(apiroot+LatLongHandler, restHandler(latlongHandler))
-	http.Handle(apiroot+GeoHashHandler, restHandler(geohashHandler))
-	http.Handle(apiroot+UTMHandler, restHandler(utmHandler))
-	http.Handle(apiroot+BMNHandler, restHandler(bmnHandler))
-	http.Handle(apiroot+OSGBHandler, restHandler(osgbHandler))
+	for _, handle := range httphandlerfuncs {
+		http.Handle(apiroot+handle.specifier, handle.restHandler)
+	}
 }
