@@ -9,22 +9,25 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 )
+
+var configFileName = flag.String("config", "config.json", "location of JSON configuration file")
 
 type config struct {
 	APIRoot string
 	Binding string
 }
 
-var conf *config
+var conf = &config{"/api/", ":1111"}
 
-func readConfig(conf *config) {
-	b, err := ioutil.ReadFile("config.json")
+func readConfig(filename string, conf *config) {
+	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		fmt.Fprint(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, err)
 		return
 	}
 
@@ -34,26 +37,20 @@ func readConfig(conf *config) {
 
 	err = json.Unmarshal(b, &conf)
 	if err != nil {
-		fmt.Fprint(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, err)
 		panic("Unable to parse json configuration file")
 	}
 	return
 }
 
 func apiroot() string {
-	if conf == nil {
-		conf = &config{}
-	}
-	conf.APIRoot = "/api/"
-	readConfig(conf)
+	flag.Parse()
+	readConfig(*configFileName, conf)
 	return conf.APIRoot
 }
 
 func binding() string {
-	if conf == nil {
-		conf = &config{}
-	}
-	conf.Binding = ":1111"
-	readConfig(conf)
+	flag.Parse()
+	readConfig(*configFileName, conf)
 	return conf.Binding
 }

@@ -10,8 +10,5 @@ package main
 import "net/http"
 
 func main() {
-
-	binding := binding()
-
-	http.ListenAndServe(binding, nil)
+	http.ListenAndServe(binding(), nil)
 }
