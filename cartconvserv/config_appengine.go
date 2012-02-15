@@ -7,12 +7,6 @@
 // +build appengine
 package main
 
-func apiroot() (root string) {
-	root = "/api/"
-	return
-}
-
-func binding() (bind string) {
-	bind = ":1111"
-	return
+func apiroot() string {
+	return "/api/"
 }
