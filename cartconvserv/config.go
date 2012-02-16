@@ -2,7 +2,7 @@
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
-// RESTFul interface for coordinate transformations.
+// RESTFul interface for coordinate transformations - configuration for stand alone server
 
 // +build !appengine
 package main
@@ -19,10 +19,11 @@ var configFileName = flag.String("config", "config.json", "location of JSON conf
 
 type config struct {
 	APIRoot string
+	DocRoot string
 	Binding string
 }
 
-var conf = &config{"/api/", ":1111"}
+var conf = &config{APIRoot: "api/", DocRoot: "doc/", Binding: ":1111"}
 
 func readConfig(filename string, conf *config) {
 	b, err := ioutil.ReadFile(filename)
@@ -47,6 +48,12 @@ func apiroot() string {
 	flag.Parse()
 	readConfig(*configFileName, conf)
 	return conf.APIRoot
+}
+
+func docroot() string {
+	flag.Parse()
+	readConfig(*configFileName, conf)
+	return conf.DocRoot
 }
 
 func binding() string {
