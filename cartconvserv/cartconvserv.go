@@ -251,11 +251,8 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		// we  serialize the error here in the chosen encoding
 		enc.Encode(&Error{Error: fmt.Sprint(err)})
 		w.WriteHeader(http.StatusInternalServerError)
-		buf.WriteTo(w)
-	} else {
-		// The conversion went fine, write to the response stream
-		buf.WriteTo(w)
 	}
+	buf.WriteTo(w)
 }
 
 func rootHandler(w http.ResponseWriter, req *http.Request) {
@@ -285,6 +282,6 @@ func init() {
 	http.HandleFunc("/", rootHandler)
 
 	for _, handle := range httphandlerfuncs {
-		http.Handle(apiroot+handle.specifier, handle.restHandler)
+		http.Handle("/"+apiroot+handle.specifier, handle.restHandler)
 	}
 }
