@@ -10,8 +10,14 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	// "bytes"
+	//"path"
 )
+
+var docmainTemplate = docroot() + "index.tpl"
+
+type PageLayout struct {
+  Navigation []string
+}
 
 const errorParsingTemplate = `
 <html>
@@ -22,14 +28,14 @@ const errorParsingTemplate = `
   </body>
 </html>`
 
-var docmainTemplate = docroot() + "index.tpl"
-
 func docHandler(w http.ResponseWriter, req *http.Request) {
 	/*
 	 * Idee: Zuerst das allgemeine template laden, falls parameter angegeben wurden, das spezielle template nachladen
 	 * 
 	 * 
 	 */
+	
+	val := req.URL.Path
 	tpl, err := template.ParseFiles(docmainTemplate)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
