@@ -71,10 +71,6 @@ func docHandler(w http.ResponseWriter, req *http.Request) {
 func init() {
 
 	for function, val := range httphandlerfuncs {
-		url, err := url.Parse(function)
-		if err != nil {
-			panic(fmt.Sprintf("%s: %s is not a valid url", err.Error(), function))
-		}
 		docitem := Link{URL: url, Documentation: val.docstring}
 		docPage.Navigation = append(docPage.Navigation, docitem)
 	}
