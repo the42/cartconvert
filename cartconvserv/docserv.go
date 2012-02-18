@@ -10,41 +10,73 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	//"path"
+	"net/url"
+	"path"
 )
 
-var docmainTemplate = docroot() + "index.tpl"
+// These constants specifiy the directory in which the documentation files are saved
+const (
+	docfileroot     = "doc/"
+	docmainTemplate = "index.tpl" // The main documentation file. Other filenames are created from the requested API documentation
+)
 
-type PageLayout struct {
-  Navigation []string
+type Link struct {
+	*url.URL
+	Documentation string
 }
 
-const errorParsingTemplate = `
-<html>
-  <head>
-  </head>
-  <body>
-    An error occured: %s
-  </body>
-</html>`
+// defines the layout of a documentation page and is used by html/template
+type docPageLayout struct {
+	ConcreteHeading  string
+	APIRoot, DocRoot string  // APIRoot is used for inline examples
+	Navigation       []Link  // 
+}
+
+// user defined APIRoot and DocRoot are constant throughout program execution
+var docPage = docPageLayout{APIRoot: apiroot(), DocRoot: docroot()}
 
 func docHandler(w http.ResponseWriter, req *http.Request) {
-	/*
-	 * Idee: Zuerst das allgemeine template laden, falls parameter angegeben wurden, das spezielle template nachladen
-	 * 
-	 * 
-	 */
-	
-	val := req.URL.Path
-	tpl, err := template.ParseFiles(docmainTemplate)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, errorParsingTemplate, err)
+
+	// Error handler for documentation	
+	defer func() {
+		if err := recover(); err != nil {
+			http.Error(w, "An error occurred: "+fmt.Sprint(err), http.StatusInternalServerError)
+		}
+	}()
+
+	base := path.Base(req.URL.Path)
+	var filename string
+
+	// check if the incoming url is the base url for documentation
+	if base == path.Base(docPage.DocRoot) {
+	  // if the incoming url is the base url for documentation, load the generic help template
+		filename = docfileroot + docmainTemplate
 	} else {
-		tpl.Execute(w, nil)
+	  // else load the specific help template. The filename is constructed from the API function
+		filename = docfileroot + base + ".tpl"
+		docPage.ConcreteHeading = httphandlerfuncs[base+"/"].docstring
+	}
+
+	tpl, err := template.ParseFiles(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	err = tpl.Execute(w, docPage)
+	if err != nil {
+		panic(err)
 	}
 }
 
 func init() {
+
+	for function, val := range httphandlerfuncs {
+		url, err := url.Parse(function)
+		if err != nil {
+			panic(fmt.Sprintf("%s: %s is not a valid url", err.Error(), function))
+		}
+		docitem := Link{URL: url, Documentation: val.docstring}
+		docPage.Navigation = append(docPage.Navigation, docitem)
+	}
 	http.HandleFunc("/"+docroot(), docHandler)
 }
