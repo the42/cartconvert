@@ -214,6 +214,14 @@ type restHandler func(enc Encoder, req *http.Request, value, oformat string) err
 
 func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
+	// API error handler 
+	// Recover from panic by setting http error 500 and letting the user know the reason
+	defer func() {
+		if err := recover(); err != nil {
+			http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
+		}
+	}()
+
 	// enc keeps the requested encoding scheme as requested by content negotiation
 	var enc Encoder
 	// allocate buffer to which the http stream is written, until it gets responded. By doing so we keep the chance to trap errors and respond them to the caller
@@ -239,13 +247,6 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Recover from panic by setting http error 500 and letting the user know the reason
-	defer func() {
-		if err := recover(); err != nil {
-			http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
-		}
-	}()
-
 	if err := fn(enc, req, val, oformat); err != nil {
 		// might as well panic(err) but we add some more info
 		// we  serialize the error here in the chosen encoding
@@ -263,16 +264,16 @@ func rootHandler(w http.ResponseWriter, req *http.Request) {
 // Definition of restful methods: combine API URI with handler method.
 // For every API URI,there may be a corresponding documentation URI
 type httphandlerfunc struct {
-	specifier string
+//	function string
 	restHandler
+	docstring string
 }
-
-var httphandlerfuncs = []httphandlerfunc{
-	{"latlong/", latlongHandler},
-	{"geohash/", geohashHandler},
-	{"utm/", utmHandler},
-	{"bmn/", bmnHandler},
-	{"osgb/", osgbHandler},
+var httphandlerfuncs = map[string]httphandlerfunc{
+	"latlong/" : httphandlerfunc{latlongHandler, "Latitude, Longitude"},
+	"geohash/":  httphandlerfunc{geohashHandler, "Geohash"},
+	"utm/": httphandlerfunc{utmHandler, "UTM"},
+	"bmn/": httphandlerfunc{bmnHandler, "AT:Bundesmeldenetz"},
+	"osgb/": httphandlerfunc{osgbHandler, "UK:OSGB36"},
 }
 
 func init() {
@@ -281,7 +282,7 @@ func init() {
 
 	http.HandleFunc("/", rootHandler)
 
-	for _, handle := range httphandlerfuncs {
-		http.Handle("/"+apiroot+handle.specifier, handle.restHandler)
+	for function, handle := range httphandlerfuncs {
+		http.Handle("/"+apiroot+function, handle.restHandler)
 	}
 }
