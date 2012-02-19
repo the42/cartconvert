@@ -542,7 +542,7 @@ the contents gets parsed and the respective default values for APIRoot, Binding 
 the corresponding values of keys named `APIRoot`, `Binding` and `DocRoot`. Example:
 
     {
-        "APIRoot": "",
+        "APIRoot": "myapi/",
         "Binding": "www.example.com:8080"
         "DocRoot": "doc/"
     }
@@ -552,11 +552,13 @@ at which the configuration file gets loaded.
 
 A call might look like
 
-    http://www.example.com:8080/utm/17T 630084 4833438.xml?&outputformat=bmn
+    http://www.example.com:8080/myapi/utm/17T 630084 4833438.xml?&outputformat=bmn
 
 and documentation for UTM transformations is served as
 
     http://www.example.com:8080/doc/utm/
+
+Both APIRoot and DocRoot must be valid, non-empty paths.
 
 ### Google App Engine
 Not yet (20120214) tested on GAE.

@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 )
 
 var configFileName = flag.String("config", "config.json", "location of JSON configuration file")
@@ -47,12 +48,20 @@ func readConfig(filename string, conf *config) {
 func apiroot() string {
 	flag.Parse()
 	readConfig(*configFileName, conf)
+	path := path.Base(conf.APIRoot)
+	if path == "/" || path == "." {
+		panic("configuration error: APIRoot must be a non-empty path")
+	}
 	return conf.APIRoot
 }
 
 func docroot() string {
 	flag.Parse()
 	readConfig(*configFileName, conf)
+	path := path.Base(conf.DocRoot)
+	if path == "/" || path == "." {
+		panic("configuration error: DocRoot must be a non-empty path")
+	}
 	return conf.DocRoot
 }
 

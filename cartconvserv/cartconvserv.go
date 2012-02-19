@@ -261,6 +261,8 @@ type Link struct {
 	Documentation string
 }
 
+var rootLinks []Link
+
 func rootHandler(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, "Cartography transformation")
 }
@@ -271,12 +273,13 @@ type httphandlerfunc struct {
 	restHandler
 	docstring string
 }
+
 var httphandlerfuncs = map[string]httphandlerfunc{
-	"latlong/" : httphandlerfunc{latlongHandler, "Latitude, Longitude"},
-	"geohash/":  httphandlerfunc{geohashHandler, "Geohash"},
-	"utm/": httphandlerfunc{utmHandler, "UTM"},
-	"bmn/": httphandlerfunc{bmnHandler, "AT:Bundesmeldenetz"},
-	"osgb/": httphandlerfunc{osgbHandler, "UK:OSGB36"},
+	"latlong/": httphandlerfunc{latlongHandler, "Latitude, Longitude"},
+	"geohash/": httphandlerfunc{geohashHandler, "Geohash"},
+	"utm/":     httphandlerfunc{utmHandler, "UTM"},
+	"bmn/":     httphandlerfunc{bmnHandler, "AT:Bundesmeldenetz"},
+	"osgb/":    httphandlerfunc{osgbHandler, "UK:OSGB36"},
 }
 
 func init() {

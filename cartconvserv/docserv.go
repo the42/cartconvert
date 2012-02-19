@@ -22,9 +22,9 @@ const (
 
 // defines the layout of a documentation page and is used by html/template
 type docPageLayout struct {
-	ConcreteHeading  string
-	APIRoot, DocRoot string  // APIRoot is used for inline examples
-	Navigation       []Link  // 
+	ConcreteHeading  string // Heading for detailed documentation pages
+	APIRoot, DocRoot string // APIRoot is used for inline examples
+	Navigation       []Link // Keeps an url and the text for a href
 }
 
 // user defined APIRoot and DocRoot are constant throughout program execution
@@ -44,10 +44,10 @@ func docHandler(w http.ResponseWriter, req *http.Request) {
 
 	// check if the incoming url is the base url for documentation
 	if base == path.Base(docPage.DocRoot) {
-	  // if the incoming url is the base url for documentation, load the generic help template
+		// if the incoming url is the base url for documentation, load the generic help template
 		filename = docfileroot + docmainTemplate
 	} else {
-	  // else load the specific help template. The filename is constructed from the API function
+		// else load the specific help template. The filename is constructed from the API function
 		filename = docfileroot + base + ".tpl"
 		docPage.ConcreteHeading = httphandlerfuncs[base+"/"].docstring
 	}
@@ -65,6 +65,7 @@ func docHandler(w http.ResponseWriter, req *http.Request) {
 
 func init() {
 
+	// parse all REST handlers and create corresponding documentation links
 	for function, val := range httphandlerfuncs {
 		url, err := url.Parse(function)
 		if err != nil {
@@ -73,5 +74,9 @@ func init() {
 		docitem := Link{URL: url, Documentation: val.docstring}
 		docPage.Navigation = append(docPage.Navigation, docitem)
 	}
+
+	// if documentation is compiled in, we want it included as a link on the main page
+	url, _ := url.Parse(docfileroot)
+	rootLinks = append(rootLinks, Link{URL: url, Documentation: "API Documentation"})
 	http.HandleFunc("/"+docroot(), docHandler)
 }
