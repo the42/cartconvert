@@ -490,7 +490,7 @@ Trailing zeros prevent the automatic averaging towards the rectangles center:
 NN 123 123 means NN 12350 12350 (30V 374160 6237590), whereas
 NN 12300 12300 really specifies the point at NN 12300 12300 (30V 374110 6237539).
 
-if only the
+If only the
 [letter designators](http://en.wikipedia.org/wiki/Ordnance_Survey_National_Grid#Grid_letters) `CC`
 or one additional northing / easting `CC d d` is specified, automatic averaging towards the middle
 of the rectangle is not performed.
@@ -528,26 +528,35 @@ Configuration
 
 ### Stand alone application
 
-Both `URL` (base url to service) and the `APIRoot` (root of the RESTFul API)
-can be configured. The default values are
+Both `URL` (base url to service), `APIRoot` (root of the RESTFul API)
+and DocRoot (root of documentation) can be configured. The default values are
 
 * Binding: `:1111`, that is listening on TCP/IP port 1111
-* APIRoot: `/api/`
+* APIRoot: `api/`
+* DocRoot: `doc/`
 
-which means the RESTFul handlers base Url listen at `:1111/api/`.
+which means the RESTFul handlers base Url listen at `:1111/api/` and documentation is served at `:1111/doc/`
 
-If a file named `config.json` is located within the directory in which the RESTFul service is started,
-the contents gets parsed and the respective default values for `APIRoot` and `Binding` are replaced by
-the corresponding values of keys named `APIRoot` and `Binding`. Example:
+By default, a JSON-encoded file named `config.json` is loaded within the directory in which the RESTFul service is started,
+the contents gets parsed and the respective default values for APIRoot, Binding and DocRoot are replaced by
+the corresponding values of keys named `APIRoot`, `Binding` and `DocRoot`. Example:
 
     {
-        "APIRoot": "/",
+        "APIRoot": "",
         "Binding": "www.example.com:8080"
+        "DocRoot": "doc/"
     }
+
+The command line parameter `--config=<filespec>` appended to the executable overides the location,
+at which the configuration file gets loaded.
 
 A call might look like
 
     http://www.example.com:8080/utm/17T 630084 4833438.xml?&outputformat=bmn
+
+and documentation for UTM transformations is served as
+
+    http://www.example.com:8080/doc/utm/
 
 ### Google App Engine
 Not yet (20120214) tested on GAE.

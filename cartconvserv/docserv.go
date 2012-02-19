@@ -20,11 +20,6 @@ const (
 	docmainTemplate = "index.tpl" // The main documentation file. Other filenames are created from the requested API documentation
 )
 
-type Link struct {
-	*url.URL
-	Documentation string
-}
-
 // defines the layout of a documentation page and is used by html/template
 type docPageLayout struct {
 	ConcreteHeading  string

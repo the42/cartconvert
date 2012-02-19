@@ -15,6 +15,7 @@ import (
 	"github.com/the42/cartconvert/osgb36"
 	"io"
 	"net/http"
+	"net/url"
 	"path"
 )
 
@@ -243,8 +244,7 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "text/xml")
 		enc = xml.NewEncoder(buf)
 	default:
-		http.Error(w, fmt.Sprintf("Unsupported serialization format: '%s'", serialformat), http.StatusInternalServerError)
-		return
+		panic(fmt.Sprintf("Unsupported serialization format: '%s'", serialformat))
 	}
 
 	if err := fn(enc, req, val, oformat); err != nil {
@@ -256,15 +256,18 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	buf.WriteTo(w)
 }
 
+type Link struct {
+	*url.URL
+	Documentation string
+}
+
 func rootHandler(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
 	io.WriteString(w, "Cartography transformation")
 }
 
 // Definition of restful methods: combine API URI with handler method.
 // For every API URI,there may be a corresponding documentation URI
 type httphandlerfunc struct {
-//	function string
 	restHandler
 	docstring string
 }
