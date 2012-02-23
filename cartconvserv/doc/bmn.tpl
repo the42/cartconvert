@@ -8,7 +8,7 @@
     <h1>Documentation</h1>
   </header>
   <nav>{{range .Navigation}}
-    <a href="../{{print .URL}}">{{.Documentation}}</a>{{end}}
+    <a href="../{{.URL}}">{{.Documentation}}</a>{{end}}
   </nav>
   </body>
 </html>
