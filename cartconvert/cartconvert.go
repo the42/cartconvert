@@ -9,10 +9,14 @@ package cartconvert
 import (
 	"fmt"
 	"math"
-	"os"
 	"strconv"
 	"strings"
+	"errors"
 )
+
+// Cartography Errors
+var ErrRange = errors.New("value out of range")
+var ErrSyntax = errors.New("invalid syntax")
 
 // A CartographyError is yielded when a literal can not be parsed as a bearing specifier.
 // In this case the following values may be set and carry the meaning:
@@ -212,7 +216,7 @@ L2:
 			accu = ""
 			break L2
 		default:
-			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
+			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: ErrSyntax}
 		}
 	}
 
@@ -236,7 +240,7 @@ L4:
 			accu = ""
 			break L4
 		default:
-			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
+			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: ErrSyntax}
 		}
 	}
 
@@ -259,11 +263,11 @@ L6:
 			position += i
 
 			if !(position < slen && degree[0] == '\'') {
-				return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
+				return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: ErrSyntax}
 			}
 			break L6
 		default:
-			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
+			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: ErrSyntax}
 		}
 	}
 
@@ -313,7 +317,7 @@ L2:
 			accu = ""
 			break L2
 		default:
-			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
+			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: ErrSyntax}
 		}
 	}
 L4:
@@ -333,12 +337,12 @@ L4:
 			accu = ""
 			break L4
 		default:
-			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
+			return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: ErrSyntax}
 		}
 	}
 
 	if len(accu) > 0 {
-		return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: os.EINVAL}
+		return 0, CartographyError{Val: degf, Index: i, Coord: degree, Err: ErrSyntax}
 	}
 
 	if negate {
@@ -827,7 +831,7 @@ func abase32tobitset(sval, codeset string) (bitset string, err error) {
 	for _, val := range sval {
 		bval = asciiindex(codeset, byte(val))
 		if bval == -1 {
-			return "", os.EINVAL
+			return "", ErrRange
 		}
 		bitset += fmt.Sprintf("%05b", bval)
 	}

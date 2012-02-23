@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"github.com/the42/cartconvert"
 	"math"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -97,18 +96,18 @@ L1:
 
 	zl := len(zone)
 	if zl == 0 || zl > 2 {
-		return nil, os.EINVAL
+		return nil, cartconvert.ErrSyntax
 	}
 
 	ennlen := byte(len(enn))
 	if ennlen > 0 {
 		if ennlen%2 > 0 {
-			return nil, os.EINVAL
+			return nil, cartconvert.ErrRange
 		}
 
 		ennlen /= 2
 		if ennlen > byte(OSGB36_Max) {
-			return nil, os.EINVAL
+			return nil, cartconvert.ErrRange
 		}
 
 		east, err = strconv.Atoi(enn[:ennlen])
@@ -238,7 +237,7 @@ func GridRefNumToLet(easting, northing uint, height float64, prec OSGB36prec) (*
 	northing100k := northing / 100000
 
 	if easting100k < 0 || easting100k > 6 || northing100k < 0 || northing100k > 12 {
-		return nil, os.EINVAL
+		return nil, cartconvert.ErrRange
 	}
 
 	// translate those into numeric equivalents of the grid letters

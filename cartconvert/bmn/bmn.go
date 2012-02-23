@@ -18,7 +18,6 @@ package bmn
 import (
 	"fmt"
 	"github.com/the42/cartconvert"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -112,7 +111,7 @@ L1:
 			case "M34":
 				meridian = BMNM34
 			default:
-				err = os.EINVAL
+				err = cartconvert.ErrSyntax
 				break L1
 			}
 		case 1:
@@ -158,7 +157,7 @@ func BMNToWGS84LatLong(bmncoord *BMNCoord) (*cartconvert.PolarCoord, error) {
 		long0 = 16.0 + 20.0/60.0
 		fe = 750000
 	default:
-		return nil, os.EINVAL
+		return nil, cartconvert.ErrRange
 	}
 
 	gc := cartconvert.InverseTransverseMercator(
@@ -214,7 +213,7 @@ func WGS84LatLongToBMN(gc *cartconvert.PolarCoord, meridian BMNMeridian) (*BMNCo
 		long0 = 16.0 + 20.0/60.0
 		fe = 750000
 	default:
-		return nil, os.EINVAL
+		return nil, cartconvert.ErrRange
 	}
 
 	gp := cartconvert.DirectTransverseMercator(

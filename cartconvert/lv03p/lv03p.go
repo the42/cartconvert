@@ -17,7 +17,6 @@ package lv03p
 import (
 	"fmt"
 	"github.com/the42/cartconvert"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -100,12 +99,12 @@ L1:
 			coordType = LV95
 			heights = compact[2:index]
 		default:
-			err = os.EINVAL
+			err = cartconvert.ErrSyntax
 			break L1
 		}
 
 		if oldcoordType != coordType {
-			err = os.EINVAL
+			err = cartconvert.ErrSyntax
 			break L1
 		}
 
@@ -146,7 +145,7 @@ func SwissCoordToGRS80LatLong(coord *SwissCoord) (*cartconvert.PolarCoord, error
 		fe = -2600000
 		fn = -1200000
 	default:
-		return nil, os.EINVAL
+		return nil, cartconvert.ErrRange
 	}
 
 	gc := cartconvert.InverseTransverseMercator(
@@ -195,7 +194,7 @@ func GRS80LatLongToSwissCoord(gc *cartconvert.PolarCoord, coordType SwissCoordTy
 		fe = -2600000
 		fn = -1200000
 	default:
-		return nil, os.EINVAL
+		return nil, cartconvert.ErrRange
 	}
 
 	gp := cartconvert.DirectTransverseMercator(
