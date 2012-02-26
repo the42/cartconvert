@@ -77,6 +77,6 @@ func init() {
 
 	// if documentation is compiled in, we want it included as a link on the main page
 	url, _ := url.Parse(docfileroot)
-	rootLinks = append(rootLinks, Link{URL: url, Documentation: "API Documentation"})
+	docrootLinks = append(docrootLinks, Link{URL: url, Documentation: "API Documentation"})
 	http.HandleFunc("/"+docroot(), docHandler)
 }

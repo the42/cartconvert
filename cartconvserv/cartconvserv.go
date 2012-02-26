@@ -261,7 +261,9 @@ type Link struct {
 	Documentation string
 }
 
-var rootLinks []Link
+// docrootLinks gets initialized in docserv.go. It is used here to display a welcome screen
+// with reference to documentation (if there is any) in the future
+var docrootLinks []Link
 
 func rootHandler(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, "Cartography transformation")
