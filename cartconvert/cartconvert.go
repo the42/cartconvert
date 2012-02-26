@@ -7,11 +7,11 @@
 package cartconvert
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
 	"strings"
-	"errors"
 )
 
 // Cartography Errors
