@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"github.com/the42/cartconvert"
 	"math"
-	"os"
 	"testing"
 )
 
@@ -62,7 +61,7 @@ var aSwissCoordToStructTests = []aSwissCoordToStruct{
 		in: "x:25 y:34.3", out: aSwissCoordToStructretparam{coord: &SwissCoord{Easting: 34.3, Northing: 25, CoordType: LV03}, err: nil},
 	},
 	{
-		in: "x:25.0 N:34.3", out: aSwissCoordToStructretparam{coord: nil, err: os.EINVAL},
+		in: "x:25.0 N:34.3", out: aSwissCoordToStructretparam{coord: nil, err: cartconvert.ErrSyntax},
 	},
 }
 
