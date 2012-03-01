@@ -4,6 +4,7 @@
 
 // RESTFul interface for coordinate transformations - documentation part
 
+// +build !nodoc
 package main
 
 import (
@@ -64,7 +65,6 @@ func docHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func init() {
-
 	// parse all REST handlers and create corresponding documentation links
 	for function, val := range httphandlerfuncs {
 		url, err := url.Parse(function)

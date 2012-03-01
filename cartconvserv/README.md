@@ -567,7 +567,11 @@ Not yet (20120214) tested on GAE.
 Installation
 ------------
 
-go get github.com/the42/cartconv/cartconvserv
+    go get github.com/the42/cartconv/cartconvserv
+
+If you do not want documentation for the API fucntions, execute 
+
+    go get -t=nodoc github.com/the42/cartconv/cartconvserv
 
 
 Test
