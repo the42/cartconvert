@@ -1,5 +1,5 @@
 {
-        "APIRoot": "api/",
+        "APIRoot": "/api/",
         "Binding": ":1111",
-	"DocRoot": "doc/"
+	"DocRoot": "/doc/"
 }

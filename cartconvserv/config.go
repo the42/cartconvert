@@ -24,7 +24,7 @@ type config struct {
 	Binding string
 }
 
-var conf = &config{APIRoot: "api/", DocRoot: "doc/", Binding: ":1111"}
+var conf = &config{APIRoot: "/api/", DocRoot: "/doc/", Binding: ":1111"}
 
 func readConfig(filename string, conf *config) {
 	b, err := ioutil.ReadFile(filename)

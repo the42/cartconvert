@@ -532,8 +532,8 @@ Both `URL` (base url to service), `APIRoot` (root of the RESTFul API)
 and DocRoot (root of documentation) can be configured. The default values are
 
 * Binding: `:1111`, that is listening on TCP/IP port 1111
-* APIRoot: `api/`
-* DocRoot: `doc/`
+* APIRoot: `/api/`
+* DocRoot: `/doc/`
 
 which means the RESTFul handlers base Url listen at `:1111/api/` and documentation is served at `:1111/doc/`
 
@@ -542,9 +542,9 @@ the contents gets parsed and the respective default values for APIRoot, Binding 
 the corresponding values of keys named `APIRoot`, `Binding` and `DocRoot`. Example:
 
     {
-        "APIRoot": "myapi/",
+        "APIRoot": "/myapi/",
         "Binding": "www.example.com:8080"
-        "DocRoot": "doc/"
+        "DocRoot": "/doc/"
     }
 
 The command line parameter `--config=<filespec>` appended to the executable overides the location,

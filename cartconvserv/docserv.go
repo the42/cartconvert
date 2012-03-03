@@ -17,8 +17,8 @@ import (
 
 // These constants specifiy the directory in which the documentation files are saved
 const (
-	docfileroot     = "doc/"
 	docmainTemplate = "index.tpl" // The main documentation file. Other filenames are created from the requested API documentation
+	docfileroot ="./doc/"
 )
 
 // defines the layout of a documentation page and is used by html/template
@@ -76,7 +76,8 @@ func init() {
 	}
 
 	// if documentation is compiled in, we want it included as a link on the main page
-	url, _ := url.Parse(docfileroot)
-	docrootLinks = append(docrootLinks, Link{URL: url, Documentation: "API Documentation"})
-	http.HandleFunc("/"+docroot(), docHandler)
+
+	url, _ := url.Parse(docroot())
+	docrootLink = &Link{URL: url, Documentation: "API Documentation"}
+	http.HandleFunc(url.String(), docHandler)
 }
