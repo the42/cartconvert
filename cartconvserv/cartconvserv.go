@@ -265,8 +265,56 @@ type Link struct {
 // with reference to documentation (if there is any) in the future
 var docrootLinks []Link
 
+const rootPage = `<!DOCTYPE HTML>
+<html>
+<head>
+  <h1>Cartconvert - Online cartography transformation</h1>
+  <heading>
+    This service provides a RESTFul API to perform cartography transformations.
+  </heading>
+  <nav>
+    <p>
+      <!-- TODO: set API root by template -->
+      <a href="/api/">The API</a>
+      </br>
+      <!-- TODO: set DOC root by template -->
+      <a href="/doc/">Documentation</a>
+    </p>
+  </nav>
+</head>
+<body>
+</body>
+</html>`
+
 func rootHandler(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "Cartography transformation")
+	io.WriteString(w, rootPage)
+}
+
+const apiPage = `<!DOCTYPE HTML>
+<html>
+<head>
+  <h1>Cartconvert - API page</h1>
+  <heading>
+    Root of API services
+  </heading>
+  <nav>
+    <p>
+      <a href="/">Back to main page</a>
+    </p>
+    <p>
+      <!-- 
+      <!-- TODO: iterate over APIs in a sorted manner a href="{{.APIRoot}}">The API</a> -->
+      <!-- TODO: set DOC root by template -->
+      <a href="/doc/">{{.DocRoot}}Documentation</a>
+    </p>
+  </nav>
+</head>
+<body>
+</body>
+</html>`
+
+func apiHandler(w http.ResponseWriter, req *http.Request) {
+	io.WriteString(w, apiPage)
 }
 
 // Definition of restful methods: combine API URI with handler method.
@@ -289,6 +337,7 @@ func init() {
 	apiroot := apiroot()
 
 	http.HandleFunc("/", rootHandler)
+	http.HandleFunc("/"+apiroot, apiHandler)
 
 	for function, handle := range httphandlerfuncs {
 		http.Handle("/"+apiroot+function, handle.restHandler)
