@@ -13,10 +13,12 @@ import (
 	"github.com/the42/cartconvert"
 	"github.com/the42/cartconvert/bmn"
 	"github.com/the42/cartconvert/osgb36"
+	"html/template"
 	"io"
 	"net/http"
 	"net/url"
 	"path"
+	"strconv"
 )
 
 // supported serialization formats
@@ -256,43 +258,67 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	buf.WriteTo(w)
 }
 
+// --------------------------------------------------------------------
+// http part of the restful service: Templates, cache-variables, ...
+//
 type Link struct {
 	*url.URL
 	Documentation string
 }
 
 // docrootLinks gets initialized in docserv.go. It is used here to display a welcome screen
-// with reference to documentation (if there is any) in the future
-var docrootLinks []Link
+// with reference to documentation (if there is any)
+var docrootLink *Link
+var pageCache []*template.Template
+
+type apidocpageLayout struct {
+	APIRoot string
+	APIRefs []Link
+	DOCRoot *Link
+}
 
 const rootPage = `<!DOCTYPE HTML>
 <html>
 <head>
+  <title>Cartconvert - Online cartography transformation</title>
+</head>
+<body>
   <h1>Cartconvert - Online cartography transformation</h1>
   <heading>
     This service provides a RESTFul API to perform cartography transformations.
   </heading>
   <nav>
     <p>
-      <!-- TODO: set API root by template -->
-      <a href="/api/">The API</a>
-      </br>
-      <!-- TODO: set DOC root by template -->
-      <a href="/doc/">Documentation</a>
+      <a href="{{.APIRoot}}">The API</a>
+    </p>
+    <p>
+      <!-- TODO: set DOC root by template only when documentation is part of the prog -->
+      <a href="{{.DOCRoot.URL}}">{{.DOCRoot.Documentation}}</a>
     </p>
   </nav>
-</head>
-<body>
 </body>
 </html>`
 
 func rootHandler(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, rootPage)
+	tpl := template.Must(template.New("root").Parse(rootPage))
+	apiroot := apiroot()
+	rootpage := &apidocpageLayout{APIRoot: apiroot, DOCRoot: docrootLink}
+
+	buf := new(bytes.Buffer)
+	if err := tpl.Execute(buf, rootpage); err != nil {
+		http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
+	buf.WriteTo(w)
 }
 
 const apiPage = `<!DOCTYPE HTML>
 <html>
 <head>
+  <title>Cartconvert - API page</title>
+</head>
+<body>
   <h1>Cartconvert - API page</h1>
   <heading>
     Root of API services
@@ -304,12 +330,10 @@ const apiPage = `<!DOCTYPE HTML>
     <p>
       <!-- 
       <!-- TODO: iterate over APIs in a sorted manner a href="{{.APIRoot}}">The API</a> -->
-      <!-- TODO: set DOC root by template -->
-      <a href="/doc/">{{.DocRoot}}Documentation</a>
+      <!-- TODO: set DOC root by template only when documentation is part of the prog -->
+      <a href="{{.DOCRoot.URL}}">{{.DOCRoot.Documentation}}</a>
     </p>
   </nav>
-</head>
-<body>
 </body>
 </html>`
 
@@ -337,9 +361,9 @@ func init() {
 	apiroot := apiroot()
 
 	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/"+apiroot, apiHandler)
+	http.HandleFunc(apiroot, apiHandler)
 
 	for function, handle := range httphandlerfuncs {
-		http.Handle("/"+apiroot+function, handle.restHandler)
+		http.Handle(apiroot+function, handle.restHandler)
 	}
 }
