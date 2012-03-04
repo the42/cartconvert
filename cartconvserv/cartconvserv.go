@@ -14,7 +14,6 @@ import (
 	"github.com/the42/cartconvert/bmn"
 	"github.com/the42/cartconvert/osgb36"
 	"html/template"
-	"io"
 	"net/http"
 	"net/url"
 	"path"
@@ -270,6 +269,7 @@ type Link struct {
 // docrootLinks gets initialized in docserv.go. It is used here to display a welcome screen
 // with reference to documentation (if there is any)
 var docrootLink *Link
+var apirootLink string
 var pageCache []*template.Template
 
 type apidocpageLayout struct {
@@ -292,19 +292,16 @@ const rootPage = `<!DOCTYPE HTML>
     <p>
       <a href="{{.APIRoot}}">The API</a>
     </p>
-    <p>
-      <!-- TODO: set DOC root by template only when documentation is part of the prog -->
+    {{if .DOCRoot}}<p>
       <a href="{{.DOCRoot.URL}}">{{.DOCRoot.Documentation}}</a>
-    </p>
+    </p>{{end}}
   </nav>
 </body>
 </html>`
 
-
 func rootHandler(w http.ResponseWriter, req *http.Request) {
 	tpl := template.Must(template.New("root").Parse(rootPage))
-	apiroot := apiroot()
-	rootpage := &apidocpageLayout{APIRoot: apiroot, DOCRoot: docrootLink}
+	rootpage := &apidocpageLayout{APIRoot: apirootLink, DOCRoot: docrootLink}
 
 	buf := new(bytes.Buffer)
 	if err := tpl.Execute(buf, rootpage); err != nil {
@@ -328,19 +325,30 @@ const apiPage = `<!DOCTYPE HTML>
   <nav>
     <p>
       <a href="/">Back to main page</a>
-    </p>
-    <p>
-      <!-- 
-      <!-- TODO: iterate over APIs in a sorted manner a href="{{.APIRoot}}">The API</a> -->
-      <!-- TODO: set DOC root by template only when documentation is part of the prog -->
-      <a href="{{.DOCRoot.URL}}">{{.DOCRoot.Documentation}}</a>
+    </p>    
+    {{range .APIRefs}}<p>
+      <a href="{{with $.DOCRoot}}{{.}}{{end}}{{.URL}}">{{.Documentation}}</a>{{end}}
     </p>
   </nav>
 </body>
 </html>`
 
 func apiHandler(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, apiPage)
+	tpl := template.Must(template.New("api").Parse(apiPage))
+	apipage := &apidocpageLayout{APIRoot: apirootLink, DOCRoot: docrootLink}
+	for key, val := range httphandlerfuncs {
+		url, _ := url.Parse(key)
+		linkitem := Link{URL: url, Documentation: val.docstring}
+		apipage.APIRefs = append(apipage.APIRefs, linkitem)
+	}
+
+	buf := new(bytes.Buffer)
+	if err := tpl.Execute(buf, apipage); err != nil {
+		http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
+	buf.WriteTo(w)
 }
 
 // Definition of restful methods: combine API URI with handler method.
@@ -360,12 +368,12 @@ var httphandlerfuncs = map[string]httphandlerfunc{
 
 func init() {
 
-	apiroot := apiroot()
+	apirootLink = apiroot()
 
 	http.HandleFunc("/", rootHandler)
-	http.HandleFunc(apiroot, apiHandler)
+	http.HandleFunc(apirootLink, apiHandler)
 
 	for function, handle := range httphandlerfuncs {
-		http.Handle(apiroot+function, handle.restHandler)
+		http.Handle(apirootLink+function, handle.restHandler)
 	}
 }
