@@ -58,10 +58,14 @@ func docHandler(w http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	err = tpl.Execute(w, docPage)
+	buf := new(bytes.Buffer)
+	err = tpl.Execute(buf, docPage)
 	if err != nil {
 		panic(err)
 	}
+
+	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
+	buf.WriteTo(w)
 }
 
 func init() {

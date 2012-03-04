@@ -255,6 +255,7 @@ func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		enc.Encode(&Error{Error: fmt.Sprint(err)})
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
 	buf.WriteTo(w)
 }
 
@@ -298,6 +299,7 @@ const rootPage = `<!DOCTYPE HTML>
   </nav>
 </body>
 </html>`
+
 
 func rootHandler(w http.ResponseWriter, req *http.Request) {
 	tpl := template.Must(template.New("root").Parse(rootPage))
