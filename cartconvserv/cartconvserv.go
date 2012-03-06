@@ -214,13 +214,20 @@ func osgbHandler(enc Encoder, req *http.Request, osgb36strval, oformat string) (
 //    oformat: requested transformation representation, eg. utm, geohash
 type restHandler func(enc Encoder, req *http.Request, value, oformat string) error
 
+const httperrorstr = "An error occurred: %s"
+
 func (fn restHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	// API error handler 
 	// Recover from panic by setting http error 500 and letting the user know the reason
 	defer func() {
 		if err := recover(); err != nil {
-			http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
+			buf := fmt.Sprintf(httperrorstr, err)
+			// There is probably a bug in the http-Server which prevents sending the body 
+			// if Content-Length is set. Comment it out for now but follow the bug,
+			// as we want to prevent chunked encoding
+			// w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
+			http.Error(w, buf, http.StatusInternalServerError)
 		}
 	}()
 
