@@ -38,7 +38,9 @@ func docHandler(w http.ResponseWriter, req *http.Request) {
 	// Error handler for documentation	
 	defer func() {
 		if err := recover(); err != nil {
-			http.Error(w, "An error occurred: "+fmt.Sprint(err), http.StatusInternalServerError)
+			buf := fmt.Sprintf(httperrorstr, err)
+			w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
+			http.Error(w, buf, http.StatusInternalServerError)
 		}
 	}()
 
