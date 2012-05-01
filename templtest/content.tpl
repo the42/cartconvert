@@ -1,3 +1,0 @@
-{.repeated section Items}
-{@}
-{.end}
