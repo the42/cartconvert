@@ -801,7 +801,6 @@ func utmLetterDesignator(Lat float64) (LetterDesignator byte) {
 	default:
 		LetterDesignator = 'Z' //  error flag to show that the Latitude is outside the UTM limits
 	}
-
 	return
 }
 
@@ -853,7 +852,6 @@ func round(val float64, prec int) float64 {
 	return rounder / math.Pow(10, float64(prec))
 }
 
-// 
 func decodegeohashbitset(bitset string, floor, ceiling float64) float64 {
 	mid := 0.0
 	// calculate the mean error for improved rounding 
@@ -869,7 +867,6 @@ func decodegeohashbitset(bitset string, floor, ceiling float64) float64 {
 			ceiling = mid
 		}
 	}
-	// rounding according to 
 	return round(mid, int(math.Max(1.0, -round(math.Log10(err), 0))-1))
 }
 
@@ -879,9 +876,6 @@ func decodegeohashbitset(bitset string, floor, ceiling float64) float64 {
 func GeoHashToLatLong(geohash string, el *Ellipsoid) (pc *PolarCoord, err error) {
 
 	var bitfield, lats, longs string
-
-	// TODO: This uses a very inefficient implemenation of strings for bitfields
-
 	// base32 to bitfield
 	bitfield, err = abase32tobitset(geohash, Base32GeohashCode)
 	if err != nil {
@@ -983,13 +977,12 @@ func LatLongToGeoHash(pc *PolarCoord) string {
 // Return a geohased representation of a latitude & longitude bearing point using bits precision.
 // If bits is 0 or larger than 30, it is set to a maximum of 30 bits
 func LatLongToGeoHashBits(pc *PolarCoord, bits byte) string {
+	var accu, bitstring string
+	latbits, longbits := bits, bits
 
 	if bits == 0 || bits > 30 {
 		bits = 30
 	}
-
-	var accu, bitstring string
-	latbits, longbits := bits, bits
 
 	for addlong := byte(1); (longbits+latbits)%5 != 0; addlong = (addlong + 1) % 2 {
 		longbits += addlong % 2

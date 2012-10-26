@@ -44,8 +44,8 @@ All features provided by the package are covered by test cases.
 Room for improvement
 ---------------------
 The Geohashing implementation uses a well working yet inefficient implementation
-of bitsets using strings. It would be good to replace this with a set of bitwise
-operations on integers or use a (yet to emerge?) bit package
+of bitsets using strings. It would be good to either replace this operations with
+a set of bitwise operations on integers or use a dedicated bit package.
 
 Implementation details
 ----------------------

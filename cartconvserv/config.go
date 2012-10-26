@@ -2,9 +2,9 @@
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
-// RESTFul interface for coordinate transformations - configuration for stand alone server
-
 // +build !appengine
+
+// RESTFul interface for coordinate transformations - configuration for stand alone server
 package main
 
 import (
