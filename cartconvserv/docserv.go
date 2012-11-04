@@ -54,7 +54,7 @@ func docHandler(w http.ResponseWriter, req *http.Request) {
 	} else {
 		// else load the specific help template. The filename is constructed from the API function
 		filename = docfileroot + base + ".tpl"
-		docPage.ConcreteHeading = httphandlerfuncs[base+"/"].docstring
+		docPage.ConcreteHeading = httphandlerfuncs[base].docstring
 	}
 
 	tpl, err := template.ParseFiles(filename)
@@ -74,10 +74,10 @@ func docHandler(w http.ResponseWriter, req *http.Request) {
 
 func init() {
 	// parse all REST handlers and create corresponding documentation links
-	for function, val := range httphandlerfuncs {
-		url, err := url.Parse(function)
+	for _, val := range httphandlerfuncs {
+		url, err := url.Parse(val.method)
 		if err != nil {
-			panic(fmt.Sprintf("%s: %s is not a valid url", err.Error(), function))
+			panic(fmt.Sprintf("%s: %s is not a valid url", err.Error(), val.method))
 		}
 		docitem := Link{URL: url, Documentation: val.docstring}
 		docPage.Navigation = append(docPage.Navigation, docitem)

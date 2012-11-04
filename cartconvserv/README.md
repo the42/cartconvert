@@ -64,23 +64,38 @@ Note: When running on GAE, the port may not be specified!
 
 Output serialized as XML:
 
-    <LatLong>
-      <Lat>N 43°38'33.22''</Lat>
-      <Long>W 79°23'13.71''</Long>
-      <Fmt>LLFdms</Fmt>
-      <LatLongString>lat: 43.642562°, long: -79.387143°</LatLongString>
-    </LatLong>
+    <GEOConvertResponse>
+      <Status/>
+      <Code>0</Code>
+      <Error>false</Error>
+      <GEOConvertRequest>
+	<Method>utm/</Method>
+	<Values>
+	  <Key>outputformat</Key>
+	  <Values>latlongdeg</Values>
+	</Values>
+      </GEOConvertRequest>
+      <Payload>
+	<Lat>S 46°38'23.97''</Lat>
+	<Long>W 175°18'1.13''</Long>
+	<Fmt>LLFdms</Fmt>
+	<LatLongString>lat: -46.639992°, long: -175.300313°</LatLongString>
+      </Payload>
+    </GEOConvertResponse>
 
 Call
     http://localhost:1111/api/utm/17 630084 4833438.json?outputformat=latlongdeg
 
 Output serialized as JSON:
 
-    {"Lat":"N 43°38'33.22''",
-     "Long":"W 79°23'13.71''",
-     "Fmt":"LLFdms",
-     "LatLongString":"lat: 43.642562°, long: -79.387143°"}
+   {"Status":"",
+    "Code":0,
+    "Error":false,
+    "GEOConvertRequest": {"Method":"utm/","Values":[{"Key":"outputformat","Values":["latlongdeg"]}]},
+    "Payload":{"Lat":"S 46°38'23.97''","Long":"W 175°18'1.13''","Fmt":"LLFdms","LatLongString":"lat: -46.639992°, long: -175.300313°"}}
 
+* GEOConvertRequest Contains the request parameters and API method
+* Payload contains the methods result:
 * Lat, Long: Latitude, Longitude of converted coordinate, in degrees. Full
   degrees are separated by "°" from the minutes, which are separated by " ' " from
   the seconds, which are postfixed by " '' ". All zero minutes or seconds are
@@ -99,13 +114,28 @@ Call
 
 Output serialized as XML:
 
-    <LatLong>
-      <Lat>43.642562</Lat>
-      <Long>-79.387143</Long>
-      <Fmt>LLFdeg</Fmt>
-      <LatLongString>lat: 43.642562°, long: -79.387143°</LatLongString>
-    </LatLong>
+    <GEOConvertResponse>
+      <Status/>
+      <Code>0</Code>
+      <Error>false</Error>
+      <GEOConvertRequest>
+	<Method>utm/</Method>
+	<Values>
+	  <Key>outputformat</Key>
+	  <Values>latlongcomma</Values>
+	</Values>
+      </GEOConvertRequest>
+      <Payload>
+	<Lat>43.642562</Lat>
+	<Long>-79.387143</Long>
+	<Fmt>LLFdeg</Fmt>
+	<LatLongString>lat: 43.642562°, long: -79.387143°</LatLongString>
+      </Payload>
+    </GEOConvertResponse>
 
+* The whole result is wrapped into a GEOConvertResponse-envelope (this is true for every XML-Response)
+* GEOConvertRequest Contains the request parameters and API method
+* Payload contains the methods result:
 * Lat, Long: Latitude, Longitude of converted coordinate, in decimal degrees.
 * Fmt: For serialization as a decimal, the string "LLFdeg"
 
@@ -118,7 +148,12 @@ Call
 
 Output serialized as JSON:
 
-    {"GeoHash":"dpz838bh37pv"}
+    {"Status":"",
+    "Code":0,
+    "Error":false,
+    "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["geohash"]}]},
+    "Payload":{"GeoHash":"dpz838bh37pv"}}
+
 
 Call
 
@@ -126,9 +161,21 @@ Call
 
 Output serialized as XML:
 
-    <GeoHash>
-      <GeoHash>dpz838bh37pv</GeoHash>
-    </GeoHash>
+    <GEOConvertResponse>
+      <Status/>
+      <Code>0</Code>
+      <Error>false</Error>
+      <GEOConvertRequest>
+	<Method>utm/</Method>
+	<Values>
+	  <Key>outputformat</Key>
+	  <Values>geohash</Values>
+	</Values>
+      </GEOConvertRequest>
+      <Payload>
+	<GeoHash>dpz838bh37pv</GeoHash>
+      </Payload>
+    </GEOConvertResponse>
 
 
 ### Output requested as [BMN](http://homepage.ntlworld.com/anton.helm/bmn_mgi.html)
@@ -140,11 +187,21 @@ Call
 
 Output
 
-This call returns with status code 500: Internal server error: Invalid argument
+This call returns with status code 500: Internal server error
+and sets Error to true
 
-    <Error>
-      <Error>invalid argument</Error>
-    </Error>
+    <GEOConvertResponse>
+      <Status>value out of range</Status>
+      <Code>0</Code>
+      <Error>true</Error>
+      <GEOConvertRequest>
+	<Method>utm/</Method>
+	<Values>
+	  <Key>outputformat</Key>
+	  <Values>bmn</Values>
+	</Values>
+      </GEOConvertRequest>
+    </GEOConvertResponse>
 
 In case of
 
@@ -152,7 +209,12 @@ In case of
 
 the return would be
 
-    {"Error":"invalid argument"}
+    {"Status":
+    "value out of range",
+    "Code":0,
+    "Error":true,
+    "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["bmn"]}]},
+    "Payload":null}
 
 The reason is the requested serialization as a BMN bearing, which has only a
 valid representation within the longitude of 8°50' and 17°50'. Errors get
@@ -165,18 +227,30 @@ Call
 
 Output serialized as XML:
 
-    <BMN>
-      <BMNCoord>
-        <Right>517965.58808025334</Right>
-        <Height>270554.81500793993</Height>
-        <RelHeight>0</RelHeight>
-        <Meridian>2</Meridian>
-        <El>
-          <CommonName>Bessel1841MGI</CommonName>
-        </El>
-      </BMNCoord>
-      <BMNString>M31 517966 270555</BMNString>
-    </BMN>
+    <GEOConvertResponse>
+      <Status/>
+      <Code>0</Code>
+      <Error>false</Error>
+      <GEOConvertRequest>
+	<Method>utm/</Method>
+	<Values>
+	  <Key>outputformat</Key>
+	  <Values>bmn</Values>
+	</Values>
+      </GEOConvertRequest>
+      <Payload>
+	<BMNCoord>
+	  <Right>517965.58808025334</Right>
+	  <Height>270554.81500793993</Height>
+	  <RelHeight>0</RelHeight>
+	  <Meridian>2</Meridian>
+	  <El>
+	    <CommonName>Bessel1841MGI</CommonName>
+	  </El>
+	</BMNCoord>
+	<BMNString>M31 517966 270555</BMNString>
+      </Payload>
+    </GEOConvertResponse>
 
 The reference ellipsoid of a BMN bearing is always the
 [Bessel1841MGI](http://de.wikipedia.org/wiki/Geod%C3%A4tisches_Datum#Deutschland_und_.C3.96sterreich)
@@ -188,7 +262,16 @@ Call
 
 Output serialized as JSON:
 
-    {"BMNCoord":{"Right":517965.58808025334,"Height":270554.81500793993,"RelHeight":0,"Meridian":2,"El":{"CommonName":"Bessel1841MGI"}},"BMNString":"M31 517966 270555"}
+    {"Status":"",
+      "Code":0,
+      "Error":false,
+      "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["bmn"]}]},
+      "Payload":
+	  {"BMNCoord":
+	      {"Right":517965.58808025334,"Height":270554.81500793993,"RelHeight":0,"Meridian":2,"El":{"CommonName":"Bessel1841MGI"}},
+	      "BMNString":"M31 517966 270555"
+	  }
+      }
 
 
 ### Output requested as [OSGB36](http://en.wikipedia.org/wiki/OSGB)
@@ -199,18 +282,30 @@ Call
 
 Output serialized as XML:
 
-    <OSGB36>
-      <OSGB36Coord>
-        <Easting>13862</Easting>
-        <Northing>59718</Northing>
-        <RelHeight>0</RelHeight>
-        <Zone>TR</Zone>
-        <El>
-           <CommonName>Airy1830</CommonName>
-        </El>
-      </OSGB36Coord>
-      <OSGB36String>TR1386259718</OSGB36String>
-    </OSGB36>
+    <GEOConvertResponse>
+      <Status/>
+      <Code>0</Code>
+      <Error>false</Error>
+      <GEOConvertRequest>
+	<Method>utm/</Method>
+	<Values>
+	  <Key>outputformat</Key>
+	  <Values>osgb</Values>
+	</Values>
+      </GEOConvertRequest>
+      <Payload>
+	<OSGB36Coord>
+	  <Easting>13862</Easting>
+	  <Northing>59718</Northing>
+	  <RelHeight>0</RelHeight>
+	  <Zone>TR</Zone>
+	  <El>
+	    <CommonName>Airy1830</CommonName>
+	  </El>
+	</OSGB36Coord>
+	<OSGB36String>TR1386259718</OSGB36String>
+      </Payload>
+    </GEOConvertResponse>
 
 The reference ellipsoid of a OSGB36 bearing is always the
 [Airy1830](http://en.wikipedia.org/wiki/Ordnance_Survey_National_Grid#General)
@@ -244,12 +339,24 @@ Call
 
 Output serialized as XML:
 
-    <LatLong>
-      <Lat>N 57°38'56.8''</Lat>
-      <Long>E 10°24'26.78''</Long>
-      <Fmt>LLFdms</Fmt>
-      <LatLongString>lat: 57.649112°, long: 10.40744°</LatLongString>
-    </LatLong>
+    <GEOConvertResponse>
+      <Status/>
+      <Code>0</Code>
+      <Error>false</Error>
+      <GEOConvertRequest>
+	<Method>geohash/</Method>
+	<Values>
+	  <Key>outputformat</Key>
+	  <Values>latlongdeg</Values>
+	</Values>
+      </GEOConvertRequest>
+      <Payload>
+	<Lat>N 57°38'56.8''</Lat>
+	<Long>E 10°24'26.78''</Long>
+	<Fmt>LLFdms</Fmt>
+	<LatLongString>lat: 57.649112°, long: 10.40744°</LatLongString>
+      </Payload>
+    </GEOConvertResponse>
 
 Call
 
@@ -257,7 +364,12 @@ Call
 
 Output serialized as JSON:
 
-    {"Lat":"42.6","Long":"-5.6","Fmt":"LLFdeg","LatLongString":"lat: 42.6°, long: -5.6°"}
+    {"Status":"",
+    "Code":0,
+    "Error":false,
+    "GEOConvertRequest":
+      {"Method":"geohash/","Values":[{"Key":"outputformat","Values":["latlongcomma"]}]},
+    "Payload":{"Lat":"42.6","Long":"-5.6","Fmt":"LLFdeg","LatLongString":"lat: 42.6°, long: -5.6°"}}
 
 
 Latitude / Longitude - Conversions
@@ -272,7 +384,11 @@ Call
 
 Output:
 
-    {"Error":"Latlong doesn't accept an input value. Use parameters instead"}
+   {"Status":"Latlong doesn't accept an input value. Use the parameters 'lat' and 'long' instead",
+    "Code":0,
+    "Error":true,
+    "GEOConvertRequest":{"Method":"latlong/","Values":[{"Key":"lat","Values":["47.57°"]},{"Key":"outputformat","Values":["utm"]},{"Key":"long","Values":["14.23°"]}]},
+    "Payload":null}
 
 Parameters:
 
@@ -365,16 +481,45 @@ Note the mix of fractions of degrees (long=14°0'27'') and decimal fractions
 
 Output:
 
-    {"Lat":"N 47°34'12''","Long":"E 14°0'23''","Fmt":"LLFdms","LatLongString":"lat: 47.57°, long: 14.006389°"}
+    {"Status":"",
+     "Code":0,
+     "Error":false,
+     "GEOConvertRequest":{"Method":"latlong/","Values":[{"Key":"lat","Values":["47.57°"]},{"Key":"outputformat","Values":["latlongdeg"]},{"Key":"long","Values":["14°0'27''"]}]},
+     "Payload":{"Lat":"N 47°34'12''","Long":"E 14°0'27''","Fmt":"LLFdms","LatLongString":"lat: 47.57°, long: 14.0075°"}}
 
-    {"UTMCoord":{"Northing":5.268986550533157e+06,"Easting":425351.161981314,"Zone":"33T","El":{"CommonName":"WGS84"}},"UTMString":"33T 425351 5268987"}
 
-    <LatLong>
-      <Lat>47.57</Lat>
-      <Long>14.0075</Long>
-      <Fmt>LLFdeg</Fmt>
-      <LatLongString>lat: 47.57°, long: 14.0075°</LatLongString>
-    </LatLong>
+    {"Status":"",
+     "Code":0,
+     "Error":false,
+     "GEOConvertRequest":{"Method":"latlong/","Values":[{"Key":"lat","Values":["47.57°"]},{"Key":"long","Values":["14°0'27''"]},{"Key":"outputformat","Values":["utm"]}]},
+     "Payload":{"UTMCoord":{"Northing":5.268986550533157e+06,"Easting":425351.161981314,"Zone":"33T","El":{"CommonName":"WGS84"}},"UTMString":"33T 425351 5268987"}}
+
+    <GEOConvertResponse>
+      <Status/>
+      <Code>0</Code>
+      <Error>false</Error>
+      <GEOConvertRequest>
+	<Method>latlong/</Method>
+	<Values>
+	  <Key>lat</Key>
+	  <Values>47.57°</Values>
+	</Values>
+	<Values>
+	  <Key>outputformat</Key>
+	  <Values>latlongcomma</Values>
+	</Values>
+	<Values>
+	  <Key>long</Key>
+	  <Values>14°0'27''</Values>
+	</Values>
+      </GEOConvertRequest>
+      <Payload>
+	<Lat>47.57</Lat>
+	<Long>14.0075</Long>
+	<Fmt>LLFdeg</Fmt>
+	<LatLongString>lat: 47.57°, long: 14.0075°</LatLongString>
+      </Payload>
+    </GEOConvertResponse>
 
 
 BMN - Conversions
@@ -413,7 +558,11 @@ Call
 
 Output serialized as JSON:
 
-    {"Lat":"N 48°30'25.2''","Long":"E 15°41'55.49''","Fmt":"LLFdms","LatLongString":"lat: 48.507001°, long: 15.698748°"}
+    {"Status":"",
+     "Code":0,
+     "Error":false,
+     "GEOConvertRequest":{"Method":"bmn/","Values":[{"Key":"outputformat","Values":["latlongdeg"]}]},
+     "Payload":{"Lat":"N 48°30'25.2''","Long":"E 15°41'55.49''","Fmt":"LLFdms","LatLongString":"lat: 48.507001°, long: 15.698748°"}}
 
 Call
 
@@ -421,15 +570,29 @@ Call
 
 Output serialized as XML:
 
-    <UTMCoord>
-      <UTMCoord>
-        <Northing>5.372889492316671e+06</Northing>
-        <Easting>551610.575844678</Easting>
-        <Zone>33U</Zone>
-        <El><CommonName>WGS84</CommonName></El>
-      </UTMCoord>
-      <UTMString>33U 551611 5372889</UTMString>
-    </UTMCoord>
+    <GEOConvertResponse>
+      <Status/>
+      <Code>0</Code>
+      <Error>false</Error>
+      <GEOConvertRequest>
+	<Method>bmn/</Method>
+	<Values>
+	  <Key>outputformat</Key>
+	  <Values>utm</Values>
+	</Values>
+      </GEOConvertRequest>
+      <Payload>
+	<UTMCoord>
+	  <Northing>5.372889492316671e+06</Northing>
+	  <Easting>551610.575844678</Easting>
+	  <Zone>33U</Zone>
+	  <El>
+	    <CommonName>WGS84</CommonName>
+	  </El>
+	</UTMCoord>
+	<UTMString>33U 551611 5372889</UTMString>
+      </Payload>
+    </GEOConvertResponse>
 
 
 OSGB36 - Conversions
@@ -502,7 +665,11 @@ Call
 
 Output serialized as JSON:
 
-    {"OSGB36Coord":{"Easting":12350,"Northing":12350,"RelHeight":0,"Zone":"NN","El":{"CommonName":"Airy1830"}},"OSGB36String":"NN1235012350"}
+    {"Status":"",
+     "Code":0,
+     "Error":false,
+     "GEOConvertRequest":{"Method":"osgb/","Values":[{"Key":"outputformat","Values":["osgb"]}]},
+     "Payload":{"OSGB36Coord":{"Easting":12350,"Northing":12350,"RelHeight":0,"Zone":"NN","El":{"CommonName":"Airy1830"}},"OSGB36String":"NN1235012350"}}
 
 Call
 
@@ -510,17 +677,29 @@ Call
 
 Output serialized as XML:
 
-    <UTMCoord>
-      <UTMCoord>
-        <Northing>6.237628180629014e+06</Northing>
-        <Easting>374197.17282885656</Easting>
-        <Zone>30V</Zone>
-        <El>
-          <CommonName>WGS84</CommonName>
-        </El>
-      </UTMCoord>
-      <UTMString>30V 374197 6237628</UTMString>
-    </UTMCoord>
+    <GEOConvertResponse>
+      <Status/>
+      <Code>0</Code>
+      <Error>false</Error>
+      <GEOConvertRequest>
+	<Method>osgb/</Method>
+	<Values>
+	  <Key>outputformat</Key>
+	  <Values>utm</Values>
+	</Values>
+      </GEOConvertRequest>
+      <Payload>
+	<UTMCoord>
+	  <Northing>6.237628180629014e+06</Northing>
+	  <Easting>374197.17282885656</Easting>
+	  <Zone>30V</Zone>
+	  <El>
+	    <CommonName>WGS84</CommonName>
+	  </El>
+	</UTMCoord>
+	<UTMString>30V 374197 6237628</UTMString>
+      </Payload>
+    </GEOConvertResponse>
 
 
 Configuration
@@ -560,8 +739,8 @@ and documentation for UTM transformations is served as
 
 Both APIRoot and DocRoot must be valid, non-empty paths.
 
-### Google App Engine
-Not yet (20120214) tested on GAE.
+### Heroku
+Not yet (20120214) tested on Heroku
 
 
 Installation
