@@ -61,21 +61,20 @@ const (
 	LLFdms                   // format a lat/long coordinate in degrees, minutes and seconds with prepended main directions N, S, E, W
 )
 
-func (spec LatLongFormat) String() (ret string) {
+func (spec LatLongFormat) String() string {
 	switch spec {
 	case LLFdeg:
-		ret = "LLFdeg"
+		return "LLFdeg"
 	case LLFdms:
-		ret = "LLFdms"
-	default:
-		ret = "#unknown"
+		return "LLFdms"
 	}
-	return
+	return "#unknown"
 }
 
-func LatLongToString(pc *PolarCoord, format LatLongFormat) (latitude, longitude string) {
+func LatLongToString(pc *PolarCoord, format LatLongFormat) (string, string) {
 
 	var lat, long, latrem, longrem, latmin, longmin, latsec, longsec float64
+	var latitude, longitude string
 
 	switch format {
 	case LLFdeg:
@@ -129,7 +128,7 @@ func LatLongToString(pc *PolarCoord, format LatLongFormat) (latitude, longitude 
 			longitude += fmt.Sprintf("%s''", f64toa(longsec, 2))
 		}
 	}
-	return
+	return latitude, longitude
 }
 
 // Canonical representation of a lat/long bearing
@@ -160,8 +159,8 @@ func radtodeg(rad float64) float64 {
 	return 180 * rad / math.Pi
 }
 
-func removeblank(input string) (accu string) {
-
+func removeblank(input string) string {
+	var accu string
 	for _, token := range input {
 		switch token {
 		case ' ':
@@ -170,8 +169,7 @@ func removeblank(input string) (accu string) {
 			accu += string(token)
 		}
 	}
-
-	return
+	return accu
 }
 
 // The function accepts a string representing a bearing in degree, minute and second.
@@ -181,12 +179,13 @@ func removeblank(input string) (accu string) {
 // the signs '+' or '-' may be used.
 //
 // [N|E|S|W|+|-]ddd°[dd'[dd'']]
-func ADegMMSSToNum(DegMMSS string) (degf float64, err error) {
+func ADegMMSSToNum(DegMMSS string) (float64, error) {
 
 	var accu string
 	var i, position int
 	var token rune
-	var tf float64
+	var tf, degf float64
+	var err error
 
 	degree := strings.ToUpper(removeblank(DegMMSS))
 	slen := len(degree)
@@ -275,7 +274,7 @@ L6:
 		degf = -degf
 	}
 
-	return
+	return degf, nil
 }
 
 // The function accepts a string literal representing a bearing
@@ -286,12 +285,13 @@ L6:
 // the signs '+' or '-' may be used.
 //
 // [N|E|S|W|+|-]ddd[.suffix]°
-func ADegCommaToNum(DegComma string) (degf float64, err error) {
+func ADegCommaToNum(DegComma string) (float64, error) {
 
 	var accu string
 	var i int
 	var token rune
-	var tf float64
+	var degf, tf float64
+	var err error
 
 	degree := strings.ToUpper(removeblank(DegComma))
 	negate := false
@@ -349,7 +349,7 @@ L4:
 		degf = -degf
 	}
 
-	return
+	return degf, nil
 }
 
 // ## Polar to Cartesian coordinate conversion and vice-versa
@@ -822,9 +822,10 @@ func asciiindex(s string, ch byte) int16 {
 	return -1
 }
 
-func abase32tobitset(sval, codeset string) (bitset string, err error) {
+func abase32tobitset(sval, codeset string) (string, error) {
 
 	var bval int16
+	var bitset string
 	sval = strings.TrimSpace(sval)
 
 	for _, val := range sval {
@@ -834,7 +835,7 @@ func abase32tobitset(sval, codeset string) (bitset string, err error) {
 		}
 		bitset += fmt.Sprintf("%05b", bval)
 	}
-	return
+	return bitset, nil
 }
 
 // actually a general purpose round
@@ -873,12 +874,12 @@ func decodegeohashbitset(bitset string, floor, ceiling float64) float64 {
 // Return latitude & longitude from a geohash-encoded string.
 // If the reference ellipsoid is nil, the default Ellipsoid will be returned.
 // If the string is not a geohash, err will be set to EINVAL.
-func GeoHashToLatLong(geohash string, el *Ellipsoid) (pc *PolarCoord, err error) {
+func GeoHashToLatLong(geohash string, el *Ellipsoid) (*PolarCoord, error) {
 
 	var bitfield, lats, longs string
+	var err error
 	// base32 to bitfield
-	bitfield, err = abase32tobitset(geohash, Base32GeohashCode)
-	if err != nil {
+	if bitfield, err = abase32tobitset(geohash, Base32GeohashCode); err != nil {
 		return nil, err
 	}
 
@@ -896,9 +897,9 @@ func GeoHashToLatLong(geohash string, el *Ellipsoid) (pc *PolarCoord, err error)
 	}
 
 	return &PolarCoord{
-		Latitude:  decodegeohashbitset(lats, -90.0, 90.0),
-		Longitude: decodegeohashbitset(longs, -180.0, 180.0),
-		El:        el},
+			Latitude:  decodegeohashbitset(lats, -90.0, 90.0),
+			Longitude: decodegeohashbitset(longs, -180.0, 180.0),
+			El:        el},
 		nil
 }
 
@@ -920,9 +921,9 @@ func geohashbitset(val, floor, ceiling float64, prec byte) string {
 
 }
 
-func f64toa(val float64, prec int) (sval string) {
+func f64toa(val float64, prec int) string {
 
-	sval = fmt.Sprintf("%.*f", prec, val)
+	sval := fmt.Sprintf("%.*f", prec, val)
 	n := len(sval)
 	for n > 0 && sval[n-1] == '0' {
 		n--
@@ -930,8 +931,7 @@ func f64toa(val float64, prec int) (sval string) {
 	if n > 0 && sval[n-1] == '.' {
 		n--
 	}
-	sval = sval[:n]
-	return
+	return sval[:n]
 }
 
 func precision(val string) float64 {
