@@ -14,9 +14,11 @@ import (
 	"github.com/the42/cartconvert/bmn"
 	"github.com/the42/cartconvert/osgb36"
 	"html/template"
+	"log"
 	"net/http"
 	"net/url"
 	"path"
+	"runtime/debug"
 	"strconv"
 )
 
@@ -25,6 +27,9 @@ const (
 	JSONFormatSpec = ".json"
 	XMLFormatSpec  = ".xml"
 )
+
+const apitemplateroot = templateroot + "api/"
+const apiTemplate = "index.tpl"
 
 // supported representation/transformation formats
 const (
@@ -230,6 +235,8 @@ func (fn httphandlerfunc) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			buf := fmt.Sprintf(httperrorstr, err)
+			log.Printf("%s", buf)
+			log.Printf("%s", debug.Stack())
 			http.Error(w, buf, http.StatusInternalServerError)
 		}
 	}()
@@ -309,63 +316,8 @@ type apidocpageLayout struct {
 	DOCRoot *Link
 }
 
-const rootPage = `<!DOCTYPE HTML>
-<html>
-<head>
-  <title>Cartconvert - Online cartography transformation</title>
-</head>
-<body>
-  <h1>Cartconvert - Online cartography transformation</h1>
-  <heading>
-    This service provides a RESTFul API to perform cartography transformations.
-  </heading>
-  <nav>
-    <p>
-      <a href="{{.APIRoot}}">The API</a>
-    </p>
-    {{if .DOCRoot}}<p>
-      <a href="{{.DOCRoot.URL}}">{{.DOCRoot.Documentation}}</a>
-    </p>{{end}}
-  </nav>
-</body>
-</html>`
-
-func rootHandler(w http.ResponseWriter, req *http.Request) {
-	tpl := template.Must(template.New("root").Parse(rootPage))
-	rootpage := &apidocpageLayout{APIRoot: apirootLink, DOCRoot: docrootLink}
-
-	buf := new(bytes.Buffer)
-	if err := tpl.Execute(buf, rootpage); err != nil {
-		http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
-	buf.WriteTo(w)
-}
-
-const apiPage = `<!DOCTYPE HTML>
-<html>
-<head>
-  <title>Cartconvert - API page</title>
-</head>
-<body>
-  <h1>Cartconvert - API page</h1>
-  <heading>
-    Root of API services
-  </heading>
-  <nav>
-    <p>
-      <a href="/">Back to main page</a>
-    </p>    
-    {{range .APIRefs}}<p>
-      <a href="{{with $.DOCRoot}}{{.}}{{end}}{{.URL}}">{{.Documentation}}</a>{{end}}
-    </p>
-  </nav>
-</body>
-</html>`
-
 func apiHandler(w http.ResponseWriter, req *http.Request) {
-	tpl := template.Must(template.New("api").Parse(apiPage))
+	tpl := template.Must(template.ParseFiles(apitemplateroot + apiTemplate))
 	apipage := &apidocpageLayout{APIRoot: apirootLink, DOCRoot: docrootLink}
 	for _, val := range httphandlerfuncs {
 		url, _ := url.Parse(val.method)
@@ -400,9 +352,8 @@ var httphandlerfuncs = map[string]httphandlerfunc{
 
 func init() {
 
-	apirootLink = apiroot()
+	apirootLink = conf_apiroot()
 
-	http.HandleFunc("/", rootHandler)
 	http.HandleFunc(apirootLink, apiHandler)
 
 	for _, handle := range httphandlerfuncs {

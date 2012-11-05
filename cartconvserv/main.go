@@ -8,10 +8,17 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
+
+const templateroot = "./template/"
+const mainTemplate = "index.tpl"
 
 type logRecord struct {
 	http.ResponseWriter
@@ -35,6 +42,31 @@ func Log(handler http.Handler) http.Handler {
 	})
 }
 
+func rootHandler(w http.ResponseWriter, req *http.Request) {
+	tpl := template.Must(template.ParseFiles(templateroot + mainTemplate))
+	rootpage := &apidocpageLayout{APIRoot: apirootLink, DOCRoot: docrootLink}
+
+	buf := new(bytes.Buffer)
+	if err := tpl.Execute(buf, rootpage); err != nil {
+		http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
+	buf.WriteTo(w)
+}
+
+// modelled after https://groups.google.com/d/msg/golang-nuts/n-GjwsDlRco/2l8kpJbAHHwJ
+// another good read: http://www.mnot.net/cache_docs/
+func maxAgeHandler(seconds int, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Cache-Control", fmt.Sprintf("max-age=%d, public, must-revalidate, proxy-revalidate", seconds))
+		h.ServeHTTP(w, r)
+	})
+}
+
 func main() {
-	http.ListenAndServe(binding(), Log(http.DefaultServeMux))
+
+	http.HandleFunc("/", rootHandler)
+	http.Handle("/static/", maxAgeHandler(conf_statictimeout(), http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
+	http.ListenAndServe(conf_binding(), Log(http.DefaultServeMux))
 }

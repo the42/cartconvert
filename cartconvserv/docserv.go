@@ -11,16 +11,19 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"net/url"
 	"path"
+	"runtime/debug"
 	"strconv"
 )
 
 // These constants specifiy the directory in which the documentation files are saved
 const (
+	docdefaultsetup = "default.tpl"
 	docmainTemplate = "index.tpl" // The main documentation file. Other filenames are created from the requested API documentation
-	docfileroot     = "./static/template/"
+	doctemplateroot = templateroot + "doc/"
 )
 
 // defines the layout of a documentation page and is used by html/template
@@ -31,7 +34,7 @@ type docPageLayout struct {
 }
 
 // user defined APIRoot and DocRoot are constant throughout program execution
-var docPage = docPageLayout{APIRoot: apiroot(), DocRoot: docroot()}
+var docPage = docPageLayout{APIRoot: conf_apiroot(), DocRoot: conf_docroot()}
 
 func docHandler(w http.ResponseWriter, req *http.Request) {
 
@@ -39,7 +42,8 @@ func docHandler(w http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			buf := fmt.Sprintf(httperrorstr, err)
-			w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
+			log.Printf("%s", buf)
+			log.Printf("%s", debug.Stack())
 			http.Error(w, buf, http.StatusInternalServerError)
 		}
 	}()
@@ -50,20 +54,20 @@ func docHandler(w http.ResponseWriter, req *http.Request) {
 	// check if the incoming url is the base url for documentation
 	if base == path.Base(docPage.DocRoot) {
 		// if the incoming url is the base url for documentation, load the generic help template
-		filename = docfileroot + docmainTemplate
+		filename = doctemplateroot + docmainTemplate
 	} else {
 		// else load the specific help template. The filename is constructed from the API function
-		filename = docfileroot + base + ".tpl"
+		filename = doctemplateroot + base + ".tpl"
 		docPage.ConcreteHeading = httphandlerfuncs[base].docstring
 	}
 
-	tpl, err := template.ParseFiles(filename)
+	tpl, err := template.ParseFiles(filename, doctemplateroot+docdefaultsetup)
 	if err != nil {
 		panic(err)
 	}
 
 	buf := new(bytes.Buffer)
-	err = tpl.Execute(buf, docPage)
+	err = tpl.ExecuteTemplate(buf, "DocSetup", docPage)
 	if err != nil {
 		panic(err)
 	}

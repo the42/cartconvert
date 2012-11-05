@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 )
 
 var configFileName = flag.String("config", "config.json", "location of JSON configuration file")
@@ -22,9 +21,19 @@ type config struct {
 	APIRoot string
 	DocRoot string
 	Binding string
+	TimeOut int
 }
 
-var conf = &config{APIRoot: "/api/", DocRoot: "/doc/", Binding: ":1111"}
+var conf *config
+
+func createorreturnconfig(conf *config) *config {
+	if conf == nil {
+		conf = &config{APIRoot: "/api/", DocRoot: "/doc/", Binding: ":1111", TimeOut: 3600}
+	}
+	flag.Parse()
+	readConfig(*configFileName, conf)
+	return conf
+}
 
 func readConfig(filename string, conf *config) {
 	b, err := ioutil.ReadFile(filename)
@@ -45,28 +54,22 @@ func readConfig(filename string, conf *config) {
 	return
 }
 
-func apiroot() string {
-	flag.Parse()
-	readConfig(*configFileName, conf)
-	path := path.Base(conf.APIRoot)
-	if path == "/" || path == "." {
-		panic("configuration error: APIRoot must be a non-empty path")
-	}
+func conf_apiroot() string {
+	conf = createorreturnconfig(conf)
 	return conf.APIRoot
 }
 
-func docroot() string {
-	flag.Parse()
-	readConfig(*configFileName, conf)
-	path := path.Base(conf.DocRoot)
-	if path == "/" || path == "." {
-		panic("configuration error: DocRoot must be a non-empty path")
-	}
+func conf_docroot() string {
+	conf = createorreturnconfig(conf)
 	return conf.DocRoot
 }
 
-func binding() string {
-	flag.Parse()
-	readConfig(*configFileName, conf)
+func conf_binding() string {
+	conf = createorreturnconfig(conf)
 	return conf.Binding
+}
+
+func conf_statictimeout() int {
+	conf = createorreturnconfig(conf)
+	return conf.TimeOut
 }
