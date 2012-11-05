@@ -149,10 +149,10 @@ Call
 Output serialized as JSON:
 
     {"Status":"",
-    "Code":0,
-    "Error":false,
-    "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["geohash"]}]},
-    "Payload":{"GeoHash":"dpz838bh37pv"}}
+     "Code":0,
+     "Error":false,
+     "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["geohash"]}]},
+     "Payload":{"GeoHash":"dpz838bh37pv"}}
 
 
 Call
@@ -210,11 +210,11 @@ In case of
 the return would be
 
     {"Status":
-    "value out of range",
-    "Code":0,
-    "Error":true,
-    "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["bmn"]}]},
-    "Payload":null}
+     "value out of range",
+     "Code":0,
+     "Error":true,
+     "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["bmn"]}]},
+     "Payload":null}
 
 The reason is the requested serialization as a BMN bearing, which has only a
 valid representation within the longitude of 8°50' and 17°50'. Errors get
@@ -263,12 +263,12 @@ Call
 Output serialized as JSON:
 
     {"Status":"",
-      "Code":0,
-      "Error":false,
-      "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["bmn"]}]},
-      "Payload": {"BMNCoord":
-                 {"Right":517965.58808025334,"Height":270554.81500793993,"RelHeight":0,"Meridian":2,"El":{"CommonName":"Bessel1841MGI"}},
-                  "BMNString":"M31 517966 270555"}}
+     "Code":0,
+     "Error":false,
+     "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["bmn"]}]},
+     "Payload": {"BMNCoord":
+                {"Right":517965.58808025334,"Height":270554.81500793993,"RelHeight":0,"Meridian":2,"El":{"CommonName":"Bessel1841MGI"}},
+                 "BMNString":"M31 517966 270555"}}
 
 
 ### Output requested as [OSGB36](http://en.wikipedia.org/wiki/OSGB)
