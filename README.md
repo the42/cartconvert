@@ -9,8 +9,6 @@ Cartconvert consists of
   of cartography functions for the [Go](http://golang.org/) programming
 language to parse, convert, transform and project coordinates.
 - cartconvserv: A RESTFul service exposing a subset of the cartconvert package.
-- geotrans: An application which interacts with cartconvserv. WORK IN PROGRESS
-- static: CSS, templates and HTML files for geotrans
 - conv: A command line application for batch converting coordinates.
 
 The subfolders contain further information regarding the installation, testing

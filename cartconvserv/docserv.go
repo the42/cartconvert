@@ -20,7 +20,7 @@ import (
 // These constants specifiy the directory in which the documentation files are saved
 const (
 	docmainTemplate = "index.tpl" // The main documentation file. Other filenames are created from the requested API documentation
-	docfileroot     = "./doc/"
+	docfileroot     = "./static/template/"
 )
 
 // defines the layout of a documentation page and is used by html/template
