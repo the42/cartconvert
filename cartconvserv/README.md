@@ -704,14 +704,16 @@ Configuration
 
 ### Stand alone application
 
-Both `URL` (base url to service), `APIRoot` (root of the RESTFul API)
-and DocRoot (root of documentation) can be configured. The default values are
+`Binding` (base url to service), `APIRoot` (root of the RESTFul API), `DocRoot` (root of documentation) and
+`TimeOut` can be configured. The default values are
 
-* Binding: `:1111`, that is listening on TCP/IP port 1111
+* Binding: `5000`, that is listening on TCP/IP port 5000
 * APIRoot: `/api/`
 * DocRoot: `/doc/`
+* TimeOut: 3600
 
-which means the RESTFul handlers base Url listen at `:1111/api/` and documentation is served at `:1111/doc/`
+which means the RESTFul handlers base Url listens at `:5000/api/` and documentation is served at `:5000/doc/`.
+Static content (CSS, Javascript) will be chached for 3600 seconds.
 
 By default, a JSON-encoded file named `config.json` is loaded within the directory in which the RESTFul service is started,
 the contents gets parsed and the respective default values for APIRoot, Binding and DocRoot are replaced by
@@ -719,9 +721,15 @@ the corresponding values of keys named `APIRoot`, `Binding` and `DocRoot`. Examp
 
     {
         "APIRoot": "/myapi/",
-        "Binding": "www.example.com:8080"
+        "Binding": "8080",
         "DocRoot": "/doc/"
     }
+
+The value for `Binding` will be determined in that order:
+
+1. Read from environment variable `PORT`
+2. Read from configuration file
+3. Set from defaults
 
 The command line parameter `--config=<filespec>` appended to the executable overides the location,
 at which the configuration file gets loaded.

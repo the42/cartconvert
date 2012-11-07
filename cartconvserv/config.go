@@ -28,10 +28,13 @@ var conf *config
 
 func createorreturnconfig(conf *config) *config {
 	if conf == nil {
-		conf = &config{APIRoot: "/api/", DocRoot: "/doc/", Binding: ":1111", TimeOut: 3600}
+		conf = &config{APIRoot: "/api/", DocRoot: "/doc/", Binding: os.Getenv("PORT"), TimeOut: 3600}
 	}
 	flag.Parse()
 	readConfig(*configFileName, conf)
+	if conf.Binding == "" {
+		conf.Binding = "5000"
+	}
 	return conf
 }
 
