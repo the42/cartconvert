@@ -16,7 +16,7 @@ package osgb36
 
 import (
 	"fmt"
-	"github.com/the42/cartconvert"
+	"github.com/the42/cartconvert/cartconvert"
 	"math"
 	"strconv"
 	"strings"

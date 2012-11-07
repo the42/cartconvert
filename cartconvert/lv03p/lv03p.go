@@ -16,7 +16,7 @@ package lv03p
 
 import (
 	"fmt"
-	"github.com/the42/cartconvert"
+	"github.com/the42/cartconvert/cartconvert"
 	"strconv"
 	"strings"
 )
