@@ -1,1 +1,1 @@
-web: cartconvserv
+web: sh -c 'cd ./cartconvserv/ && exec cartconvserv'
