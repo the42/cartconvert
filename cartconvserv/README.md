@@ -70,10 +70,11 @@ Output serialized as XML:
       <Error>false</Error>
       <GEOConvertRequest>
         <Method>utm/</Method>
-        <Values>
+        <Value>17 630084 4833438</Value>
+        <Parameters>
           <Key>outputformat</Key>
           <Values>latlongdeg</Values>
-        </Values>
+        </Parameters>
       </GEOConvertRequest>
       <Payload>
         <Lat>S 46°38'23.97''</Lat>
@@ -87,12 +88,13 @@ Call
     http://localhost:1111/api/utm/17 630084 4833438.json?outputformat=latlongdeg
 
 Output serialized as JSON:
-
     {"Status":"",
      "Code":0,
      "Error":false,
-     "GEOConvertRequest": {"Method":"utm/","Values":[{"Key":"outputformat","Values":["latlongdeg"]}]},
-     "Payload":{"Lat":"S 46°38'23.97''","Long":"W 175°18'1.13''","Fmt":"LLFdms","LatLongString":"lat: -46.639992°, long: -175.300313°"}}
+     "GEOConvertRequest":{"Method":"utm/","Value":"17 630084 4833438","Parameters":[{"Key":"outputformat","Values":["latlongdeg"]}]},
+     "Payload":{"Lat":"S 46°38'23.97''","Long":"W 175°18'1.13''","Fmt":"LLFdms",
+     "LatLongString":"lat: -46.639992°, long: -175.300313°"}}
+
 
 * GEOConvertRequest Contains the request parameters and API method
 * Payload contains the methods result:
@@ -120,10 +122,11 @@ Output serialized as XML:
       <Error>false</Error>
       <GEOConvertRequest>
         <Method>utm/</Method>
-        <Values>
+        <Value>17T 630084 4833438</Value>
+        <Parameters>
           <Key>outputformat</Key>
           <Values>latlongcomma</Values>
-        </Values>
+        </Parameters>
       </GEOConvertRequest>
       <Payload>
         <Lat>43.642562</Lat>
@@ -151,7 +154,7 @@ Output serialized as JSON:
     {"Status":"",
      "Code":0,
      "Error":false,
-     "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["geohash"]}]},
+     "GEOConvertRequest":{"Method":"utm/","Value":"17T 630084 4833438","Parameters":[{"Key":"outputformat","Values":["geohash"]}]},
      "Payload":{"GeoHash":"dpz838bh37pv"}}
 
 
@@ -167,10 +170,11 @@ Output serialized as XML:
       <Error>false</Error>
       <GEOConvertRequest>
         <Method>utm/</Method>
-        <Values>
+        <Value>17T 630084 4833438</Value>
+        <Parameters>
           <Key>outputformat</Key>
           <Values>geohash</Values>
-        </Values>
+        </Parameters>
       </GEOConvertRequest>
       <Payload>
         <GeoHash>dpz838bh37pv</GeoHash>
@@ -196,10 +200,11 @@ and sets Error to true
       <Error>true</Error>
       <GEOConvertRequest>
         <Method>utm/</Method>
-        <Values>
+        <Value>17T 630084 4833438</Value>
+        <Parameters>
           <Key>outputformat</Key>
           <Values>bmn</Values>
-        </Values>
+        </Parameters>
       </GEOConvertRequest>
     </GEOConvertResponse>
 
@@ -209,11 +214,10 @@ In case of
 
 the return would be
 
-    {"Status":
-     "value out of range",
+    {"Status":"value out of range",
      "Code":0,
      "Error":true,
-     "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["bmn"]}]},
+     "GEOConvertRequest":{"Method":"utm/","Value":"17T 630084 4833438","Parameters":[{"Key":"outputformat","Values":["bmn"]}]},
      "Payload":null}
 
 The reason is the requested serialization as a BMN bearing, which has only a
@@ -233,10 +237,11 @@ Output serialized as XML:
       <Error>false</Error>
       <GEOConvertRequest>
         <Method>utm/</Method>
-        <Values>
+        <Value>33T 442552 5268825</Value>
+        <Parameters>
           <Key>outputformat</Key>
           <Values>bmn</Values>
-        </Values>
+        </Parameters>
       </GEOConvertRequest>
       <Payload>
         <BMNCoord>
@@ -265,10 +270,10 @@ Output serialized as JSON:
     {"Status":"",
      "Code":0,
      "Error":false,
-     "GEOConvertRequest":{"Method":"utm/","Values":[{"Key":"outputformat","Values":["bmn"]}]},
-     "Payload": {"BMNCoord":
-                {"Right":517965.58808025334,"Height":270554.81500793993,"RelHeight":0,"Meridian":2,"El":{"CommonName":"Bessel1841MGI"}},
-                 "BMNString":"M31 517966 270555"}}
+     "GEOConvertRequest":{"Method":"utm/","Value":"33T 442552 5268825","Parameters":[{"Key":"outputformat","Values":["bmn"]}]},
+     "Payload":{"BMNCoord":{"Right":517965.58808025334,"Height":270554.81500793993,"RelHeight":0,"Meridian":2,
+     "El":{"CommonName":"Bessel1841MGI"}},"BMNString":"M31 517966 270555"}}
+
 
 
 ### Output requested as [OSGB36](http://en.wikipedia.org/wiki/OSGB)
@@ -285,10 +290,11 @@ Output serialized as XML:
       <Error>false</Error>
       <GEOConvertRequest>
         <Method>utm/</Method>
-        <Values>
+        <Value>31U 365166 5684564</Value>
+        <Parameters>
           <Key>outputformat</Key>
           <Values>osgb</Values>
-        </Values>
+        </Parameters>
       </GEOConvertRequest>
       <Payload>
         <OSGB36Coord>
@@ -342,10 +348,11 @@ Output serialized as XML:
       <Error>false</Error>
       <GEOConvertRequest>
         <Method>geohash/</Method>
-        <Values>
+        <Value>u4pruydqqvj</Value>
+        <Parameters>
           <Key>outputformat</Key>
           <Values>latlongdeg</Values>
-        </Values>
+        </Parameters>
       </GEOConvertRequest>
       <Payload>
         <Lat>N 57°38'56.8''</Lat>
@@ -364,9 +371,8 @@ Output serialized as JSON:
     {"Status":"",
      "Code":0,
      "Error":false,
-     "GEOConvertRequest":
-     {"Method":"geohash/","Values":[{"Key":"outputformat","Values":["latlongcomma"]}]},
-      "Payload":{"Lat":"42.6","Long":"-5.6","Fmt":"LLFdeg","LatLongString":"lat: 42.6°, long: -5.6°"}}
+     "GEOConvertRequest":{"Method":"geohash/","Value":"ezs42","Parameters":[{"Key":"outputformat","Values":["latlongcomma"]}]},
+     "Payload":{"Lat":"42.6","Long":"-5.6","Fmt":"LLFdeg","LatLongString":"lat: 42.6°, long: -5.6°"}}
 
 
 Latitude / Longitude - Conversions
@@ -384,9 +390,9 @@ Output:
     {"Status":"Latlong doesn't accept an input value. Use the parameters 'lat' and 'long' instead",
      "Code":0,
      "Error":true,
-     "GEOConvertRequest":{"Method":"latlong/","Values":[{"Key":"lat","Values":["47.57°"]},{"Key":"outputformat","Values":["utm"]},
-     {"Key":"long","Values":["14.23°"]}]},
-     "Payload":null}
+     "GEOConvertRequest":{"Method":"latlong/","Value":"23","Parameters":[{"Key":"outputformat","Values":["utm"]},
+      {"Key":"long","Values":["14.23°"]},{"Key":"lat","Values":["47.57°"]}]},
+       "Payload":null}
 
 Parameters:
 
@@ -482,13 +488,15 @@ Output:
     {"Status":"",
      "Code":0,
      "Error":false,
-     "GEOConvertRequest":{"Method":"latlong/","Values":[{"Key":"lat","Values":["47.57°"]},{"Key":"outputformat","Values":["latlongdeg"]},{"Key":"long","Values":["14°0'27''"]}]},
+     "GEOConvertRequest":{"Method":"latlong/","Value":"",
+     "Parameters":[{"Key":"lat","Values":["47.57°"]},{"Key":"long","Values":["14°0'27''"]},{"Key":"outputformat","Values":["latlongdeg"]}]},
      "Payload":{"Lat":"N 47°34'12''","Long":"E 14°0'27''","Fmt":"LLFdms","LatLongString":"lat: 47.57°, long: 14.0075°"}}
 
     {"Status":"",
      "Code":0,
      "Error":false,
-     "GEOConvertRequest":{"Method":"latlong/","Values":[{"Key":"lat","Values":["47.57°"]},{"Key":"long","Values":["14°0'27''"]},{"Key":"outputformat","Values":["utm"]}]},
+     "GEOConvertRequest":{"Method":"latlong/","Value":"",
+     "Parameters":[{"Key":"outputformat","Values":["utm"]},{"Key":"lat","Values":["47.57°"]},{"Key":"long","Values":["14°0'27''"]}]},
      "Payload":{"UTMCoord":{"Northing":5.268986550533157e+06,"Easting":425351.161981314,"Zone":"33T","El":{"CommonName":"WGS84"}},"UTMString":"33T 425351 5268987"}}
 
     <GEOConvertResponse>
@@ -497,18 +505,19 @@ Output:
       <Error>false</Error>
       <GEOConvertRequest>
         <Method>latlong/</Method>
-        <Values>
-          <Key>lat</Key>
-          <Values>47.57°</Values>
-        </Values>
-        <Values>
+        <Value/>
+        <Parameters>
           <Key>outputformat</Key>
           <Values>latlongcomma</Values>
-        </Values>
-        <Values>
+        </Parameters>
+        <Parameters>
+          <Key>lat</Key>
+          <Values>47.57°</Values>
+        </Parameters>
+        <Parameters>
           <Key>long</Key>
           <Values>14°0'27''</Values>
-      </Values>
+        </Parameters>
       </GEOConvertRequest>
       <Payload>
         <Lat>47.57</Lat>
@@ -517,7 +526,6 @@ Output:
         <LatLongString>lat: 47.57°, long: 14.0075°</LatLongString>
       </Payload>
     </GEOConvertResponse>
-
 
 BMN - Conversions
 -----------------
@@ -558,7 +566,8 @@ Output serialized as JSON:
     {"Status":"",
      "Code":0,
      "Error":false,
-     "GEOConvertRequest":{"Method":"bmn/","Values":[{"Key":"outputformat","Values":["latlongdeg"]}]},
+     "GEOConvertRequest":{"Method":"bmn/","Value":"M34 703168 374510",
+     "Parameters":[{"Key":"outputformat","Values":["latlongdeg"]}]},
      "Payload":{"Lat":"N 48°30'25.2''","Long":"E 15°41'55.49''","Fmt":"LLFdms","LatLongString":"lat: 48.507001°, long: 15.698748°"}}
 
 Call
@@ -573,10 +582,11 @@ Output serialized as XML:
       <Error>false</Error>
       <GEOConvertRequest>
         <Method>bmn/</Method>
-        <Values>
+        <Value>M34 703168 374510</Value>
+        <Parameters>
           <Key>outputformat</Key>
           <Values>utm</Values>
-        </Values>
+        </Parameters>
       </GEOConvertRequest>
       <Payload>
         <UTMCoord>
@@ -665,7 +675,7 @@ Output serialized as JSON:
     {"Status":"",
      "Code":0,
      "Error":false,
-     "GEOConvertRequest":{"Method":"osgb/","Values":[{"Key":"outputformat","Values":["osgb"]}]},
+     "GEOConvertRequest":{"Method":"osgb/","Value":"NN123123","Parameters":[{"Key":"outputformat","Values":["osgb"]}]},
      "Payload":{"OSGB36Coord":{"Easting":12350,"Northing":12350,"RelHeight":0,"Zone":"NN","El":{"CommonName":"Airy1830"}},"OSGB36String":"NN1235012350"}}
 
 Call
@@ -680,10 +690,11 @@ Output serialized as XML:
       <Error>false</Error>
       <GEOConvertRequest>
         <Method>osgb/</Method>
-        <Values>
+        <Value>NN1238812388</Value>
+        <Parameters>
           <Key>outputformat</Key>
           <Values>utm</Values>
-        </Values>
+        </Parameters>
       </GEOConvertRequest>
       <Payload>
         <UTMCoord>
@@ -745,7 +756,7 @@ and documentation for UTM transformations is served as
 Both APIRoot and DocRoot must be valid, non-empty paths.
 
 ### Heroku
-Not yet (20120214) tested on Heroku
+http://cartconvert.allowed.org
 
 
 Installation

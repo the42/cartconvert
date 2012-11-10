@@ -58,7 +58,8 @@ type (
 
 	GEOConvertRequest struct {
 		Method string
-		Values []URLParameter
+		Value string
+		Parameters []URLParameter
 	}
 
 	GEOConvertResponse struct {
@@ -147,8 +148,8 @@ func latlongHandler(request *GEOConvertRequest, latlongstrval, oformat string) (
 		return nil, fmt.Errorf("Latlong doesn't accept an input value. Use the parameters 'lat' and 'long' instead")
 	}
 
-	slat := getfirstValueFromURLParameters(request.Values, "lat")
-	slong := getfirstValueFromURLParameters(request.Values, "long")
+	slat := getfirstValueFromURLParameters(request.Parameters, "lat")
+	slong := getfirstValueFromURLParameters(request.Parameters, "long")
 
 	var lat, long float64
 	var err error
@@ -253,9 +254,9 @@ func (fn httphandlerfunc) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	val = val[:len(val)-len(serialformat)]
 	oformat := req.URL.Query().Get(OutputFormatSpec)
 
-	request := &GEOConvertRequest{Method: fn.method}
+	request := &GEOConvertRequest{Method: fn.method, Value:val}
 	for key, value := range req.Form {
-		request.Values = append(request.Values, URLParameter{Key: key, Values: value})
+		request.Parameters = append(request.Parameters, URLParameter{Key: key, Values: value})
 	}
 
 	// enc keeps the requested encoding scheme as requested by content negotiation
