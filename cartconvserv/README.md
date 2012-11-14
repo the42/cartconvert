@@ -313,7 +313,7 @@ The reference ellipsoid of a OSGB36 bearing is always the
 ellipsoid, which requires a helmert transformation from WGS84 to Airy1830.
 
 
-Geohash - Conversions
+Geohash - Conversions <a id="geohashconversion" />
 ---------------------
 
 All following conversions have the same output specifier as described by the UTM conversion.
@@ -373,7 +373,7 @@ Output serialized as JSON:
      "Payload":{"Lat":"42.6","Long":"-5.6","Fmt":"LLFdeg","LatLongString":"lat: 42.6°, long: -5.6°"}}
 
 
-Latitude / Longitude - Conversions
+Latitude / Longitude - Conversions <a id="latlongconversion" />
 ----------------------------------
 
 Latitude and Longitude can't be represented as a single value, thus lat and long have to be specified as parameters.
@@ -525,7 +525,7 @@ Output:
       </Payload>
     </GEOConvertResponse>
 
-BMN - Conversions
+BMN - Conversions <a id="bmnconversion" />
 -----------------
 
 The Bundesmeldenetz is the former
@@ -600,8 +600,8 @@ Output serialized as XML:
     </GEOConvertResponse>
 
 
-OSGB36 - Conversions
------------------
+OSGB36 - Conversions <a id="osgb36conversion" />
+--------------------
 
 Base url for osgb36 operations:
    
