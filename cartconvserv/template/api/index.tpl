@@ -7,6 +7,7 @@
   <link rel="stylesheet" type="text/css" href="../static/css/styles.css"/> 
 </head>
 <body>
+<div>
   <heading>
     <h1>Cartconvert - API page</h1>
     <p>Root of API services</p>
@@ -16,5 +17,6 @@
       <li><a href="{{with $.DOCRoot}}{{.}}{{end}}{{.URL}}">{{.Documentation}}</a></li>{{end}}
     </ul>
   </nav>
+</div>
 </body>
 </html>
