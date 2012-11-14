@@ -4,19 +4,17 @@
   <title>Cartconvert - API page</title>
   <link rel="shortcut icon" href="../static/images/favicon.png" type="image/png"/> 
   <link rel="icon" href="../static/images/favicon.png" type="image/png"/>
+  <link rel="stylesheet" type="text/css" href="../static/css/styles.css"/> 
 </head>
 <body>
-  <h1>Cartconvert - API page</h1>
   <heading>
-    Root of API services
+    <h1>Cartconvert - API page</h1>
+    <p>Root of API services</p>
   </heading>
   <nav>
-    <p>
-      <a href="/">Back to main page</a>
-    </p>    
-    {{range .APIRefs}}<p>
-      <a href="{{with $.DOCRoot}}{{.}}{{end}}{{.URL}}">{{.Documentation}}</a>{{end}}
-    </p>
+    <ul>{{range .APIRefs}}
+      <li><a href="{{with $.DOCRoot}}{{.}}{{end}}{{.URL}}">{{.Documentation}}</a></li>{{end}}
+    </ul>
   </nav>
 </body>
 </html>
