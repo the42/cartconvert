@@ -25,7 +25,7 @@ Convention for this help:
 * APIRoot: Root of the RESTFul API (configurable)
 
 
-UTM - Conversions
+UTM - Conversions <a id="utmconversion" />
 -----------------
 
 Base url for UTM operations:
@@ -59,8 +59,6 @@ The value to the parameter "outputformat" is one of
 
 Call
     http://localhost:1111/api/utm/17 630084 4833438.xml?outputformat=latlongdeg
-
-Note: When running on GAE, the port may not be specified!
 
 Output serialized as XML:
 
