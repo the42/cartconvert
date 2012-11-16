@@ -57,8 +57,8 @@ type (
 	}
 
 	GEOConvertRequest struct {
-		Method string
-		Value string
+		Method     string
+		Value      string
 		Parameters []URLParameter
 	}
 
@@ -254,7 +254,7 @@ func (fn httphandlerfunc) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	val = val[:len(val)-len(serialformat)]
 	oformat := req.URL.Query().Get(OutputFormatSpec)
 
-	request := &GEOConvertRequest{Method: fn.method, Value:val}
+	request := &GEOConvertRequest{Method: fn.method, Value: val}
 	for key, value := range req.Form {
 		request.Parameters = append(request.Parameters, URLParameter{Key: key, Values: value})
 	}
@@ -344,20 +344,20 @@ type httphandlerfunc struct {
 }
 
 var httphandlerfuncs = map[string]httphandlerfunc{
-	"latlong": {"latlong/", latlongHandler, "Latitude, Longitude"},
-	"geohash": {"geohash/", geohashHandler, "Geohash"},
-	"utm":     {"utm/", utmHandler, "UTM"},
-	"bmn":     {"bmn/", bmnHandler, "AT:Bundesmeldenetz"},
-	"osgb":    {"osgb/", osgbHandler, "UK:OSGB36"},
+	"/latlong": {"/latlong", latlongHandler, "Latitude, Longitude"},
+	"/geohash": {"/geohash", geohashHandler, "Geohash"},
+	"/utm":     {"/utm", utmHandler, "UTM"},
+	"/bmn":     {"/bmn", bmnHandler, "AT:Bundesmeldenetz"},
+	"/osgb":    {"/osgb", osgbHandler, "UK:OSGB36"},
 }
 
 func init() {
 
 	apirootLink = conf_apiroot()
 
-	http.HandleFunc(apirootLink, apiHandler)
+	http.HandleFunc(apirootLink+"/", apiHandler)
 
 	for _, handle := range httphandlerfuncs {
-		http.Handle(apirootLink+handle.method, handle)
+		http.Handle(apirootLink+handle.method+"/", handle)
 	}
 }

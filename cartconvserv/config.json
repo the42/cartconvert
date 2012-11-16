@@ -1,4 +1,4 @@
 {
-        "APIRoot": "/api/",
-	"DocRoot": "/doc/"
+        "APIRoot": "/api",
+	"DocRoot": "/doc"
 }

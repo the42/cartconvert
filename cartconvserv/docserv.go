@@ -79,7 +79,7 @@ func docHandler(w http.ResponseWriter, req *http.Request) {
 func init() {
 	// parse all REST handlers and create corresponding documentation links
 	for _, val := range httphandlerfuncs {
-		url, err := url.Parse(val.method)
+		url, err := url.Parse(val.method + "/")
 		if err != nil {
 			panic(fmt.Sprintf("%s: %s is not a valid url", err.Error(), val.method))
 		}
@@ -91,5 +91,5 @@ func init() {
 
 	url, _ := url.Parse(docPage.DocRoot)
 	docrootLink = &Link{URL: url, Documentation: "API Documentation"}
-	http.HandleFunc(url.String(), docHandler)
+	http.HandleFunc(url.String()+"/", docHandler)
 }

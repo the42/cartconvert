@@ -68,5 +68,5 @@ func main() {
 
 	http.HandleFunc("/", rootHandler)
 	http.Handle("/static/", maxAgeHandler(conf_statictimeout(), http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
-	http.ListenAndServe(":" + conf_binding(), Log(http.DefaultServeMux))
+	http.ListenAndServe(":"+conf_binding(), Log(http.DefaultServeMux))
 }
