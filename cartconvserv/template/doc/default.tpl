@@ -6,10 +6,10 @@
   <link rel="icon" href="../{{template "Back"}}static/images/favicon.png" type="image/png"/>
   <link rel="stylesheet" type="text/css" href="../{{template "Back"}}static/css/styles.css"/> 
 </head>
-<body>{{template "Payload"}}
+<body>{{template "Payload" .}}
   <nav>
     <ul>{{range .Navigation}}
-      <li><a href="{{template "Back"}}{{.URL}}">{{.Documentation}}</a></li>{{end}}
+      <li><a href="{{template "Back"}}{{$.DocRoot}}{{.URL}}">{{.Documentation}}</a></li>{{end}}
     </ul>
   </nav>
 </body>
