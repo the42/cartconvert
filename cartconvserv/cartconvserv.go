@@ -267,6 +267,8 @@ func (fn httphandlerfunc) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	switch serialformat {
 	case JSONFormatSpec, "":
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		// Enable CORS for JSON-Requests
+		// w.Header().Set("Access-Control-Allow-Origin", "*")
 		enc = json.NewEncoder(buf)
 	case XMLFormatSpec:
 		w.Header().Set("Content-Type", "text/xml")
@@ -293,6 +295,7 @@ func (fn httphandlerfunc) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(fmt.Sprintf("Unable to encode response: %s", err))
 	}
+	// prevent chunking by explicitely set the content-length
 	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
 	buf.WriteTo(w)
 }
@@ -352,9 +355,7 @@ var httphandlerfuncs = map[string]httphandlerfunc{
 }
 
 func init() {
-
 	apirootLink = conf_apiroot()
-
 	http.HandleFunc(apirootLink+"/", apiHandler)
 
 	for _, handle := range httphandlerfuncs {
