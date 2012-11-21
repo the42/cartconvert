@@ -7,7 +7,7 @@
   <link rel="stylesheet" type="text/css" href="../{{template "Back"}}static/css/styles.css"/> 
 </head>
 <body>
-<div>{{template "Payload"}}
+<div>{{template "Payload" .}}
   <nav>
     <ul>{{range .Navigation}}
       <li><a href="{{template "Back"}}{{$.DocRoot}}{{.URL}}">{{.Documentation}}</a></li>{{end}}
