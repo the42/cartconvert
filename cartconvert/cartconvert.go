@@ -2,7 +2,7 @@
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
-// This package provides a series of functions to deal with 
+// This package provides a series of functions to deal with
 // conversion, transformation and projection of coordinate systems.
 package cartconvert
 
@@ -31,7 +31,7 @@ func (ce CartographyError) Error() string {
 	return fmt.Sprintf("unable to parse fragment \"%s\". Partial value: %f. The additional error was: %s", ce.Coord, ce.Val, ce.Err.Error())
 }
 
-// Set of common ellipsoidal models regularly found in cartography 
+// Set of common ellipsoidal models regularly found in cartography
 var (
 	Bessel1841MGIEllipsoid = NewEllipsoid(6377397.155, 6356078.965, "Bessel1841MGI")
 	Bessel1841Ellipsoid    = NewEllipsoid(6377397.155, 6356078.962822, "Bessel1841")
@@ -138,14 +138,14 @@ func (pc *PolarCoord) String() string {
 }
 
 // A generic representation of easting (right, Y) and northing (Height,X) of a 2D projection
-// relative to Ellipsoid El. The height H at Point X,Y is above defining ellipsoid 
+// relative to Ellipsoid El. The height H at Point X,Y is above defining ellipsoid
 type GeoPoint struct {
 	X, Y, H float64
 	El      *Ellipsoid
 }
 
 // A generic Cartesian, geocentric point. For ease of conversion between polar and Cartesian
-// coordinates, the ellipsis might be included 
+// coordinates, the ellipsis might be included
 type CartPoint struct {
 	X, Y, Z float64
 	El      *Ellipsoid
@@ -378,7 +378,7 @@ func ADegMMSSToPolar(Northing, Easting string, Height float64, El *Ellipsoid) (*
 }
 
 // Convert polar coordinates to Cartesian. The polar coordinates must be in decimal degrees.
-// The reference ellipsoid is copied verbatim to the result. 
+// The reference ellipsoid is copied verbatim to the result.
 // Inspired by http://www.movable-type.co.uk/scripts/latlong-convert-coords.html
 func PolarToCartesian(gc *PolarCoord) *CartPoint {
 
@@ -631,7 +631,7 @@ func (utm *UTMCoord) String() string {
 //
 // Zone is the UTM meridian zone specifier and must be specified in the unambiguous
 // way of zone number and latitude band. Easting and northing are specified as decimal meters.
-// If the reference ellipsoid is nil, the DefaultEllipsoid is assumed.  
+// If the reference ellipsoid is nil, the DefaultEllipsoid is assumed.
 func AUTMToStruct(utmcoord string, el *Ellipsoid) (*UTMCoord, error) {
 
 	var zone, northing, easting string
@@ -855,7 +855,7 @@ func round(val float64, prec int) float64 {
 
 func decodegeohashbitset(bitset string, floor, ceiling float64) float64 {
 	mid := 0.0
-	// calculate the mean error for improved rounding 
+	// calculate the mean error for improved rounding
 	err := (ceiling - floor) / 2.0
 
 	for _, val := range bitset {
@@ -883,7 +883,7 @@ func GeoHashToLatLong(geohash string, el *Ellipsoid) (*PolarCoord, error) {
 		return nil, err
 	}
 
-	// split the bitfield into latitude and longitude component 
+	// split the bitfield into latitude and longitude component
 	for index, bit := range bitfield {
 		if index%2 == 0 {
 			longs += string(bit)
@@ -952,7 +952,7 @@ func LatLongToGeoHash(pc *PolarCoord) string {
 
 	// the suffix of a float64 may not be accurately representable as a string value due to
 	// IEEE bit representation. We limit it to 6 places right of comma. Geohash-Encoding
-	// doesn't support more precision either 
+	// doesn't support more precision either
 	plat := precision(f64toa(pc.Latitude, 6))
 	latbits := byte(1)
 	for err = 45.0; err > plat; err /= 2.0 {
@@ -1022,7 +1022,7 @@ func NewEllipsoid(a, b float64, CommonName string) *Ellipsoid {
 	return &Ellipsoid{a: a, b: b, CommonName: CommonName}
 }
 
-// ## Helmert transformation 
+// ## Helmert transformation
 
 type transformer struct {
 	dx, dy, dz, dM, drx, dry, drz float64
@@ -1066,7 +1066,7 @@ func (hp *transformer) Transform(ip *Point3D) *Point3D {
 
 // Method to perform the inverse helmert transformation on a generic 3D datum and return a new datum.
 // The inverse might be easily computed by inverting all helmert parameters. The inversion is moderately
-// accurate if the points of the orginal datum (x0, y0, z0) do not substantially diverge.   
+// accurate if the points of the orginal datum (x0, y0, z0) do not substantially diverge.
 // Instances of helmert transformations might be created by calls to NewHelmertTransformer
 func (hp *transformer) InverseTransform(pt *Point3D) *Point3D {
 
@@ -1100,9 +1100,9 @@ func (tp *transformer) WellKnownString() string {
 //	drx, dry, drz: delta of coordinate bearing in rads
 //	dM:  scale correction to be made to the position vector in the source coordinate reference
 //		system, in parts of per million
-//  
+//
 // Attention: Unlike the other functions dealing with bearings and coordinates in this package,
-// the angular helmert parameters have to be specified in rad [-pi;pi]  
+// the angular helmert parameters have to be specified in rad [-pi;pi]
 func NewHelmertTransformer(dx, dy, dz, dM, drx, dry, drz float64, datum string) *transformer {
 	return &transformer{dx: dx, dy: dy, dz: dz, dM: dM, drx: drx, dry: dry, drz: drz, datum: datum}
 }
