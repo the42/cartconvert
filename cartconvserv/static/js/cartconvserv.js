@@ -21,3 +21,16 @@ function createCORSRequest(method, url) {
   }
   return xhr;
 }
+
+function osmload(url) {
+  xhr = createCORSRequest("GET", url);
+  xhr.onload = function() {
+    response = JSON.parse(xhr.responseText);
+    latitude = response.Payload.Lat;
+    longitude = response.Payload.Long;
+
+    location.href='http://openstreetmap.org/index.html?mlat='+ latitude + '&mlon=' + longitude + '&zoom=15';
+  }
+  xhr.send();
+  return false;
+}

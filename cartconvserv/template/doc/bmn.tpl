@@ -1,4 +1,4 @@
-{{define "Back"}}../{{end}}{{define "Payload"}}
+{{define "Back"}}..{{end}}{{define "Payload"}}
   <header>
     <h1><a href=".">Documentation for Bundesmeldenetz</a></h1>
   </header>
@@ -10,24 +10,7 @@
     </p>
   </iframe>
   <script>
-    document.getElementById("osm1").addEventListener('click', osm1call);
-    document.getElementById("osm2").addEventListener('click', osm2call);
-
-    function osm1call() {
-      xhr = createCORSRequest("GET", "../..{{.APIRoot}}/bmn/M34 703168 374510.json?outputformat=latlongcomma");
-      xhr.onload = function() {
-	response = JSON.parse(xhr.responseText);
-	latitude = response.Payload.Lat;
-	longitude = response.Payload.Long;
-
-        location.href='http://openstreetmap.org/index.html?mlat='+ latitude + '&mlon=' + longitude + '&zoom=15';
-      }
-      xhr.send();
-      return false;
-    }
-
-    function osm2call() {
-      return true;
-    }
+    document.getElementById("osm1").addEventListener('click', function() {return osmload('../..{{.APIRoot}}/bmn/M34 703168 374510.json?outputformat=latlongcomma')});
+    document.getElementById("osm2").addEventListener('click', function() {return osmload('../..{{.APIRoot}}/bmn/M34 703168 374510.json?outputformat=latlongcomma')});
   </script>
   {{end}}
