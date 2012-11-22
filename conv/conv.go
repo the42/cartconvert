@@ -8,7 +8,7 @@
 // The target reference ellipsoid is always the WGS84Ellipsoid
 //
 // Usage of ./conv
-//  -of="deg": specify output format. Possible values are:  dms  geohash  utc  deg 
+//  -of="deg": specify output format. Possible values are:  dms  geohash  utc  deg
 //
 package main
 

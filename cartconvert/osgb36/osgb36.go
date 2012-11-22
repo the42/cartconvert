@@ -22,7 +22,7 @@ import (
 	"strings"
 )
 
-// A OSGB36 coordinate is specified by zone, easting and northing. 
+// A OSGB36 coordinate is specified by zone, easting and northing.
 type OSGB36Coord struct {
 	Easting, Northing uint
 	RelHeight         float64
@@ -262,7 +262,7 @@ func GridRefNumToLet(easting, northing uint, height float64, prec OSGB36prec) (*
 // Transform a latitude / longitude coordinate datum into a OSGB36 coordinate.
 //
 // Important: The reference ellipsoid of the originating coordinate system will be assumed
-// to be the WGS84Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid. 
+// to be the WGS84Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid.
 func WGS84LatLongToOSGB36(gc *cartconvert.PolarCoord) (*OSGB36Coord, error) {
 	// This sets the Ellipsoid to WGS84, regardless of the actual value set
 	gc.El = cartconvert.WGS84Ellipsoid

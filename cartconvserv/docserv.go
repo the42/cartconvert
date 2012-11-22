@@ -38,7 +38,7 @@ var docPage = docPageLayout{APIRoot: conf_apiroot(), DocRoot: conf_docroot()}
 
 func docHandler(w http.ResponseWriter, req *http.Request) {
 
-	// Error handler for documentation	
+	// Error handler for documentation
 	defer func() {
 		if err := recover(); err != nil {
 			buf := fmt.Sprintf(httperrorstr, err)

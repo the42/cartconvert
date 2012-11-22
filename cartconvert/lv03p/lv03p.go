@@ -2,7 +2,7 @@
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
-// This package provides a series of functions to deal with 
+// This package provides a series of functions to deal with
 // conversion and transformations of coordinates in the Swiss coordinate system.
 //
 // The Swiss coordinate system recently switched from lv03 to lv95, however the difference is

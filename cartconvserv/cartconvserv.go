@@ -231,7 +231,7 @@ const httperrorstr = "An error occurred: %s"
 
 func (fn httphandlerfunc) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
-	// API error handler 
+	// API error handler
 	// Recover from panic by setting http error 500 and letting the user know the reason
 	defer func() {
 		if err := recover(); err != nil {
@@ -267,8 +267,6 @@ func (fn httphandlerfunc) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	switch serialformat {
 	case JSONFormatSpec, "":
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		// Enable CORS for JSON-Requests
-		// w.Header().Set("Access-Control-Allow-Origin", "*")
 		enc = json.NewEncoder(buf)
 	case XMLFormatSpec:
 		w.Header().Set("Content-Type", "text/xml")
@@ -295,6 +293,12 @@ func (fn httphandlerfunc) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(fmt.Sprintf("Unable to encode response: %s", err))
 	}
+
+	// Enable CORS and set the allowed domain to those requested by Origin
+	if origin := req.Header.Get("Origin"); origin != "" {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+	}
+
 	// prevent chunking by explicitely set the content-length
 	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
 	buf.WriteTo(w)

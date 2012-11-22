@@ -2,7 +2,7 @@
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
-// This package provides a series of functions to deal with 
+// This package provides a series of functions to deal with
 // conversion and transformations of coordinates in the Datum Austria
 //
 // and here specifically of the Bundesmeldenetz, the former federal cartographic datum
@@ -50,7 +50,7 @@ func (bm BMNMeridian) String() (rep string) {
 }
 
 // A BMN coordinate is specified by right-value (easting), height-value (northing)
-// and the meridian stripe, 28°, 31° or 34° West of Hierro 
+// and the meridian stripe, 28°, 31° or 34° West of Hierro
 type BMNCoord struct {
 	Right, Height, RelHeight float64
 	Meridian                 BMNMeridian

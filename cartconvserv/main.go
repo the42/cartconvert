@@ -31,7 +31,7 @@ type logRecord struct {
 	proto               string // "HTTP/1.1"
 }
 
-// Wrapper arround DefaultServeMux, inspired by 
+// Wrapper arround DefaultServeMux, inspired by
 func Log(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// TODO: add more information
