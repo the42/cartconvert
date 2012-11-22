@@ -10,7 +10,7 @@
 <div>{{template "Payload" .}}
   <nav>
     <ul>{{range .Navigation}}
-      <li><a href="{{template "Back"}}{{$.DocRoot}}{{.URL}}">{{.Documentation}}</a></li>{{end}}
+      <li><a href="../{{template "Back"}}{{$.DocRoot}}{{.URL}}">{{.Documentation}}</a></li>{{end}}
     </ul>
   </nav>
 </div>
