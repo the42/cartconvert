@@ -1,4 +1,4 @@
-{{define "Back"}}../{{end}}{{define "Payload"}}
+{{define "Back"}}..{{end}}{{define "Payload"}}
   <header>
     <h1><a href=".">Documentation for OSGB36</a></h1>
   </header>

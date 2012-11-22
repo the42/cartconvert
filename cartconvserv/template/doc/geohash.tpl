@@ -1,4 +1,4 @@
-{{define "Back"}}../{{end}}{{define "Payload"}}
+{{define "Back"}}..{{end}}{{define "Payload"}}
   <header>
     <h1><a href=".">Documentation for Geohash</a></h1>
   </header>
