@@ -15,4 +15,5 @@
   </nav>
 </div>
 </body>
+<script src="../{{template "Back"}}static/js/cartconvserv.js"></script>
 </html>{{end}}
