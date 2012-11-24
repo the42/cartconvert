@@ -1,13 +1,14 @@
 {{define "DocSetup"}}<!DOCTYPE HTML>
-<html>
+<html lang="en">
 <head>
   <title>Documentation for the cartconvserv API{{if .ConcreteHeading}} - {{.ConcreteHeading}}{{end}}</title>
-  <link rel="shortcut icon" href="../{{template "Back"}}/static/images/favicon.png" type="image/png"/> 
-  <link rel="icon" href="../{{template "Back"}}/static/images/favicon.png" type="image/png"/>
-  <link rel="stylesheet" type="text/css" href="../{{template "Back"}}/static/css/styles.css"/> 
+  <link rel="shortcut icon" href="/static/images/favicon.png" type="image/png"/> 
+  <link rel="icon" href="/static/images/favicon.png" type="image/png"/>
+  <link rel="stylesheet" type="text/css" href="/static/css/styles.css"/> 
 </head>
 <body>
 <div>{{template "Payload" .}}
+  <h2>Further Documentation</h2>
   <nav>
     <ul>{{range .Navigation}}
       <li><a href="{{$.DocRoot}}{{.URL}}">{{.Documentation}}</a></li>{{end}}
@@ -15,5 +16,5 @@
   </nav>
 </div>
 </body>
-<script src="../{{template "Back"}}/static/js/cartconvserv.js"></script>
+<script src="/static/js/cartconvserv.js"></script>
 </html>{{end}}

@@ -90,6 +90,6 @@ func init() {
 	// if documentation is compiled in, we want it included as a link on the main page
 
 	url, _ := url.Parse(docPage.DocRoot)
-	docrootLink = &Link{URL: url, Documentation: "API Documentation"}
+	docrootLink = &Link{URL: url, Documentation: "Documentation"}
 	http.HandleFunc(url.String()+"/", docHandler)
 }

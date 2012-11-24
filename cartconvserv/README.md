@@ -4,8 +4,7 @@ cartconvserv - A RESTFul service for coordinate transformations
 Purpose
 -------
 
-cartconvserv is a RESTFul service to the cartconv - package. It may be installed
-as a stand-alone service or executed in the [Appengine](http://code.google.com/appengine/docs/go/) environment.
+cartconvserv is a RESTFul service to the cartconv - package. It plays well with [Heroku](http://cartconvert.allowed.org/).
 
 
 Functionality
@@ -726,7 +725,7 @@ Static content (CSS, Javascript) will be chached for 3600 seconds.
 
 By default, a JSON-encoded file named `config.json` is loaded within the directory in which the RESTFul service is started,
 the contents gets parsed and the respective default values for APIRoot, Binding and DocRoot are replaced by
-the corresponding values of keys named `APIRoot`, `Binding` and `DocRoot`. Example:
+the corresponding values of keys named `APIRoot`, `Binding`, `DocRoot` and `TimeOut`. Example:
 
     {
         "APIRoot": "/myapi/",
@@ -734,7 +733,7 @@ the corresponding values of keys named `APIRoot`, `Binding` and `DocRoot`. Examp
         "DocRoot": "/doc/"
     }
 
-The value for `Binding` will be determined in that order:
+Additionally, the valu for `Binding` will be determined in that order:
 
 1. Read from environment variable `PORT`
 2. Read from configuration file
@@ -754,7 +753,7 @@ and documentation for UTM transformations is served as
 Both APIRoot and DocRoot must be valid, non-empty paths.
 
 ### Heroku
-http://cartconvert.allowed.org
+cartconvserv is on Heroku as http://cartconvert.allowed.org
 
 
 Installation
