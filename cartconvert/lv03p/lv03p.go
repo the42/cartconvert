@@ -132,7 +132,7 @@ L1:
 }
 
 // Transform a Swiss coordinate value to a GRS80 based latitude and longitude coordinate. Function returns
-// EINVAL, if the swiss coordinate type is not one of LV03 or LV95
+// cartconvert.ErrRange, if the swiss coordinate type is not one of LV03 or LV95
 func SwissCoordToGRS80LatLong(coord *SwissCoord) (*cartconvert.PolarCoord, error) {
 
 	var fn, fe float64
@@ -167,7 +167,7 @@ func SwissCoordToGRS80LatLong(coord *SwissCoord) (*cartconvert.PolarCoord, error
 }
 
 // Transform a latitude / longitude coordinate datum into a Swiss coordinate. Function returns
-// EINVAL, if the coordinate type is not set.
+// cartconvert.ErrRange, if the coordinate type is not set.
 //
 // Important: The reference ellipsoid of the originating coordinate system will be assumed
 // to be the GRS80Ellipsoid and will be set thereupon, regardless of the actually set reference ellipsoid.

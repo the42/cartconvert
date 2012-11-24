@@ -74,7 +74,8 @@ func (coord *OSGB36Coord) String() string {
 //
 // The reference ellipsoid of an OSGB36 will always be set to the Airy1830 ellipsoid.
 //
-// The function returns EINVAL if northing and easting are of different length.
+// returns cartconvert.ErrSyntax if format is not understood
+// returns cartconvert.ErrRange if values are outside the defined parameters for an OSGB36 bearing
 func AOSGB36ToStruct(osgb36coord string, prec OSGB36prec) (*OSGB36Coord, error) {
 
 	compact := strings.ToUpper(strings.TrimSpace(osgb36coord))
@@ -230,7 +231,7 @@ func SanitizeOSGB36CoordToPrec(easting, northing *uint, inputprec byte, desiredp
 // Build OSGB36 coordinate from easting and northing relative to Grid. The parameter prec controls
 // how the resulting OSGB36 coordinates are formated. See OSGB36prec.
 //
-// The function will return EINVAL if lat/long are not within the OSGB36 datum area.
+// The function will return cartconvert.ErrRange if lat/long are not within the OSGB36 datum area.
 func GridRefNumToLet(easting, northing uint, height float64, prec OSGB36prec) (*OSGB36Coord, error) {
 	// get the 100km-grid indices
 	easting100k := easting / 100000
