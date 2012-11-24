@@ -23,6 +23,23 @@ Convention for this help:
 * Binding: Base url to service (configurable)
 * APIRoot: Root of the RESTFul API (configurable)
 
+Using the API
+-------------
+
+Typical usage of this service is calling it from a Javascript-enabled web site. Thus, the cartconvserver is
+[CORS](http://www.w3.org/TR/cors/)-enabled to support Javascript calling a service in another domain. This 
+service doesn't support JSONP!
+
+The interactive documentation calls itself to display coordinates on OpenStreetMap. The Javascript-Library `cartconvserv.js`
+contained in the static folder should get you started. Calling the function `osmload` as following:
+
+    osmload('http://cartconvert.allowed.org/api/geohash/u4pruydqqvj.json?outputformat=latlongcomma')
+
+will call the API to request a transformation of the geohash coordinates `u4pruydqqvj` into latitude and longitude
+and transfer the browser to OpenStreetMap, highlighting the specified point. osmload expects the result to be in JSON
+(so it could be parsed by JSON.parse), and OpenStreetMap accepts in it's URL-parameters latitude and longitude as decimals.
+Your own wrapper might accept a XML response or another resulting format but latitude/longitude.
+
 
 UTM - Conversions <a id="utmconversion" />
 -----------------
