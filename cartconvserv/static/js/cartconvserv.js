@@ -25,11 +25,20 @@ function createCORSRequest(method, url) {
 function osmload(url) {
   xhr = createCORSRequest("GET", url);
   xhr.onload = function() {
-    response = JSON.parse(xhr.responseText);
+    try {
+      response = JSON.parse(xhr.responseText);
+    }
+    catch(err) {
+      alert("Parsing of http response as JSON failed"); 
+      return;
+    }
     latitude = response.Payload.Lat;
     longitude = response.Payload.Long;
 
-    location.href='http://openstreetmap.org/index.html?mlat='+ latitude + '&mlon=' + longitude + '&zoom=15';
+    location.href='http://www.openstreetmap.org/index.html?mlat='+ latitude + '&mlon=' + longitude + '&zoom=15';
+  }
+  xhr.onerror = function() {
+    alert(xhr, xhr.status); 
   }
   xhr.send();
   return false;
