@@ -1,10 +1,10 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="en">
 <head>
   <title>Cartconvert - Cartography Transformation API</title>
-  <link rel="shortcut icon" href="./static/images/favicon.png" type="image/png"/> 
-  <link rel="icon" href="./static/images/favicon.png" type="image/png"/>
-  <link rel="stylesheet" type="text/css" href="./static/css/styles.css"/> 
+  <link rel="shortcut icon" href="/static/images/favicon.png" type="image/png"/> 
+  <link rel="icon" href="/static/images/favicon.png" type="image/png"/>
+  <link rel="stylesheet" type="text/css" href="/static/css/styles.css"/> 
 </head>
 <body>
 <div>
@@ -16,7 +16,7 @@
   </heading>
   <nav>
   <ul>
-    <li><a href="{{.APIRoot}}">The API</a></li>
+    <li><a href="{{.APIRoot}}">API</a></li>
     {{if .DOCRoot}}<li><a href="{{.DOCRoot.URL}}">{{.DOCRoot.Documentation}}</a></li>{{end}}
   </ul>
   </nav>
