@@ -8,7 +8,7 @@
 </head>
 <body>
 <div>
-  <a href="https://github.com/the42"><img style="position: absolute; top: 0; right: 0; border: 0;"
+  <a href="https://github.com/the42/cartconvert"><img style="position: absolute; top: 0; right: 0; border: 0;"
    src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
   <heading>
     <h1>Cartconvert - Cartography Transformation API</h1>
