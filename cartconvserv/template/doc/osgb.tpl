@@ -4,8 +4,8 @@
   </header>
   <h2>Examples</h2>
   <p>
-    <a id="osm1" href="#">NN 123 123</a> as <a href="{{.APIRoot}}/osgb/NN 123 123.json?outputformat=osgb">OSGB36, JSON-encoded</a>,
-    as <a href="{{.APIRoot}}/osgb/NN 123 123.xml?outputformat=latlongcomma">Lat / Long in fractions, XML-encoded</a>.
+    <a id="osm1" href="#">NN 123 123</a> as <a href="{{.APIRoot}}/osgb/NN%20123%20123.json?outputformat=osgb">OSGB36, JSON-encoded</a>,
+    as <a href="{{.APIRoot}}/osgb/NN%20123%20123.xml?outputformat=latlongcomma">Lat / Long in fractions, XML-encoded</a>.
   </p>
   <h2>Reference</h2>
   <p>
@@ -17,6 +17,6 @@
     </p>
   </iframe>
   <script>
-    document.getElementById("osm1").addEventListener('click', function() {return osmload("{{.APIRoot}}/osgb/NN 123 123.json?outputformat=latlongcomma")});
+    document.getElementById("osm1").addEventListener('click', function() {return osmload("{{.APIRoot}}/osgb/NN%20123%20123.json?outputformat=latlongcomma")});
   </script>
   {{end}}

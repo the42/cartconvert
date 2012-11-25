@@ -4,8 +4,8 @@
   </header>
   <h2>Examples</h2>
   <p>
-    <a id="osm1" href="#">Lat 47.57° Lon 14°0'27''</a> as <a href="{{.APIRoot}}/latlong/.json?lat=47.57°&long=14°0'27''&outputformat=utm">UTM JSON-encoded</a>,
-    as <a href="{{.APIRoot}}/latlong/.xml?lat=47.57°&long=14°0'27''&outputformat=latlongcomma">Lat / Long in fractions, XML-encoded</a>.
+    <a id="osm1" href="#">Lat 47.57° Lon 14°0'27''</a> as <a href="{{.APIRoot}}/latlong/.json?lat=47.57°&amp;long=14°0'27''&amp;outputformat=utm">UTM JSON-encoded</a>,
+    as <a href="{{.APIRoot}}/latlong/.xml?lat=47.57°&amp;long=14°0'27''&amp;outputformat=latlongcomma">Lat / Long in fractions, XML-encoded</a>.
   </p>
   <h2>Reference</h2>
   <p>
@@ -17,6 +17,6 @@
     </p>
   </iframe>
   <script>
-    document.getElementById("osm1").addEventListener('click', function() {return osmload("{{.APIRoot}}/latlong/.json?lat=47.57°&long=14°0'27''&outputformat=latlongcomma")});
+    document.getElementById("osm1").addEventListener('click', function() {return osmload("{{.APIRoot}}/latlong/.json?lat=47.57°&amp;long=14°0'27''&amp;outputformat=latlongcomma")});
   </script>
   {{end}}

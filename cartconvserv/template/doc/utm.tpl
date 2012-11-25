@@ -4,8 +4,8 @@
   </header>
   <h2>Examples</h2>
   <p>
-    <a id="osm1" href="#">17T 630084 4833438</a> as <a href="{{.APIRoot}}/utm/17T 630084 4833438.xml?outputformat=latlongdeg">Lat / Long in degrees, XML-encoded</a>,
-    as <a href="{{.APIRoot}}/utm/17T 630084 4833438.json?outputformat=geohash">Geohash, JSON-encoded</a>.
+    <a id="osm1" href="#">17T 630084 4833438</a> as <a href="{{.APIRoot}}/utm/17T%20630084%204833438.xml?outputformat=latlongdeg">Lat / Long in degrees, XML-encoded</a>,
+    as <a href="{{.APIRoot}}/utm/17T%20630084%204833438.json?outputformat=geohash">Geohash, JSON-encoded</a>.
   </p>
   <h2>Reference</h2>
   <p>
@@ -17,6 +17,6 @@
     </p>
   </iframe>
   <script>
-    document.getElementById("osm1").addEventListener('click', function() {return osmload("{{.APIRoot}}/utm/17T 630084 4833438.json?outputformat=latlongcomma")});
+    document.getElementById("osm1").addEventListener('click', function() {return osmload("{{.APIRoot}}/utm/17T%20630084%204833438.json?outputformat=latlongcomma")});
   </script>
   {{end}}
