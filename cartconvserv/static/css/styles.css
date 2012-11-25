@@ -11,7 +11,6 @@ html body div {
   overflow: auto;
 }
 
-
 nav ul {
   padding-left:0px;
 }
@@ -20,8 +19,8 @@ nav ul li {
   list-style-type:none;
   
   float:left;
+  clear:left;  
   display:inline;
-  clear:left;
   
   background:#f3f3f3;
   border:1px solid #cccccc;

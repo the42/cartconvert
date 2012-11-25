@@ -1,6 +1,7 @@
 {{define "DocSetup"}}<!DOCTYPE HTML>
 <html lang="en">
 <head>
+  <meta charset="UTF-8"> 
   <title>Documentation for the cartconvserv API{{if .ConcreteHeading}} - {{.ConcreteHeading}}{{end}}</title>
   <link rel="shortcut icon" href="/static/images/favicon.png" type="image/png"/> 
   <link rel="icon" href="/static/images/favicon.png" type="image/png"/>
@@ -15,6 +16,6 @@
     </ul>
   </nav>
 </div>
-</body>
 <script src="/static/js/cartconvserv.js"></script>
+</body>
 </html>{{end}}
