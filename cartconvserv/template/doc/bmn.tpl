@@ -9,7 +9,7 @@
   </p>
   <h2>Reference</h2>
   <p>
-    <a href="http://www.asprs.org/resources/grids/03-2004-austria.pdf">English</a>, <a href="http://de.wikipedia.org/wiki/Bundesmeldenetz">German</a>
+    <a href="http://www.asprs.org/resources/grids/03-2004-austria.pdf">asprs.org [EN]</a>, <a href="http://de.wikipedia.org/wiki/Bundesmeldenetz">Wikipedia [DE]</a>
   </p>
   <h2>Embeded documentation</h2>
   <iframe class="documentation" src="http://markdress.org/raw.github.com/the42/cartconvert/master/cartconvserv/README.md#bmnconversion">
