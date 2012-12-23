@@ -11,11 +11,9 @@
   <p>
     <a href="http://en.wikipedia.org/wiki/OSGB36">Wikipedia [EN]</a>, <a href="http://gps.ordnancesurvey.co.uk/etrs89geo_natgrid.asp">UK Ordnance Survey</a>
   </p>
-  <h2>Embeded documentation</h2>
-  <iframe class="documentation" src="http://markdress.org/raw.github.com/the42/cartconvert/master/cartconvserv/README.md#osgb36conversion">
-    <p><a href="https://github.com/the42/cartconvert/blob/master/cartconvserv/README.md#osgb36---conversions-">Documentation on Github</a> (authorative developer source)
-    </p>
-  </iframe>
+  <h2>OSGB36 API Documentation</h2>
+  <p><a href="https://github.com/the42/cartconvert/blob/master/cartconvserv/README.md#osgb36---conversions-">Documentation on Github</a> (authorative developer source)
+  </p>
   <script>
     document.getElementById("osm1").addEventListener('click', function() {return osmload("{{.APIRoot}}/osgb/NN%20123%20123.json?outputformat=latlongcomma")});
   </script>

@@ -11,11 +11,9 @@
   <p>
     <a href="http://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system">Wikipedia [EN]</a>, <a href="http://de.wikipedia.org/wiki/UTM-Koordinatensystem">Wikipedia [DE]</a>
   </p>
-  <h2>Embeded documentation</h2>
-  <iframe class="documentation" src="http://markdress.org/raw.github.com/the42/cartconvert/master/cartconvserv/README.md#utmconversion">
-    <p><a href="https://github.com/the42/cartconvert/blob/master/cartconvserv/README.md#utm---conversions-">Documentation on Github</a> (authorative developer source)
-    </p>
-  </iframe>
+  <h2>UTM API Documentation</h2>
+  <p><a href="https://github.com/the42/cartconvert/blob/master/cartconvserv/README.md#utm---conversions-">Documentation on Github</a> (authorative developer source)
+  </p>
   <script>
     document.getElementById("osm1").addEventListener('click', function() {return osmload("{{.APIRoot}}/utm/17T%20630084%204833438.json?outputformat=latlongcomma")});
   </script>

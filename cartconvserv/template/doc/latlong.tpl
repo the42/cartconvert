@@ -11,11 +11,9 @@
   <p>
     <a href="http://en.wikipedia.org/wiki/Geographic_coordinate_system">Wikipedia [EN]</a>, <a href="http://en.wikipedia.org/wiki/Geographic_coordinate_system">Wikipedia [DE]</a>
   </p>
-  <h2>Embeded documentation</h2>
-  <iframe class="documentation" src="http://markdress.org/raw.github.com/the42/cartconvert/master/cartconvserv/README.md#latlongconversion">
-    <p><a href="https://github.com/the42/cartconvert/blob/master/cartconvserv/README.md#latitude--longitude---conversions-">Documentation on Github</a> (authorative developer source)
-    </p>
-  </iframe>
+  <h2>Lat / Long API Documentation</h2>
+  <p><a href="https://github.com/the42/cartconvert/blob/master/cartconvserv/README.md#latitude--longitude---conversions-">Documentation on Github</a> (authorative developer source)
+  </p>
   <script>
     document.getElementById("osm1").addEventListener('click', function() {return osmload("{{.APIRoot}}/latlong/.json?lat=47.57°&amp;long=14°0'27''&amp;outputformat=latlongcomma")});
   </script>

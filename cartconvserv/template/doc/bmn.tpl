@@ -11,11 +11,9 @@
   <p>
     <a href="http://www.asprs.org/resources/grids/03-2004-austria.pdf">asprs.org [EN]</a>, <a href="http://de.wikipedia.org/wiki/Bundesmeldenetz">Wikipedia [DE]</a>
   </p>
-  <h2>Embeded documentation</h2>
-  <iframe class="documentation" src="http://markdress.org/raw.github.com/the42/cartconvert/master/cartconvserv/README.md#bmnconversion">
-    <p><a href="https://github.com/the42/cartconvert/tree/master/cartconvserv#bmn---conversions">Documentation on Github</a> (authorative developer source)
-    </p>
-  </iframe>
+  <h2>BMN API Documentation</h2>
+  <p><a href="https://github.com/the42/cartconvert/tree/master/cartconvserv/README.md#bmn---conversions-">Documentation on Github</a> (authorative developer source)
+  </p>
   <script>
     document.getElementById("osm1").addEventListener('click', function() {return osmload('{{.APIRoot}}/bmn/M34%20703168%20374510.json?outputformat=latlongcomma')});
   </script>

@@ -11,11 +11,9 @@
   <p>
     <a href="https://en.wikipedia.org/wiki/Geohash">Wikipedia [EN]</a>, <a href="https://github.com/kungfoo/geohash-java/blob/master/src/main/java/ch/hsr/geohash/GeoHash.java">Java</a>, <a href="http://blog.dixo.net/downloads/geohash-php-class/">PHP</a>
   </p>
-  <h2>Embeded documentation</h2>
-  <iframe class="documentation" src="http://markdress.org/raw.github.com/the42/cartconvert/master/cartconvserv/README.md#geohashconversion">
-    <p><a href="https://github.com/the42/cartconvert/blob/master/cartconvserv/README.md#geohash---conversions-">Documentation on Github</a> (authorative developer source)
-    </p>
-  </iframe>
+  <h2>Geohash API Documentation</h2>
+  <p><a href="https://github.com/the42/cartconvert/blob/master/cartconvserv/README.md#geohash---conversions-">Documentation on Github</a> (authorative developer source)
+  </p>
   <script>
     document.getElementById("osm1").addEventListener('click', function() {return osmload('{{.APIRoot}}/geohash/u4pruydqqvj.json?outputformat=latlongcomma')});
   </script>
