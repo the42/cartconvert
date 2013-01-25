@@ -7,6 +7,7 @@
 package cartconvert
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"math"
@@ -69,6 +70,19 @@ func (spec LatLongFormat) String() string {
 		return "LLFdms"
 	}
 	return "#unknown"
+}
+
+func f64toa(val float64, prec int) string {
+
+	sval := fmt.Sprintf("%.*f", prec, val)
+	n := len(sval)
+	for n > 0 && sval[n-1] == '0' {
+		n--
+	}
+	if n > 0 && sval[n-1] == '.' {
+		n--
+	}
+	return sval[:n]
 }
 
 func LatLongToString(pc *PolarCoord, format LatLongFormat) (string, string) {
@@ -805,90 +819,50 @@ func utmLetterDesignator(Lat float64) (LetterDesignator byte) {
 }
 
 // Base32 codeset for geohash as described in http://en.wikipedia.org/wiki/Geohash
-const Base32GeohashCode = "0123456789bcdefghjkmnpqrstuvwxyz"
+var Base32GeohashCode = []byte("0123456789bcdefghjkmnpqrstuvwxyz")
 
 // The following functions deal with geohash encoding & decoding as described in http://en.wikipedia.org/wiki/Geohash
 // Inspiration taken from
 // - http://code.google.com/p/geospatialweb/source/browse/trunk/geohash/src/Geohash.java
 // - http://blog.dixo.net/downloads/geohash-php-class/
-// - https://github.com/kungfoo/geohash-java/blob/master/src/main/java/ch/hsr/geohash/GeoHash.java
-func asciiindex(s string, ch byte) int16 {
-
-	for index, val := range s {
-		if byte(val) == ch {
-			return int16(index)
-		}
-	}
-	return -1
-}
-
-func abase32tobitset(sval, codeset string) (string, error) {
-
-	var bval int16
-	var bitset string
-	sval = strings.TrimSpace(sval)
-
-	for _, val := range sval {
-		bval = asciiindex(codeset, byte(val))
-		if bval == -1 {
-			return "", ErrRange
-		}
-		bitset += fmt.Sprintf("%05b", bval)
-	}
-	return bitset, nil
-}
-
-// actually a general purpose round
-func round(val float64, prec int) float64 {
-
-	var rounder float64
-	intermed := val * math.Pow(10, float64(prec))
-
-	if val >= 0.5 {
-		rounder = math.Ceil(intermed)
-	} else {
-		rounder = math.Floor(intermed)
-	}
-
-	return rounder / math.Pow(10, float64(prec))
-}
-
-func decodegeohashbitset(bitset string, floor, ceiling float64) float64 {
-	mid := 0.0
-	// calculate the mean error for improved rounding
-	err := (ceiling - floor) / 2.0
-
-	for _, val := range bitset {
-		mid = (floor + ceiling) / 2.0
-		err /= 2.0
-		switch val {
-		case '1':
-			floor = mid
-		case '0':
-			ceiling = mid
-		}
-	}
-	return round(mid, int(math.Max(1.0, -round(math.Log10(err), 0))-1))
-}
+// - https://github.com/kungfoo/geohsh-java/blob/master/src/main/java/ch/hsr/geohash/GeoHash.java
+// - https://github.com/broady/gogeohash/blob/master/geohash.go
 
 // Return latitude & longitude from a geohash-encoded string.
 // If the reference ellipsoid is nil, the default Ellipsoid will be returned.
-// If the string is not a geohash, err will be set to EINVAL.
+// If the string is not a geohash, err will be set to ERRRANGE.
 func GeoHashToLatLong(geohash string, el *Ellipsoid) (*PolarCoord, error) {
 
-	var bitfield, lats, longs string
-	var err error
-	// base32 to bitfield
-	if bitfield, err = abase32tobitset(geohash, Base32GeohashCode); err != nil {
-		return nil, err
-	}
+	latrange := [2]float64{-90, 90}
+	longrange := [2]float64{-180, 180}
 
-	// split the bitfield into latitude and longitude component
-	for index, bit := range bitfield {
-		if index%2 == 0 {
-			longs += string(bit)
-		} else {
-			lats += string(bit)
+	errlat := latrange[1]
+	errlong := longrange[1]
+
+	bytehash := []byte(geohash)
+	even := true
+
+	for _, r := range bytehash {
+		i := bytes.IndexByte(Base32GeohashCode, r)
+		if i < 0 {
+			return nil, ErrRange
+		}
+		for j := 16; j != 0; j >>= 1 {
+			var index int
+			if i&j == 0 {
+				index = 1
+			} else {
+				index = 0
+			}
+
+			if even {
+				longrange[index] = (longrange[0] + longrange[1]) / 2.0
+				errlong /= 2
+			} else {
+				latrange[index] = (latrange[0] + latrange[1]) / 2.0
+				errlat /= 2
+			}
+			even = !even
 		}
 	}
 
@@ -897,122 +871,120 @@ func GeoHashToLatLong(geohash string, el *Ellipsoid) (*PolarCoord, error) {
 	}
 
 	return &PolarCoord{
-			Latitude:  decodegeohashbitset(lats, -90.0, 90.0),
-			Longitude: decodegeohashbitset(longs, -180.0, 180.0),
+			Latitude:  round((latrange[0]+latrange[1])/2.0, int(math.Max(1.0, -round(math.Log10(errlat), 0))-1)),
+			Longitude: round((longrange[0]+longrange[1])/2.0, int(math.Max(1.0, -round(math.Log10(errlong), 0))-1)),
 			El:        el},
 		nil
 }
 
-func geohashbitset(val, floor, ceiling float64, prec byte) string {
-	var accu string
-	var mid float64
+// a general purpose round
+func round(x float64, prec int) float64 {
 
-	for i := byte(0); i < prec; i++ {
-		mid = (floor + ceiling) / 2
-		if val >= mid {
-			accu += string('1')
-			floor = mid
-		} else {
-			accu += string('0')
-			ceiling = mid
-		}
+	var rounder float64
+	pow := math.Pow(10, float64(prec))
+	intermed := x * pow
+	_, frac := math.Modf(intermed)
+	x = .5
+	if frac < 0.0 {
+		x = -.5
 	}
-	return accu
+	if frac >= x {
+		rounder = math.Ceil(intermed)
+	} else {
+		rounder = math.Floor(intermed)
+	}
 
+	return rounder / pow
 }
 
-func f64toa(val float64, prec int) string {
-
-	sval := fmt.Sprintf("%.*f", prec, val)
-	n := len(sval)
-	for n > 0 && sval[n-1] == '0' {
-		n--
+// Returns precision of number.
+// precision of 42 is 0.5
+// precision of 42.4 is 0.05
+// precision of 42.41 is 0.005 etc
+func precision(val float64) float64 {
+	str := strconv.FormatFloat(val, 'f', -1, 64)
+	pos := strings.IndexRune(str, '.')
+	if pos == -1 {
+		return 0.5
 	}
-	if n > 0 && sval[n-1] == '.' {
-		n--
-	}
-	return sval[:n]
-}
 
-func precision(val string) float64 {
-
-	prec := 0
-
-	if idx := strings.Index(val, "."); idx > 0 {
-		prec = -(len(val) - idx - 1)
-	}
-	return math.Pow(10, float64(prec)) / 2.0
+	pos = len(str) - pos - 1
+	return math.Pow(10, -float64(pos)) / 2
 }
 
 // Return a geohased representation of a latitude & longitude bearing point.
 func LatLongToGeoHash(pc *PolarCoord) string {
 
-	var err float64
-	var bits byte
-
 	// the suffix of a float64 may not be accurately representable as a string value due to
-	// IEEE bit representation. We limit it to 6 places right of comma. Geohash-Encoding
-	// doesn't support more precision either
-	plat := precision(f64toa(pc.Latitude, 6))
-	latbits := byte(1)
-	for err = 45.0; err > plat; err /= 2.0 {
-		latbits++
+	// IEEE bit representation. Geohash-Encoding supports only 6 digits remainder either
+	preclat := precision(pc.Latitude)
+	preclong := precision(pc.Longitude)
+
+	bits := byte(1)
+	for laterr, longerr := 45.0, 90.0; laterr > preclat || longerr > preclong; {
+		longerr /= 2.0
+		laterr /= 2.0
+		bits++
 	}
 
-	plong := precision(f64toa(pc.Longitude, 6))
-	longbits := byte(1)
-	for err = 90.0; err > plong; err /= 2.0 {
-		longbits++
-	}
+	// precision is for latitude and longitude so multiply by two
+	bits *= 2
 
-	if latbits > longbits {
-		bits = latbits
-	} else {
-		bits = longbits
-	}
+	// assure that once bits is not a multiple of five it will be rounded towards the next integer
+	bits = (bits-1)/5 + 1
 
 	return LatLongToGeoHashBits(pc, bits)
 }
 
 // Return a geohased representation of a latitude & longitude bearing point using bits precision.
 // If bits is 0 or larger than 30, it is set to a maximum of 30 bits
-func LatLongToGeoHashBits(pc *PolarCoord, bits byte) string {
-	var accu, bitstring string
-	latbits, longbits := bits, bits
+func LatLongToGeoHashBits(pc *PolarCoord, precision byte) string {
 
-	if bits == 0 || bits > 30 {
-		bits = 30
+	if precision == 0 || precision > 30 {
+		precision = 30
 	}
+	latrange := [2]float64{-90, 90}
+	longrange := [2]float64{-180, 180}
 
-	for addlong := byte(1); (longbits+latbits)%5 != 0; addlong = (addlong + 1) % 2 {
-		longbits += addlong % 2
-		latbits += (addlong + 1) % 2
-	}
+	even := true
+	bit := 0
+	n := 0
+	var mid float64
+	var geohash string
 
-	latbitstring := geohashbitset(pc.Latitude, -90.0, 90.0, latbits)
-	longbitstring := geohashbitset(pc.Longitude, -180.0, 180.0, longbits)
+	for byte(len(geohash)) < precision {
+		n <<= 1
 
-	for startlong := true; len(latbitstring)+len(longbitstring) > 0; startlong = !startlong {
-		switch startlong {
-		case true:
-			bitstring += longbitstring[:1]
-			longbitstring = longbitstring[1:]
-		case false:
-			bitstring += latbitstring[:1]
-			latbitstring = latbitstring[1:]
+		if even {
+			mid = (longrange[0] + longrange[1]) / 2
+			if pc.Longitude >= mid {
+				longrange[0] = mid
+				n ^= 1
+			} else {
+				longrange[1] = mid
+				n ^= 0
+			}
+		} else {
+			mid = (latrange[0] + latrange[1]) / 2
+			if pc.Latitude >= mid {
+				latrange[0] = mid
+				n ^= 1
+			} else {
+				latrange[1] = mid
+				n ^= 0
+			}
 		}
-	}
-	var base32fragment string
-	var base32index uint64
 
-	for ; len(bitstring) > 0; bitstring = bitstring[5:] {
-		base32fragment = bitstring[:5]
-
-		// An error is entirely the algorithms fault, so we ignore it here
-		base32index, _ = strconv.ParseUint(base32fragment, 2, 64)
-		accu += string(Base32GeohashCode[uint8(base32index)])
+		if bit == 4 {
+			geohash += string(Base32GeohashCode[n])
+			bit = 0
+			n = 0
+		} else {
+			bit++
+		}
+		even = !even
 	}
-	return accu
+	return geohash
 }
 
 // HELMERT Transformation - http://en.wikipedia.org/wiki/Helmert_transformation

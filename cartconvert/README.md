@@ -30,22 +30,18 @@ The package provides the following functionality:
 * Various functions to parse different geodetic coordinate datums from string to
   internal data representations
 
+
 Installation
 ------------
 
   go install github.com/the42/cartconvert/cartconvert
+
 
 Usage
 -----
 
 All features provided by the package are covered by test cases.
 
-
-Room for improvement
----------------------
-The Geohashing implementation uses a well working yet inefficient implementation
-of bitsets using strings. It would be good to either replace this operations with
-a set of bitwise operations on integers or use a dedicated bit package.
 
 Implementation details
 ----------------------

@@ -422,6 +422,12 @@ var geoHashToLatLongTests = []geoHashToLatLongTest{
 	{"u4pruydqqvj",
 		&PolarCoord{Latitude: 57.64911, Longitude: 10.40744},
 	},
+	{"vn0p",
+		&PolarCoord{Latitude: 80.0, Longitude: 45.0},
+	},
+	{"60p0",
+		&PolarCoord{Latitude: -45.0, Longitude: -80.0},
+	},
 }
 
 func TestGeoHashToLatLong(t *testing.T) {
