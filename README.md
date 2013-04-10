@@ -2,6 +2,7 @@ cartconvert - a cartography package
 ===================================
 
 This is the home of the cartconvert project.
+You can find it online at [http://cartconvert.allowed.org/](http://cartconvert.allowed.org/)
 
 Cartconvert consists of
 

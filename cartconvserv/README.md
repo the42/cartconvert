@@ -4,7 +4,8 @@ cartconvserv - A RESTFul service for coordinate transformations
 Purpose
 -------
 
-cartconvserv is a RESTFul service to the cartconv - package. It plays well with [Heroku](http://cartconvert.allowed.org/).
+cartconvserv is a RESTFul service to the cartconv - package.
+You can play with it [online](http://cartconvert.allowed.org/) and it plays well with [Heroku](http://www.heroku.com/).
 
 
 Functionality
