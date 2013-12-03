@@ -47,7 +47,7 @@ func TestDirectTransverseMercator(t *testing.T) {
 	for cnt, test := range directtransversemercatorTests {
 		out := DirectTransverseMercator(test.in.pc, test.in.lat0, test.in.long0, test.in.scale, test.in.fe, test.in.fn)
 		if !geopointequal(test.out, out) {
-			t.Errorf("DirectTransverseMercator [%d]: Expected %s, got %s", cnt, test.out, out)
+			t.Errorf("DirectTransverseMercator [%d]: Expected %v, got %v", cnt, test.out, out)
 		}
 	}
 }
