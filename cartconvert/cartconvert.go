@@ -98,15 +98,19 @@ func LatLongToString(pc *PolarCoord, format LatLongFormat) (string, string) {
 	case LLFdms:
 		lat, latrem = math.Modf(pc.Latitude)
 
+		if latrem < 0 {
+			latrem *= -1
+		}
 		if lat < 0 {
 			lat *= -1
-			latrem *= -1
 		}
 
 		long, longrem = math.Modf(pc.Longitude)
+		if longrem < 0 {
+			longrem *= -1
+		}
 		if long < 0 {
 			long *= -1
-			longrem *= -1
 		}
 
 		latmin, latrem = math.Modf(latrem / 100 * 6000)

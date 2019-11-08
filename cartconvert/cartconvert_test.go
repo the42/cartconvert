@@ -462,6 +462,7 @@ type latlongToStringTest struct {
 }
 
 var latlongToStringTests = []latlongToStringTest{
+	{&PolarCoord{Latitude: -79.67361389481076, Longitude: -0.02303728307597319}, "S 79°40'25.01''", "W 0°1'22.93''"},
 	{&PolarCoord{Latitude: 140.0, Longitude: 40.0}, "N 140°", "E 40°"},
 	{&PolarCoord{Latitude: -140.0, Longitude: -40.0}, "S 140°", "W 40°"},
 	{&PolarCoord{Latitude: 140.5, Longitude: -40.5}, "N 140°30'", "W 40°30'"},
